@@ -55,8 +55,8 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_climate"
-        self._attr_name = room_name
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{room_name.lower().replace(' ', '_')}_climate"
+        self._attr_name = f"{room_name} Climate"
         
         # Room-specific device
         self._attr_device_info = {
