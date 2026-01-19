@@ -45,6 +45,7 @@ class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEnt
     _attr_native_step = 1
     _attr_native_unit_of_measurement = "%"
     _attr_mode = NumberMode.SLIDER
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,

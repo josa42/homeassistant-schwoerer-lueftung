@@ -524,6 +524,7 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
 
     _attr_has_entity_name = True
     _attr_name = "EWT State"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
