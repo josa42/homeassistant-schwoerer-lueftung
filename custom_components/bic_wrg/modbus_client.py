@@ -30,7 +30,12 @@ class BicWrgModbusClient:
         self.host = host
         self.port = port
         self.slave_id = slave_id
-        self._client = ModbusTcpClient(host=host, port=port, timeout=5)
+        self._client = ModbusTcpClient(
+            host=host,
+            port=port,
+            timeout=5,
+            retries=3,
+        )
 
     def connect(self) -> bool:
         """Connect to the Modbus device."""
@@ -56,8 +61,24 @@ class BicWrgModbusClient:
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
             return result.registers
+        except TypeError:
+            # Try without slave parameter (newer pymodbus API)
+            try:
+                result = self._client.read_holding_registers(
+                    address=address, count=count
+                )
+                if result.isError():
+                    _LOGGER.error("Error reading registers at %s: %s", address, result)
+                    return None
+                return result.registers
+            except Exception as err:
+                _LOGGER.error("Error reading registers at %s: %s", address, err)
+                return None
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
+            return None
+        except Exception as err:
+            _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
             return None
 
     def write_register(self, address: int, value: int) -> bool:
@@ -70,8 +91,24 @@ class BicWrgModbusClient:
                 _LOGGER.error("Error writing register at %s: %s", address, result)
                 return False
             return True
+        except TypeError:
+            # Try without slave parameter (newer pymodbus API)
+            try:
+                result = self._client.write_register(
+                    address=address, value=value
+                )
+                if result.isError():
+                    _LOGGER.error("Error writing register at %s: %s", address, result)
+                    return False
+                return True
+            except Exception as err:
+                _LOGGER.error("Error writing register at %s: %s", address, err)
+                return False
         except ModbusException as err:
             _LOGGER.error("Modbus exception writing register: %s", err)
+            return False
+        except Exception as err:
+            _LOGGER.error("Unexpected error writing register at %s: %s", address, err)
             return False
 
     def read_operation_mode(self) -> int | None:
