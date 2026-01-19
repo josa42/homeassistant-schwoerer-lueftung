@@ -1,1 +1,1 @@
-"""Tests for the Bau Info Center WRG integration."""
+"""Tests for the BIC WRG integration."""

@@ -1,4 +1,4 @@
-"""The Bau Info Center WRG integration."""
+"""The BIC WRG integration."""
 from __future__ import annotations
 
 import logging
@@ -21,7 +21,7 @@ PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Bau Info Center WRG from a config entry."""
+    """Set up BIC WRG from a config entry."""
     coordinator = BicWrgCoordinator(hass, entry)
     
     try:

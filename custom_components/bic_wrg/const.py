@@ -13,5 +13,5 @@ DEFAULT_SLAVE_ID = 1
 DEFAULT_SCAN_INTERVAL = 30
 
 # Device information
-MANUFACTURER = "Schwörer / Bau Info Center"
-MODEL = "Frischluftheizung WRG 134-BP-HK"
+MANUFACTURER = "BIC"
+MODEL = "WRG 134-BP-HK"

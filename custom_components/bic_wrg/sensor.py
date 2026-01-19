@@ -1,4 +1,4 @@
-"""Sensor platform for Bau Info Center WRG."""
+"""Sensor platform for BIC WRG."""
 from __future__ import annotations
 
 from homeassistant.components.sensor import (

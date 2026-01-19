@@ -1,5 +1,5 @@
 {
-  "name": "Bau Info Center WRG",
+  "name": "BIC WRG",
   "render_readme": true,
   "domains": ["climate", "sensor"]
 }

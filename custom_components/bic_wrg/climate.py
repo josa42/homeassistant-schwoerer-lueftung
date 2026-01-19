@@ -1,4 +1,4 @@
-"""Climate platform for Bau Info Center WRG."""
+"""Climate platform for BIC WRG."""
 from __future__ import annotations
 
 from typing import Any

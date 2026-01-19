@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to WRG Device",
-        "description": "Enter the connection details for your Schwörer Frischluftheizung WRG 134-BP-HK",
+        "title": "Connect to BIC WRG Device",
+        "description": "Enter the connection details for your BIC WRG 134-BP-HK",
         "data": {
           "host": "IP Address",
           "port": "Port",

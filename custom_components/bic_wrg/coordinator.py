@@ -1,4 +1,4 @@
-"""DataUpdateCoordinator for Bau Info Center WRG."""
+"""DataUpdateCoordinator for BIC WRG."""
 from __future__ import annotations
 
 from datetime import timedelta

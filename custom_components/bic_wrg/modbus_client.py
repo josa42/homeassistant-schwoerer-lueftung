@@ -1,4 +1,4 @@
-"""Modbus TCP client for Bau Info Center WRG."""
+"""Modbus TCP client for BIC WRG."""
 from __future__ import annotations
 
 import logging

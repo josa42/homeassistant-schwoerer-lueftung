@@ -1,4 +1,4 @@
-"""Test the Bau Info Center WRG integration initialization."""
+"""Test the BIC WRG integration initialization."""
 from unittest.mock import MagicMock, patch
 
 import pytest

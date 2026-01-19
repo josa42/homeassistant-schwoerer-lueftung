@@ -1,6 +1,6 @@
-# Home Assistant Integration for Schwörer / Bau Info Center WRG 134-BP-HK
+# Home Assistant Integration for BIC WRG 134-BP-HK
 
-This is a custom Home Assistant integration for the Schwörer / Bau Info Center Frischluftheizung WRG 134-BP-HK ventilation system with heat recovery.
+This is a custom Home Assistant integration for the BIC WRG 134-BP-HK ventilation system with heat recovery.
 
 ## Features
 
@@ -14,7 +14,7 @@ This is a custom Home Assistant integration for the Schwörer / Bau Info Center 
 ### HACS (Recommended)
 
 1. Add this repository as a custom repository in HACS
-2. Search for "Bau Info Center WRG" in HACS
+2. Search for "BIC WRG" in HACS
 3. Install the integration
 4. Restart Home Assistant
 
@@ -27,7 +27,7 @@ This is a custom Home Assistant integration for the Schwörer / Bau Info Center 
 
 1. Go to Settings → Devices & Services
 2. Click "Add Integration"
-3. Search for "Bau Info Center WRG"
+3. Search for "BIC WRG"
 4. Enter your device's IP address, port (default: 502), and Modbus slave ID (default: 1)
 
 ## Development
