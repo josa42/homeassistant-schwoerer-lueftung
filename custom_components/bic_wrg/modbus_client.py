@@ -46,6 +46,10 @@ REG_PREHEATER_STATE = 133
 REG_TIME_PROGRAM_FAN_LEVEL = 140
 # Luftstufe Sensoren (Sensor Fan Level)
 REG_SENSOR_FAN_LEVEL = 141
+# Luftleistung aktuell Zuluft (Current Supply Air Flow)
+REG_CURRENT_SUPPLY_AIR_FLOW = 142
+# Luftleistung aktuell Abluft (Current Exhaust Air Flow)
+REG_CURRENT_EXHAUST_AIR_FLOW = 143
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -405,6 +409,20 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_current_supply_air_flow(self) -> int | None:
+        """Read current supply air flow (Luftleistung aktuell Zuluft)."""
+        registers = self.read_holding_registers(REG_CURRENT_SUPPLY_AIR_FLOW, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def read_current_exhaust_air_flow(self) -> int | None:
+        """Read current exhaust air flow (Luftleistung aktuell Abluft)."""
+        registers = self.read_holding_registers(REG_CURRENT_EXHAUST_AIR_FLOW, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -498,5 +516,15 @@ class BicWrgModbusClient:
         sensor_fan_level = self.read_sensor_fan_level()
         if sensor_fan_level is not None:
             data["sensor_fan_level"] = sensor_fan_level
+        
+        # Read current supply air flow (Luftleistung aktuell Zuluft)
+        current_supply_air_flow = self.read_current_supply_air_flow()
+        if current_supply_air_flow is not None:
+            data["current_supply_air_flow"] = current_supply_air_flow
+        
+        # Read current exhaust air flow (Luftleistung aktuell Abluft)
+        current_exhaust_air_flow = self.read_current_exhaust_air_flow()
+        if current_exhaust_air_flow is not None:
+            data["current_exhaust_air_flow"] = current_exhaust_air_flow
         
         return data
