@@ -82,10 +82,11 @@ class BicWrgModbusClient:
             return None
 
     def write_register(self, address: int, value: int) -> bool:
-        """Write a single register to the device."""
+        """Write a single register to the device using Write Multiple Registers (16)."""
         try:
-            result = self._client.write_register(
-                address=address, value=value, slave=self.slave_id
+            # Device requires Write Multiple Registers (16), not Write Single Register (06)
+            result = self._client.write_registers(
+                address=address, values=[value], slave=self.slave_id
             )
             if result.isError():
                 _LOGGER.error("Error writing register at %s: %s", address, result)
@@ -94,8 +95,8 @@ class BicWrgModbusClient:
         except TypeError:
             # Try without slave parameter (newer pymodbus API)
             try:
-                result = self._client.write_register(
-                    address=address, value=value
+                result = self._client.write_registers(
+                    address=address, values=[value]
                 )
                 if result.isError():
                     _LOGGER.error("Error writing register at %s: %s", address, result)
