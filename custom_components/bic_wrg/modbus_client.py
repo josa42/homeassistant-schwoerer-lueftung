@@ -22,6 +22,8 @@ REG_LINEAR_FAN_POWER = 103
 REG_FAN_OVERRIDE = 104
 # Zeitprogramm Basis Luftstufe (Time Program Base Fan Level)
 REG_TIME_PROGRAM_BASE_LEVEL = 110
+# Stoßlüftung (Shock Ventilation)
+REG_SHOCK_VENTILATION = 111
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -66,6 +68,11 @@ TIME_PROGRAM_BASE_LEVEL_1 = 1
 TIME_PROGRAM_BASE_LEVEL_2 = 2
 TIME_PROGRAM_BASE_LEVEL_3 = 3
 TIME_PROGRAM_BASE_LEVEL_4 = 4
+
+# Shock ventilation values
+# Stoßlüftung: 0=Inaktiv, 1=Aktiv
+SHOCK_VENTILATION_INACTIVE = 0
+SHOCK_VENTILATION_ACTIVE = 1
 
 
 class BicWrgModbusClient:
@@ -221,6 +228,17 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_shock_ventilation(self) -> int | None:
+        """Read shock ventilation (Stoßlüftung)."""
+        registers = self.read_holding_registers(REG_SHOCK_VENTILATION, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def write_shock_ventilation(self, active: int) -> bool:
+        """Write shock ventilation (Stoßlüftung)."""
+        return self.write_register(REG_SHOCK_VENTILATION, active)
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -254,5 +272,10 @@ class BicWrgModbusClient:
         time_program_base_level = self.read_time_program_base_level()
         if time_program_base_level is not None:
             data["time_program_base_level"] = time_program_base_level
+        
+        # Read shock ventilation (Stoßlüftung)
+        shock_ventilation = self.read_shock_ventilation()
+        if shock_ventilation is not None:
+            data["shock_ventilation"] = shock_ventilation
         
         return data
