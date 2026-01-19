@@ -494,6 +494,7 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
 
     _attr_has_entity_name = True
     _attr_name = "Exhaust Air Fan Status"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -708,6 +709,7 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     _attr_name = "Current Supply Air Flow"
     _attr_native_unit_of_measurement = "%"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -737,6 +739,7 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
     _attr_name = "Current Exhaust Air Flow"
     _attr_native_unit_of_measurement = "%"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -766,6 +769,7 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
     _attr_name = "Current Supply Air RPM"
     _attr_native_unit_of_measurement = "rpm"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -795,6 +799,7 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     _attr_name = "Current Exhaust Air RPM"
     _attr_native_unit_of_measurement = "rpm"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,

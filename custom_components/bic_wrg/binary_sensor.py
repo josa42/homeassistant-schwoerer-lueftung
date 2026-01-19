@@ -53,7 +53,7 @@ async def async_setup_entry(
             coordinator, entry, "alarm_external_utility_lock", "External Utility Lock Alarm"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_heating_module_test", "Heating Module Test Alarm"
+            coordinator, entry, "alarm_heating_module_test", "Heating Module Test Alarm", enabled_by_default=False
         ),
         BicWrgAlarmBinarySensor(
             coordinator, entry, "alarm_emergency_mode", "Emergency Mode Alarm"
@@ -78,12 +78,14 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
         entry: ConfigEntry,
         key: str,
         name: str,
+        enabled_by_default: bool = True,
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._key = key
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_entity_registry_enabled_default = enabled_by_default
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="WRG 134-BP-HK",
