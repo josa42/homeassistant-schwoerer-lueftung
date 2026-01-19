@@ -231,6 +231,9 @@ async def async_setup_entry(
         entities.append(
             BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
         )
+        entities.append(
+            BicWrgRoomAuxiliaryHeatingActiveSensor(coordinator, room["number"], room["name"])
+        )
     
     async_add_entities(entities)
 
@@ -1197,6 +1200,44 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
             return "Blocked"
         elif value == 1:
             return "Heating Enabled"
+        return None
+
+
+class BicWrgRoomAuxiliaryHeatingActiveSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for room auxiliary heating active state (Zusatzheizung aktiv)."""
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        room_number: int,
+        room_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._room_number = room_number
+        self._room_name = room_name
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating_active"
+        self._attr_name = "Auxiliary Heating Active"
+        
+        # Room-specific device
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "name": room_name,
+            "manufacturer": "BIC",
+            "model": "Room Climate Control",
+            "via_device": (DOMAIN, coordinator.config_entry.entry_id),
+        }
+
+    @property
+    def native_value(self) -> str | None:
+        """Return whether the auxiliary heating is currently active."""
+        # Register 460-476 for rooms 1-17
+        register = 460 + self._room_number - 1
+        value = self.coordinator.data.get(f"register_{register}")
+        if value == 0:
+            return "Inactive"
+        elif value == 1:
+            return "Active"
         return None
 
 

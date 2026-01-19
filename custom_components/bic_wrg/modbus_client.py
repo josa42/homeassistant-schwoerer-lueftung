@@ -849,8 +849,8 @@ class BicWrgModbusClient:
 
     def read_room_heating_enable(self, room_number: int) -> int | None:
         """Read room heating enable (Zusatzheizung Freigabe Raum)."""
-        # Only rooms 1-12 have heating enable (registers 440-451)
-        if room_number > 12:
+        # Rooms 1-17 have heating enable (registers 440-456)
+        if room_number < 1 or room_number > 17:
             return None
         register = 440 + room_number - 1
         registers = self.read_holding_registers(register, 1)
@@ -860,11 +860,22 @@ class BicWrgModbusClient:
 
     def write_room_heating_enable(self, room_number: int, enabled: int) -> bool:
         """Write room heating enable (Zusatzheizung Freigabe Raum)."""
-        # Only rooms 1-12 have heating enable (registers 440-451)
-        if room_number > 12:
+        # Rooms 1-17 have heating enable (registers 440-456)
+        if room_number < 1 or room_number > 17:
             return False
         register = 440 + room_number - 1
         return self.write_register(register, enabled)
+
+    def read_room_heating_active(self, room_number: int) -> int | None:
+        """Read room heating active state (Zusatzheizung aktiv Raum)."""
+        # Rooms 1-17 have heating active state (registers 460-476)
+        if room_number < 1 or room_number > 17:
+            return None
+        register = 460 + room_number - 1
+        registers = self.read_holding_registers(register, 1)
+        if registers:
+            return registers[0]
+        return None
 
     def read_room_base_temperature(self, room_number: int) -> float | None:
         """Read room base temperature (Grundtemperatur Raum)."""
@@ -1129,7 +1140,8 @@ class BicWrgModbusClient:
             data["error_message"] = error_message
         
         # Read room temperatures (registers 360-376 for current, 400-416 for target)
-        # and heating enable (registers 440-451 for rooms 1-12)
+        # and heating enable (registers 440-456 for rooms 1-17)
+        # and heating active (registers 460-476 for rooms 1-17)
         for room_number in range(1, 18):  # Rooms 1-17
             # Current temperature
             current_temp = self.read_room_temperature(room_number)
@@ -1146,10 +1158,14 @@ class BicWrgModbusClient:
             if base_temp is not None:
                 data[f"room_{room_number}_base_temp"] = base_temp
             
-            # Heating enable (only for rooms 1-12)
-            if room_number <= 12:
-                heating_enable = self.read_room_heating_enable(room_number)
-                if heating_enable is not None:
-                    data[f"register_{440 + room_number - 1}"] = heating_enable
+            # Heating enable (registers 440-456 for rooms 1-17)
+            heating_enable = self.read_room_heating_enable(room_number)
+            if heating_enable is not None:
+                data[f"register_{440 + room_number - 1}"] = heating_enable
+            
+            # Heating active (registers 460-476 for rooms 1-17)
+            heating_active = self.read_room_heating_active(room_number)
+            if heating_active is not None:
+                data[f"register_{460 + room_number - 1}"] = heating_active
         
         return data
