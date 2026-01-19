@@ -207,6 +207,8 @@ async def async_setup_entry(
         BicWrgSensorFanLevelSensor(coordinator, entry),
         BicWrgCurrentSupplyAirFlowSensor(coordinator, entry),
         BicWrgCurrentExhaustAirFlowSensor(coordinator, entry),
+        BicWrgCurrentSupplyAirRpmSensor(coordinator, entry),
+        BicWrgCurrentExhaustAirRpmSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -717,6 +719,64 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
     def native_value(self) -> int | None:
         """Return the current exhaust air flow percentage."""
         return self.coordinator.data.get("current_exhaust_air_flow")
+
+
+class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG current supply air RPM (Aktuelle Drehzahl Zuluft)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Current Supply Air RPM"
+    _attr_native_unit_of_measurement = "rpm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_current_supply_air_rpm"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the current supply air RPM."""
+        return self.coordinator.data.get("current_supply_air_rpm")
+
+
+class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG current exhaust air RPM (Aktuelle Drehzahl Abluft)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Current Exhaust Air RPM"
+    _attr_native_unit_of_measurement = "rpm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_rpm"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the current exhaust air RPM."""
+        return self.coordinator.data.get("current_exhaust_air_rpm")
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

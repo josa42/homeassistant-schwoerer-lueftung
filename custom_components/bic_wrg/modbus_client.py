@@ -50,6 +50,10 @@ REG_SENSOR_FAN_LEVEL = 141
 REG_CURRENT_SUPPLY_AIR_FLOW = 142
 # Luftleistung aktuell Abluft (Current Exhaust Air Flow)
 REG_CURRENT_EXHAUST_AIR_FLOW = 143
+# Aktuelle Drehzahl Zuluft (Current Supply Air RPM)
+REG_CURRENT_SUPPLY_AIR_RPM = 144
+# Aktuelle Drehzahl Abluft (Current Exhaust Air RPM)
+REG_CURRENT_EXHAUST_AIR_RPM = 145
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -423,6 +427,20 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_current_supply_air_rpm(self) -> int | None:
+        """Read current supply air RPM (Aktuelle Drehzahl Zuluft)."""
+        registers = self.read_holding_registers(REG_CURRENT_SUPPLY_AIR_RPM, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def read_current_exhaust_air_rpm(self) -> int | None:
+        """Read current exhaust air RPM (Aktuelle Drehzahl Abluft)."""
+        registers = self.read_holding_registers(REG_CURRENT_EXHAUST_AIR_RPM, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -526,5 +544,15 @@ class BicWrgModbusClient:
         current_exhaust_air_flow = self.read_current_exhaust_air_flow()
         if current_exhaust_air_flow is not None:
             data["current_exhaust_air_flow"] = current_exhaust_air_flow
+        
+        # Read current supply air RPM (Aktuelle Drehzahl Zuluft)
+        current_supply_air_rpm = self.read_current_supply_air_rpm()
+        if current_supply_air_rpm is not None:
+            data["current_supply_air_rpm"] = current_supply_air_rpm
+        
+        # Read current exhaust air RPM (Aktuelle Drehzahl Abluft)
+        current_exhaust_air_rpm = self.read_current_exhaust_air_rpm()
+        if current_exhaust_air_rpm is not None:
+            data["current_exhaust_air_rpm"] = current_exhaust_air_rpm
         
         return data
