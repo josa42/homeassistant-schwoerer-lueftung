@@ -12,8 +12,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from typing import Any
 
-from .const import DOMAIN, MANUFACTURER, MODEL
+from .const import DOMAIN, MANUFACTURER, MODEL, CONF_ROOMS
 from .coordinator import BicWrgCoordinator
 from .modbus_client import (
     CURRENT_FAN_LEVEL_OFF,
@@ -190,6 +191,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up WRG sensors from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
     
     entities = [
         BicWrgCurrentFanLevelSensor(coordinator, entry),
@@ -223,6 +225,12 @@ async def async_setup_entry(
         BicWrgUpstreamFilterRemainingSensor(coordinator, entry),
         BicWrgErrorMessageSensor(coordinator, entry),
     ]
+    
+    # Add room-specific sensors
+    for room in rooms:
+        entities.append(
+            BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
+        )
     
     async_add_entities(entities)
 
@@ -1150,6 +1158,46 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
         if error_code == 0:
             return "No Error"
         return f"Unknown Error ({error_code})"
+
+
+class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for room auxiliary heating release (Zusatzheizung Freigabe)."""
+
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        room_number: int,
+        room_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._room_number = room_number
+        self._room_name = room_name
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating"
+        self._attr_name = "Auxiliary Heating Release"
+        
+        # Room-specific device
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "name": room_name,
+            "manufacturer": "BIC",
+            "model": "Room Climate Control",
+            "via_device": (DOMAIN, coordinator.config_entry.entry_id),
+        }
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the auxiliary heating status."""
+        # Register 440-456 for rooms 1-17
+        register = 440 + self._room_number - 1
+        value = self.coordinator.data.get(f"register_{register}")
+        if value == 0:
+            return "Blocked"
+        elif value == 1:
+            return "Heating Enabled"
+        return None
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):
