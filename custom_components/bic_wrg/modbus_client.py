@@ -40,6 +40,8 @@ REG_EWT_STATE = 121
 REG_BYPASS_STATE = 123
 # Aussenklappe Zustand (Outdoor Damper State)
 REG_OUTDOOR_DAMPER_STATE = 131
+# Vorheizregister Zustand (Preheater State)
+REG_PREHEATER_STATE = 133
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -133,6 +135,13 @@ BYPASS_STATE_OPEN_HEATING = 2
 # Aussenklappe Zustand: 0=geschlossen, 1=offen
 OUTDOOR_DAMPER_STATE_CLOSED = 0
 OUTDOOR_DAMPER_STATE_OPEN = 1
+
+# Preheater state values
+# Vorheizregister Zustand: 0=Aus, 1=VHR 1 aktiv, 2=VHR 2 aktiv, 3=VHR 1 & 2 aktiv
+PREHEATER_STATE_OFF = 0
+PREHEATER_STATE_VHR1_ACTIVE = 1
+PREHEATER_STATE_VHR2_ACTIVE = 2
+PREHEATER_STATE_VHR1_2_ACTIVE = 3
 
 
 class BicWrgModbusClient:
@@ -355,6 +364,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_preheater_state(self) -> int | None:
+        """Read preheater state (Vorheizregister Zustand)."""
+        registers = self.read_holding_registers(REG_PREHEATER_STATE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -433,5 +449,10 @@ class BicWrgModbusClient:
         outdoor_damper_state = self.read_outdoor_damper_state()
         if outdoor_damper_state is not None:
             data["outdoor_damper_state"] = outdoor_damper_state
+        
+        # Read preheater state (Vorheizregister Zustand)
+        preheater_state = self.read_preheater_state()
+        if preheater_state is not None:
+            data["preheater_state"] = preheater_state
         
         return data
