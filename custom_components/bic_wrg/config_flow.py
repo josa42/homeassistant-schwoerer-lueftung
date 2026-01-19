@@ -25,7 +25,6 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
-        vol.Optional(CONF_SLAVE_ID, default=DEFAULT_SLAVE_ID): int,
     }
 )
 
@@ -41,7 +40,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     client = BicWrgModbusClient(
         data[CONF_HOST],
         data[CONF_PORT],
-        data[CONF_SLAVE_ID],
+        DEFAULT_SLAVE_ID,
     )
     
     try:
@@ -98,8 +97,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             num_rooms = user_input.get("num_rooms", 0)
             
-            # Store room configuration
-            data = {**self._host_data, CONF_ROOMS: []}
+            # Store room configuration with default slave ID
+            data = {**self._host_data, CONF_SLAVE_ID: DEFAULT_SLAVE_ID, CONF_ROOMS: []}
             
             # Generate room data with number and name
             for i in range(1, num_rooms + 1):
