@@ -43,6 +43,9 @@ from .modbus_client import (
     EXHAUST_AIR_FAN_STATUS_ACTIVE,
     EXHAUST_AIR_FAN_STATUS_STANDBY,
     EXHAUST_AIR_FAN_STATUS_ERROR,
+    EWT_STATE_OFF,
+    EWT_STATE_HEATING,
+    EWT_STATE_COOLING,
 )
 
 # Current fan level mapping
@@ -107,6 +110,14 @@ EXHAUST_AIR_FAN_STATUSES = {
     EXHAUST_AIR_FAN_STATUS_ERROR: "Error",
 }
 
+# EWT state mapping
+# EWT Zustand: 0=EWT aus/geschlossen, 1=EWT im Heizbetrieb aktiv, 2=EWT im Kühlbetrieb aktiv
+EWT_STATES = {
+    EWT_STATE_OFF: "Off",
+    EWT_STATE_HEATING: "Heating",
+    EWT_STATE_COOLING: "Cooling",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -125,6 +136,7 @@ async def async_setup_entry(
         BicWrgNhrStateSensor(coordinator, entry),
         BicWrgSupplyAirFanStatusSensor(coordinator, entry),
         BicWrgExhaustAirFanStatusSensor(coordinator, entry),
+        BicWrgEwtStateSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -396,6 +408,36 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         status = self.coordinator.data.get("exhaust_air_fan_status")
         if status is not None and status in EXHAUST_AIR_FAN_STATUSES:
             return EXHAUST_AIR_FAN_STATUSES[status]
+        return None
+
+
+class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG EWT state (EWT Zustand)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "EWT State"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_ewt_state"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the EWT state as text."""
+        state = self.coordinator.data.get("ewt_state")
+        if state is not None and state in EWT_STATES:
+            return EWT_STATES[state]
         return None
 
 

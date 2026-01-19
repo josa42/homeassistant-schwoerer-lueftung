@@ -34,6 +34,8 @@ REG_NHR_STATE = 116
 REG_SUPPLY_AIR_FAN_STATUS = 117
 # Status Gebläse Abluft (Exhaust Air Fan Status)
 REG_EXHAUST_AIR_FAN_STATUS = 118
+# EWT Zustand (EWT State)
+REG_EWT_STATE = 121
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -110,6 +112,12 @@ EXHAUST_AIR_FAN_STATUS_STARTUP = 1
 EXHAUST_AIR_FAN_STATUS_ACTIVE = 2
 EXHAUST_AIR_FAN_STATUS_STANDBY = 5
 EXHAUST_AIR_FAN_STATUS_ERROR = 6
+
+# EWT state values
+# EWT Zustand: 0=EWT aus/geschlossen, 1=EWT im Heizbetrieb aktiv, 2=EWT im Kühlbetrieb aktiv
+EWT_STATE_OFF = 0
+EWT_STATE_HEATING = 1
+EWT_STATE_COOLING = 2
 
 
 class BicWrgModbusClient:
@@ -311,6 +319,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_ewt_state(self) -> int | None:
+        """Read EWT state (EWT Zustand)."""
+        registers = self.read_holding_registers(REG_EWT_STATE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -374,5 +389,10 @@ class BicWrgModbusClient:
         exhaust_air_fan_status = self.read_exhaust_air_fan_status()
         if exhaust_air_fan_status is not None:
             data["exhaust_air_fan_status"] = exhaust_air_fan_status
+        
+        # Read EWT state (EWT Zustand)
+        ewt_state = self.read_ewt_state()
+        if ewt_state is not None:
+            data["ewt_state"] = ewt_state
         
         return data
