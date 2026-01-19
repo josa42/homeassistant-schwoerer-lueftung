@@ -109,7 +109,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         # Build schema for number of rooms
         schema_dict = {
-            vol.Required("num_rooms", default=0): vol.All(
+            vol.Required("num_rooms", default=0, description={"suggested_value": 0}): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=17)
             )
         }

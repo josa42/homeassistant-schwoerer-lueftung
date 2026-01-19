@@ -6,8 +6,14 @@
         "description": "Enter the connection details for your BIC WRG 134-BP-HK",
         "data": {
           "host": "IP Address",
-          "port": "Port",
-          "slave_id": "Modbus Slave ID"
+          "port": "Port"
+        }
+      },
+      "rooms": {
+        "title": "Configure Rooms",
+        "description": "How many rooms do you want to configure? (0-17)",
+        "data": {
+          "num_rooms": "Number of Rooms"
         }
       }
     },
