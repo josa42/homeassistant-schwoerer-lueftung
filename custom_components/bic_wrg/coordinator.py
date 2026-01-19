@@ -47,7 +47,9 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             
             data = await self.hass.async_add_executor_job(self.client.read_data)
             
-            if not data:
+            # For now, return empty dict if no data (placeholder until registers are mapped)
+            # Remove this check once actual register reading is implemented
+            if data is None:
                 raise UpdateFailed("Failed to read data from device")
             
             return data
