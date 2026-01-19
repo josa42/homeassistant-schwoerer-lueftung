@@ -31,6 +31,8 @@ from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
     HEAT_PUMP_STATUS_HEATING,
     HEAT_PUMP_STATUS_COOLING,
+    NHR_STATE_INACTIVE,
+    NHR_STATE_ACTIVE,
 )
 
 # Current fan level mapping
@@ -68,6 +70,13 @@ HEAT_PUMP_STATUSES = {
     HEAT_PUMP_STATUS_COOLING: "Cooling",
 }
 
+# NHR state mapping
+# NHR Zustand: 0=Inaktiv, 1=Aktiv
+NHR_STATES = {
+    NHR_STATE_INACTIVE: "Inactive",
+    NHR_STATE_ACTIVE: "Active",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -83,6 +92,7 @@ async def async_setup_entry(
         BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
         BicWrgShockVentilationRemainingSensor(coordinator, entry),
         BicWrgHeatPumpStatusSensor(coordinator, entry),
+        BicWrgNhrStateSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -264,6 +274,36 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         status = self.coordinator.data.get("heat_pump_status")
         if status is not None and status in HEAT_PUMP_STATUSES:
             return HEAT_PUMP_STATUSES[status]
+        return None
+
+
+class BicWrgNhrStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG NHR state (NHR Zustand)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "NHR State"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_nhr_state"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the NHR state as text."""
+        state = self.coordinator.data.get("nhr_state")
+        if state is not None and state in NHR_STATES:
+            return NHR_STATES[state]
         return None
 
 

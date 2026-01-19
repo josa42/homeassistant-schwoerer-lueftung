@@ -28,6 +28,8 @@ REG_SHOCK_VENTILATION = 111
 REG_SHOCK_VENTILATION_REMAINING = 112
 # Status Wärmepumpe (Heat Pump Status)
 REG_HEAT_PUMP_STATUS = 114
+# NHR Zustand (NHR State)
+REG_NHR_STATE = 116
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -83,6 +85,11 @@ SHOCK_VENTILATION_ACTIVE = 1
 HEAT_PUMP_STATUS_OFF = 0
 HEAT_PUMP_STATUS_HEATING = 5
 HEAT_PUMP_STATUS_COOLING = 49
+
+# NHR state values
+# NHR Zustand: 0=Inaktiv, 1=Aktiv
+NHR_STATE_INACTIVE = 0
+NHR_STATE_ACTIVE = 1
 
 
 class BicWrgModbusClient:
@@ -263,6 +270,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_nhr_state(self) -> int | None:
+        """Read NHR state (NHR Zustand)."""
+        registers = self.read_holding_registers(REG_NHR_STATE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -311,5 +325,10 @@ class BicWrgModbusClient:
         heat_pump_status = self.read_heat_pump_status()
         if heat_pump_status is not None:
             data["heat_pump_status"] = heat_pump_status
+        
+        # Read NHR state (NHR Zustand)
+        nhr_state = self.read_nhr_state()
+        if nhr_state is not None:
+            data["nhr_state"] = nhr_state
         
         return data
