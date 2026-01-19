@@ -14,6 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 REG_OPERATION_MODE = 100
 # Manuelle Luftstufe (Manual Fan Speed)
 REG_FAN_SPEED = 101
+# Aktuelle Luftstufe (Current Fan Level)
+REG_CURRENT_FAN_LEVEL = 102
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -32,6 +34,14 @@ FAN_SPEED_LEVEL_3 = 3
 FAN_SPEED_LEVEL_4 = 4
 FAN_SPEED_AUTO = 5
 FAN_SPEED_LINEAR = 6
+
+# Current fan level values
+# Aktuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+CURRENT_FAN_LEVEL_OFF = 0
+CURRENT_FAN_LEVEL_1 = 1
+CURRENT_FAN_LEVEL_2 = 2
+CURRENT_FAN_LEVEL_3 = 3
+CURRENT_FAN_LEVEL_4 = 4
 
 
 class BicWrgModbusClient:
@@ -146,6 +156,13 @@ class BicWrgModbusClient:
         """Write manual fan speed (Manuelle Luftstufe)."""
         return self.write_register(REG_FAN_SPEED, speed)
 
+    def read_current_fan_level(self) -> int | None:
+        """Read current fan level (Aktuelle Luftstufe)."""
+        registers = self.read_holding_registers(REG_CURRENT_FAN_LEVEL, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -159,5 +176,10 @@ class BicWrgModbusClient:
         fan_speed = self.read_fan_speed()
         if fan_speed is not None:
             data["fan_speed"] = fan_speed
+        
+        # Read current fan level (Aktuelle Luftstufe)
+        current_fan_level = self.read_current_fan_level()
+        if current_fan_level is not None:
+            data["current_fan_level"] = current_fan_level
         
         return data
