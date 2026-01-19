@@ -866,6 +866,27 @@ class BicWrgModbusClient:
         register = 440 + room_number - 1
         return self.write_register(register, enabled)
 
+    def read_room_base_temperature(self, room_number: int) -> float | None:
+        """Read room base temperature (Grundtemperatur Raum)."""
+        # Rooms 1-17 use registers 420-436
+        register = 420 + room_number - 1
+        registers = self.read_holding_registers(register, 1)
+        if registers:
+            # Convert to signed 16-bit integer
+            value = registers[0]
+            if value > 32767:
+                value -= 65536
+            return value / 10.0
+        return None
+
+    def write_room_base_temperature(self, room_number: int, temperature: float) -> bool:
+        """Write room base temperature (Grundtemperatur Raum)."""
+        # Rooms 1-17 use registers 420-436
+        # Temperature range: 10-30°C, stored as value * 10
+        register = 420 + room_number - 1
+        value = int(temperature * 10)
+        return self.write_register(register, value)
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -1119,6 +1140,11 @@ class BicWrgModbusClient:
             target_temp = self.read_room_target_temperature(room_number)
             if target_temp is not None:
                 data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
+            
+            # Base temperature
+            base_temp = self.read_room_base_temperature(room_number)
+            if base_temp is not None:
+                data[f"room_{room_number}_base_temp"] = base_temp
             
             # Heating enable (only for rooms 1-12)
             if room_number <= 12:
