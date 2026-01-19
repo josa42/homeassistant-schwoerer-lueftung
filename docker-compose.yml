@@ -9,5 +9,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     privileged: true
+    network_mode: bridge
     ports:
       - "8123:8123"
