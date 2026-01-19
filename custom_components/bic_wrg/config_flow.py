@@ -104,7 +104,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Generate room names
             for i in range(1, num_rooms + 1):
                 room_name = user_input.get(f"room_{i}_name", f"Room {i}")
-                data[CONF_ROOMS].append({"id": i, "name": room_name})
+                data[CONF_ROOMS].append({"number": i, "name": room_name})
             
             info = {"title": f"WRG {self._host_data[CONF_HOST]}"}
             return self.async_create_entry(title=info["title"], data=data)
