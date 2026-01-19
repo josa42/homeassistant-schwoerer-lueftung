@@ -38,6 +38,11 @@ from .modbus_client import (
     SUPPLY_AIR_FAN_STATUS_ACTIVE,
     SUPPLY_AIR_FAN_STATUS_STANDBY,
     SUPPLY_AIR_FAN_STATUS_ERROR,
+    EXHAUST_AIR_FAN_STATUS_DISABLED,
+    EXHAUST_AIR_FAN_STATUS_STARTUP,
+    EXHAUST_AIR_FAN_STATUS_ACTIVE,
+    EXHAUST_AIR_FAN_STATUS_STANDBY,
+    EXHAUST_AIR_FAN_STATUS_ERROR,
 )
 
 # Current fan level mapping
@@ -92,6 +97,16 @@ SUPPLY_AIR_FAN_STATUSES = {
     SUPPLY_AIR_FAN_STATUS_ERROR: "Error",
 }
 
+# Exhaust air fan status mapping
+# Status Gebläse Abluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
+EXHAUST_AIR_FAN_STATUSES = {
+    EXHAUST_AIR_FAN_STATUS_DISABLED: "Disabled",
+    EXHAUST_AIR_FAN_STATUS_STARTUP: "Startup",
+    EXHAUST_AIR_FAN_STATUS_ACTIVE: "Active",
+    EXHAUST_AIR_FAN_STATUS_STANDBY: "Standby",
+    EXHAUST_AIR_FAN_STATUS_ERROR: "Error",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -109,6 +124,7 @@ async def async_setup_entry(
         BicWrgHeatPumpStatusSensor(coordinator, entry),
         BicWrgNhrStateSensor(coordinator, entry),
         BicWrgSupplyAirFanStatusSensor(coordinator, entry),
+        BicWrgExhaustAirFanStatusSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -350,6 +366,36 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         status = self.coordinator.data.get("supply_air_fan_status")
         if status is not None and status in SUPPLY_AIR_FAN_STATUSES:
             return SUPPLY_AIR_FAN_STATUSES[status]
+        return None
+
+
+class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG exhaust air fan status (Status Gebläse Abluft)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Exhaust Air Fan Status"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_exhaust_air_fan_status"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the exhaust air fan status as text."""
+        status = self.coordinator.data.get("exhaust_air_fan_status")
+        if status is not None and status in EXHAUST_AIR_FAN_STATUSES:
+            return EXHAUST_AIR_FAN_STATUSES[status]
         return None
 
 

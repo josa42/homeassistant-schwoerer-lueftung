@@ -32,6 +32,8 @@ REG_HEAT_PUMP_STATUS = 114
 REG_NHR_STATE = 116
 # Status Gebläse Zuluft (Supply Air Fan Status)
 REG_SUPPLY_AIR_FAN_STATUS = 117
+# Status Gebläse Abluft (Exhaust Air Fan Status)
+REG_EXHAUST_AIR_FAN_STATUS = 118
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -100,6 +102,14 @@ SUPPLY_AIR_FAN_STATUS_STARTUP = 1
 SUPPLY_AIR_FAN_STATUS_ACTIVE = 2
 SUPPLY_AIR_FAN_STATUS_STANDBY = 5
 SUPPLY_AIR_FAN_STATUS_ERROR = 6
+
+# Exhaust air fan status values
+# Status Gebläse Abluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
+EXHAUST_AIR_FAN_STATUS_DISABLED = 0
+EXHAUST_AIR_FAN_STATUS_STARTUP = 1
+EXHAUST_AIR_FAN_STATUS_ACTIVE = 2
+EXHAUST_AIR_FAN_STATUS_STANDBY = 5
+EXHAUST_AIR_FAN_STATUS_ERROR = 6
 
 
 class BicWrgModbusClient:
@@ -294,6 +304,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_exhaust_air_fan_status(self) -> int | None:
+        """Read exhaust air fan status (Status Gebläse Abluft)."""
+        registers = self.read_holding_registers(REG_EXHAUST_AIR_FAN_STATUS, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -352,5 +369,10 @@ class BicWrgModbusClient:
         supply_air_fan_status = self.read_supply_air_fan_status()
         if supply_air_fan_status is not None:
             data["supply_air_fan_status"] = supply_air_fan_status
+        
+        # Read exhaust air fan status (Status Gebläse Abluft)
+        exhaust_air_fan_status = self.read_exhaust_air_fan_status()
+        if exhaust_air_fan_status is not None:
+            data["exhaust_air_fan_status"] = exhaust_air_fan_status
         
         return data
