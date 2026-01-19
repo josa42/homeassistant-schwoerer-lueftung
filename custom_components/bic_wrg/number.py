@@ -28,7 +28,7 @@ async def async_setup_entry(
     for room in rooms:
         entities.append(
             BicWrgRoomBaseTemperatureNumber(
-                coordinator, entry, room["room_number"], room["room_name"]
+                coordinator, entry, room["number"], room["name"]
             )
         )
     
