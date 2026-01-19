@@ -21,6 +21,8 @@ from .modbus_client import (
     CURRENT_FAN_LEVEL_2,
     CURRENT_FAN_LEVEL_3,
     CURRENT_FAN_LEVEL_4,
+    FAN_OVERRIDE_INACTIVE,
+    FAN_OVERRIDE_ACTIVE,
 )
 
 # Current fan level mapping
@@ -31,6 +33,13 @@ CURRENT_FAN_LEVELS = {
     CURRENT_FAN_LEVEL_2: "Level 2",
     CURRENT_FAN_LEVEL_3: "Level 3",
     CURRENT_FAN_LEVEL_4: "Level 4",
+}
+
+# Fan override mapping
+# Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
+FAN_OVERRIDE_STATES = {
+    FAN_OVERRIDE_INACTIVE: "Inactive",
+    FAN_OVERRIDE_ACTIVE: "Active",
 }
 
 
@@ -44,6 +53,7 @@ async def async_setup_entry(
     
     entities = [
         BicWrgCurrentFanLevelSensor(coordinator, entry),
+        BicWrgFanOverrideSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -106,6 +116,36 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         level = self.coordinator.data.get("current_fan_level")
         if level is not None and level in CURRENT_FAN_LEVELS:
             return CURRENT_FAN_LEVELS[level]
+        return None
+
+
+class BicWrgFanOverrideSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG fan override (Luftstufen Überschreibung)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Fan Override"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_fan_override"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the fan override state as text."""
+        override = self.coordinator.data.get("fan_override")
+        if override is not None and override in FAN_OVERRIDE_STATES:
+            return FAN_OVERRIDE_STATES[override]
         return None
 
 

@@ -18,6 +18,8 @@ REG_FAN_SPEED = 101
 REG_CURRENT_FAN_LEVEL = 102
 # Manuelle Lineare Luftleistung (Manual Linear Fan Power)
 REG_LINEAR_FAN_POWER = 103
+# Luftstufen Überschreibung (Fan Level Override)
+REG_FAN_OVERRIDE = 104
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -49,6 +51,11 @@ CURRENT_FAN_LEVEL_4 = 4
 # Manuelle Lineare Luftleistung: 30-100%
 LINEAR_FAN_POWER_MIN = 30
 LINEAR_FAN_POWER_MAX = 100
+
+# Fan override values
+# Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
+FAN_OVERRIDE_INACTIVE = 0
+FAN_OVERRIDE_ACTIVE = 1
 
 
 class BicWrgModbusClient:
@@ -190,6 +197,13 @@ class BicWrgModbusClient:
             return False
         return self.write_register(REG_LINEAR_FAN_POWER, power)
 
+    def read_fan_override(self) -> int | None:
+        """Read fan level override (Luftstufen Überschreibung)."""
+        registers = self.read_holding_registers(REG_FAN_OVERRIDE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -213,5 +227,10 @@ class BicWrgModbusClient:
         linear_fan_power = self.read_linear_fan_power()
         if linear_fan_power is not None:
             data["linear_fan_power"] = linear_fan_power
+        
+        # Read fan override (Luftstufen Überschreibung)
+        fan_override = self.read_fan_override()
+        if fan_override is not None:
+            data["fan_override"] = fan_override
         
         return data
