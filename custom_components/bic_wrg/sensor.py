@@ -209,6 +209,15 @@ async def async_setup_entry(
         BicWrgCurrentExhaustAirFlowSensor(coordinator, entry),
         BicWrgCurrentSupplyAirRpmSensor(coordinator, entry),
         BicWrgCurrentExhaustAirRpmSensor(coordinator, entry),
+        BicWrgTemperatureT1AfterEwtSensor(coordinator, entry),
+        BicWrgTemperatureT2AfterVhrSensor(coordinator, entry),
+        BicWrgTemperatureT3BeforeNeSensor(coordinator, entry),
+        BicWrgTemperatureT4AfterNeSensor(coordinator, entry),
+        BicWrgTemperatureT5ExhaustAirSensor(coordinator, entry),
+        BicWrgTemperatureT6InWtSensor(coordinator, entry),
+        BicWrgTemperatureT7EvaporatorSensor(coordinator, entry),
+        BicWrgTemperatureT8CondenserSensor(coordinator, entry),
+        BicWrgTemperatureT10OutdoorSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -777,6 +786,276 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     def native_value(self) -> int | None:
         """Return the current exhaust air RPM."""
         return self.coordinator.data.get("current_exhaust_air_rpm")
+
+
+class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T1 after EWT (T1 nach EWT)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T1 After EWT"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t1_after_ewt"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T1 after EWT."""
+        return self.coordinator.data.get("temp_t1_after_ewt")
+
+
+class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T2 after VHR (T2 nach VHR)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T2 After VHR"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t2_after_vhr"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T2 after VHR."""
+        return self.coordinator.data.get("temp_t2_after_vhr")
+
+
+class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T3 before NE (T3 vor NE)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T3 Before NE"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t3_before_ne"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T3 before NE."""
+        return self.coordinator.data.get("temp_t3_before_ne")
+
+
+class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T4 after NE (T4 nach NE)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T4 After NE"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t4_after_ne"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T4 after NE."""
+        return self.coordinator.data.get("temp_t4_after_ne")
+
+
+class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T5 exhaust air (T5 Abluft)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T5 Exhaust Air"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t5_exhaust_air"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T5 exhaust air."""
+        return self.coordinator.data.get("temp_t5_exhaust_air")
+
+
+class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T6 in WT (T6 im WT)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T6 In WT"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t6_in_wt"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T6 in WT."""
+        return self.coordinator.data.get("temp_t6_in_wt")
+
+
+class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T7 evaporator (T7 Verdampfer)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T7 Evaporator"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t7_evaporator"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T7 evaporator."""
+        return self.coordinator.data.get("temp_t7_evaporator")
+
+
+class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T8 condenser (T8 Kondensator)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T8 Condenser"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t8_condenser"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T8 condenser."""
+        return self.coordinator.data.get("temp_t8_condenser")
+
+
+class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG temperature T10 outdoor (T10 Aussen)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Temperature T10 Outdoor"
+    _attr_native_unit_of_measurement = "°C"
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_temp_t10_outdoor"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the temperature T10 outdoor."""
+        return self.coordinator.data.get("temp_t10_outdoor")
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

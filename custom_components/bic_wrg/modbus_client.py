@@ -55,6 +55,26 @@ REG_CURRENT_SUPPLY_AIR_RPM = 144
 # Aktuelle Drehzahl Abluft (Current Exhaust Air RPM)
 REG_CURRENT_EXHAUST_AIR_RPM = 145
 
+# Temperature registers (all values /10 for actual °C)
+# T1 nach EWT (T1 after EWT)
+REG_TEMP_T1_AFTER_EWT = 200
+# T2 nach VHR (T2 after VHR)
+REG_TEMP_T2_AFTER_VHR = 201
+# T3 vor NE (T3 before NE)
+REG_TEMP_T3_BEFORE_NE = 202
+# T4 nach NE (T4 after NE)
+REG_TEMP_T4_AFTER_NE = 203
+# T5 Abluft (T5 exhaust air)
+REG_TEMP_T5_EXHAUST_AIR = 204
+# T6 im WT (T6 in WT)
+REG_TEMP_T6_IN_WT = 205
+# T7 Verdampfer (T7 evaporator)
+REG_TEMP_T7_EVAPORATOR = 206
+# T8 Kondensator (T8 condenser)
+REG_TEMP_T8_CONDENSER = 207
+# T10 Aussen (T10 outdoor)
+REG_TEMP_T10_OUTDOOR = 209
+
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
 OPERATION_MODE_OFF = 0
@@ -441,6 +461,69 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_temperature_t1_after_ewt(self) -> float | None:
+        """Read temperature T1 after EWT (T1 nach EWT)."""
+        registers = self.read_holding_registers(REG_TEMP_T1_AFTER_EWT, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t2_after_vhr(self) -> float | None:
+        """Read temperature T2 after VHR (T2 nach VHR)."""
+        registers = self.read_holding_registers(REG_TEMP_T2_AFTER_VHR, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t3_before_ne(self) -> float | None:
+        """Read temperature T3 before NE (T3 vor NE)."""
+        registers = self.read_holding_registers(REG_TEMP_T3_BEFORE_NE, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t4_after_ne(self) -> float | None:
+        """Read temperature T4 after NE (T4 nach NE)."""
+        registers = self.read_holding_registers(REG_TEMP_T4_AFTER_NE, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t5_exhaust_air(self) -> float | None:
+        """Read temperature T5 exhaust air (T5 Abluft)."""
+        registers = self.read_holding_registers(REG_TEMP_T5_EXHAUST_AIR, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t6_in_wt(self) -> float | None:
+        """Read temperature T6 in WT (T6 im WT)."""
+        registers = self.read_holding_registers(REG_TEMP_T6_IN_WT, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t7_evaporator(self) -> float | None:
+        """Read temperature T7 evaporator (T7 Verdampfer)."""
+        registers = self.read_holding_registers(REG_TEMP_T7_EVAPORATOR, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t8_condenser(self) -> float | None:
+        """Read temperature T8 condenser (T8 Kondensator)."""
+        registers = self.read_holding_registers(REG_TEMP_T8_CONDENSER, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
+    def read_temperature_t10_outdoor(self) -> float | None:
+        """Read temperature T10 outdoor (T10 Aussen)."""
+        registers = self.read_holding_registers(REG_TEMP_T10_OUTDOOR, 1)
+        if registers:
+            return registers[0] / 10.0
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -554,5 +637,50 @@ class BicWrgModbusClient:
         current_exhaust_air_rpm = self.read_current_exhaust_air_rpm()
         if current_exhaust_air_rpm is not None:
             data["current_exhaust_air_rpm"] = current_exhaust_air_rpm
+        
+        # Read temperature T1 after EWT (T1 nach EWT)
+        temp_t1_after_ewt = self.read_temperature_t1_after_ewt()
+        if temp_t1_after_ewt is not None:
+            data["temp_t1_after_ewt"] = temp_t1_after_ewt
+        
+        # Read temperature T2 after VHR (T2 nach VHR)
+        temp_t2_after_vhr = self.read_temperature_t2_after_vhr()
+        if temp_t2_after_vhr is not None:
+            data["temp_t2_after_vhr"] = temp_t2_after_vhr
+        
+        # Read temperature T3 before NE (T3 vor NE)
+        temp_t3_before_ne = self.read_temperature_t3_before_ne()
+        if temp_t3_before_ne is not None:
+            data["temp_t3_before_ne"] = temp_t3_before_ne
+        
+        # Read temperature T4 after NE (T4 nach NE)
+        temp_t4_after_ne = self.read_temperature_t4_after_ne()
+        if temp_t4_after_ne is not None:
+            data["temp_t4_after_ne"] = temp_t4_after_ne
+        
+        # Read temperature T5 exhaust air (T5 Abluft)
+        temp_t5_exhaust_air = self.read_temperature_t5_exhaust_air()
+        if temp_t5_exhaust_air is not None:
+            data["temp_t5_exhaust_air"] = temp_t5_exhaust_air
+        
+        # Read temperature T6 in WT (T6 im WT)
+        temp_t6_in_wt = self.read_temperature_t6_in_wt()
+        if temp_t6_in_wt is not None:
+            data["temp_t6_in_wt"] = temp_t6_in_wt
+        
+        # Read temperature T7 evaporator (T7 Verdampfer)
+        temp_t7_evaporator = self.read_temperature_t7_evaporator()
+        if temp_t7_evaporator is not None:
+            data["temp_t7_evaporator"] = temp_t7_evaporator
+        
+        # Read temperature T8 condenser (T8 Kondensator)
+        temp_t8_condenser = self.read_temperature_t8_condenser()
+        if temp_t8_condenser is not None:
+            data["temp_t8_condenser"] = temp_t8_condenser
+        
+        # Read temperature T10 outdoor (T10 Aussen)
+        temp_t10_outdoor = self.read_temperature_t10_outdoor()
+        if temp_t10_outdoor is not None:
+            data["temp_t10_outdoor"] = temp_t10_outdoor
         
         return data
