@@ -8,6 +8,7 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.components.sensor import SensorDeviceClass as SDC
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -231,6 +232,20 @@ async def async_setup_entry(
         entities.append(
             BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
         )
+    
+    # Add operating hours sensors
+    entities.extend([
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan", 800, "Fan"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "Fan Level 1"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "Fan Level 2"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "Fan Level 3"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "Fan Level 4"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "Heat Pump"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "Heat Pump Cooling"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "VHR"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "Auxiliary Heating House"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "EWT"),
+    ])
     
     async_add_entities(entities)
 
@@ -1201,6 +1216,41 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
 
 
 
+
+
+class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for operating hours (Betriebsstunden)."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_native_unit_of_measurement = UnitOfTime.HOURS
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+        key: str,
+        register: int,
+        name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._key = key
+        self._register = register
+        self._attr_unique_id = f"{entry.entry_id}_operating_hours_{key}"
+        self._attr_name = f"Operating Hours {name}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the operating hours."""
+        return self.coordinator.data.get(f"register_{self._register}")
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

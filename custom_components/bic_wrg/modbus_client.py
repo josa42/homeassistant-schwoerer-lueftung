@@ -117,6 +117,18 @@ REG_DEVICE_FILTER_REMAINING = 265
 # Restlaufzeit Vorgelagerter Filter (Upstream Filter Remaining Days)
 REG_UPSTREAM_FILTER_REMAINING = 263
 
+# Operating hours registers (Betriebsstunden)
+REG_OPERATING_HOURS_FAN = 800
+REG_OPERATING_HOURS_FAN_LEVEL_1 = 801
+REG_OPERATING_HOURS_FAN_LEVEL_2 = 802
+REG_OPERATING_HOURS_FAN_LEVEL_3 = 803
+REG_OPERATING_HOURS_FAN_LEVEL_4 = 804
+REG_OPERATING_HOURS_HEAT_PUMP = 805
+REG_OPERATING_HOURS_HEAT_PUMP_COOLING = 806
+REG_OPERATING_HOURS_VHR = 809
+REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE = 810
+REG_OPERATING_HOURS_EWT = 813
+
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
 OPERATION_MODE_OFF = 0
@@ -1172,5 +1184,23 @@ class BicWrgModbusClient:
             time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
             if time_program_heating:
                 data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
+        
+        # Read operating hours (Betriebsstunden)
+        operating_hours_registers = [
+            (800, REG_OPERATING_HOURS_FAN),
+            (801, REG_OPERATING_HOURS_FAN_LEVEL_1),
+            (802, REG_OPERATING_HOURS_FAN_LEVEL_2),
+            (803, REG_OPERATING_HOURS_FAN_LEVEL_3),
+            (804, REG_OPERATING_HOURS_FAN_LEVEL_4),
+            (805, REG_OPERATING_HOURS_HEAT_PUMP),
+            (806, REG_OPERATING_HOURS_HEAT_PUMP_COOLING),
+            (809, REG_OPERATING_HOURS_VHR),
+            (810, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
+            (813, REG_OPERATING_HOURS_EWT),
+        ]
+        for reg_num, reg_const in operating_hours_registers:
+            registers = self.read_holding_registers(reg_const, 1)
+            if registers:
+                data[f"register_{reg_num}"] = registers[0]
         
         return data
