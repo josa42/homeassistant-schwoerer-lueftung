@@ -16,6 +16,8 @@ REG_OPERATION_MODE = 100
 REG_FAN_SPEED = 101
 # Aktuelle Luftstufe (Current Fan Level)
 REG_CURRENT_FAN_LEVEL = 102
+# Manuelle Lineare Luftleistung (Manual Linear Fan Power)
+REG_LINEAR_FAN_POWER = 103
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -42,6 +44,11 @@ CURRENT_FAN_LEVEL_1 = 1
 CURRENT_FAN_LEVEL_2 = 2
 CURRENT_FAN_LEVEL_3 = 3
 CURRENT_FAN_LEVEL_4 = 4
+
+# Linear fan power range
+# Manuelle Lineare Luftleistung: 30-100%
+LINEAR_FAN_POWER_MIN = 30
+LINEAR_FAN_POWER_MAX = 100
 
 
 class BicWrgModbusClient:
@@ -163,6 +170,26 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_linear_fan_power(self) -> int | None:
+        """Read manual linear fan power (Manuelle Lineare Luftleistung)."""
+        registers = self.read_holding_registers(REG_LINEAR_FAN_POWER, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def write_linear_fan_power(self, power: int) -> bool:
+        """Write manual linear fan power (Manuelle Lineare Luftleistung)."""
+        # Validate range 30-100
+        if power < LINEAR_FAN_POWER_MIN or power > LINEAR_FAN_POWER_MAX:
+            _LOGGER.error(
+                "Linear fan power %d out of range (%d-%d)",
+                power,
+                LINEAR_FAN_POWER_MIN,
+                LINEAR_FAN_POWER_MAX,
+            )
+            return False
+        return self.write_register(REG_LINEAR_FAN_POWER, power)
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -181,5 +208,10 @@ class BicWrgModbusClient:
         current_fan_level = self.read_current_fan_level()
         if current_fan_level is not None:
             data["current_fan_level"] = current_fan_level
+        
+        # Read linear fan power (Manuelle Lineare Luftleistung)
+        linear_fan_power = self.read_linear_fan_power()
+        if linear_fan_power is not None:
+            data["linear_fan_power"] = linear_fan_power
         
         return data

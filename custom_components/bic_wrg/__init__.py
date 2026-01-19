@@ -15,6 +15,7 @@ from .coordinator import BicWrgCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
+    Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
 ]
