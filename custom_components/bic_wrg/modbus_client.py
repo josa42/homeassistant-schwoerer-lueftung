@@ -20,6 +20,8 @@ REG_CURRENT_FAN_LEVEL = 102
 REG_LINEAR_FAN_POWER = 103
 # Luftstufen Überschreibung (Fan Level Override)
 REG_FAN_OVERRIDE = 104
+# Zeitprogramm Basis Luftstufe (Time Program Base Fan Level)
+REG_TIME_PROGRAM_BASE_LEVEL = 110
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -56,6 +58,14 @@ LINEAR_FAN_POWER_MAX = 100
 # Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
 FAN_OVERRIDE_INACTIVE = 0
 FAN_OVERRIDE_ACTIVE = 1
+
+# Time program base level values
+# Zeitprogramm Basis Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+TIME_PROGRAM_BASE_LEVEL_OFF = 0
+TIME_PROGRAM_BASE_LEVEL_1 = 1
+TIME_PROGRAM_BASE_LEVEL_2 = 2
+TIME_PROGRAM_BASE_LEVEL_3 = 3
+TIME_PROGRAM_BASE_LEVEL_4 = 4
 
 
 class BicWrgModbusClient:
@@ -204,6 +214,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_time_program_base_level(self) -> int | None:
+        """Read time program base fan level (Zeitprogramm Basis Luftstufe)."""
+        registers = self.read_holding_registers(REG_TIME_PROGRAM_BASE_LEVEL, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -232,5 +249,10 @@ class BicWrgModbusClient:
         fan_override = self.read_fan_override()
         if fan_override is not None:
             data["fan_override"] = fan_override
+        
+        # Read time program base level (Zeitprogramm Basis Luftstufe)
+        time_program_base_level = self.read_time_program_base_level()
+        if time_program_base_level is not None:
+            data["time_program_base_level"] = time_program_base_level
         
         return data

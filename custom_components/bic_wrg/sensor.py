@@ -23,6 +23,11 @@ from .modbus_client import (
     CURRENT_FAN_LEVEL_4,
     FAN_OVERRIDE_INACTIVE,
     FAN_OVERRIDE_ACTIVE,
+    TIME_PROGRAM_BASE_LEVEL_OFF,
+    TIME_PROGRAM_BASE_LEVEL_1,
+    TIME_PROGRAM_BASE_LEVEL_2,
+    TIME_PROGRAM_BASE_LEVEL_3,
+    TIME_PROGRAM_BASE_LEVEL_4,
 )
 
 # Current fan level mapping
@@ -42,6 +47,16 @@ FAN_OVERRIDE_STATES = {
     FAN_OVERRIDE_ACTIVE: "Active",
 }
 
+# Time program base level mapping
+# Zeitprogramm Basis Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+TIME_PROGRAM_BASE_LEVELS = {
+    TIME_PROGRAM_BASE_LEVEL_OFF: "Off",
+    TIME_PROGRAM_BASE_LEVEL_1: "Level 1",
+    TIME_PROGRAM_BASE_LEVEL_2: "Level 2",
+    TIME_PROGRAM_BASE_LEVEL_3: "Level 3",
+    TIME_PROGRAM_BASE_LEVEL_4: "Level 4",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -54,6 +69,7 @@ async def async_setup_entry(
     entities = [
         BicWrgCurrentFanLevelSensor(coordinator, entry),
         BicWrgFanOverrideSensor(coordinator, entry),
+        BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -146,6 +162,36 @@ class BicWrgFanOverrideSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         override = self.coordinator.data.get("fan_override")
         if override is not None and override in FAN_OVERRIDE_STATES:
             return FAN_OVERRIDE_STATES[override]
+        return None
+
+
+class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG time program base level (Zeitprogramm Basis Luftstufe)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Time Program Base Level"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_time_program_base_level"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the time program base level as text."""
+        level = self.coordinator.data.get("time_program_base_level")
+        if level is not None and level in TIME_PROGRAM_BASE_LEVELS:
+            return TIME_PROGRAM_BASE_LEVELS[level]
         return None
 
 
