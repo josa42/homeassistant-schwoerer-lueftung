@@ -1,0 +1,57 @@
+"""DataUpdateCoordinator for Bau Info Center WRG."""
+from __future__ import annotations
+
+from datetime import timedelta
+import logging
+from typing import Any
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
+from .const import (
+    CONF_SLAVE_ID,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+)
+from .modbus_client import BicWrgModbusClient
+
+_LOGGER = logging.getLogger(__name__)
+
+
+class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+    """Class to manage fetching WRG data."""
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        """Initialize."""
+        self.entry = entry
+        self.client = BicWrgModbusClient(
+            host=entry.data[CONF_HOST],
+            port=entry.data[CONF_PORT],
+            slave_id=entry.data[CONF_SLAVE_ID],
+        )
+        
+        super().__init__(
+            hass,
+            _LOGGER,
+            name=DOMAIN,
+            update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+        )
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        """Fetch data from WRG device."""
+        try:
+            if not await self.hass.async_add_executor_job(self.client.connect):
+                raise UpdateFailed("Failed to connect to device")
+            
+            data = await self.hass.async_add_executor_job(self.client.read_data)
+            
+            if not data:
+                raise UpdateFailed("Failed to read data from device")
+            
+            return data
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with device: {err}") from err
+        finally:
+            await self.hass.async_add_executor_job(self.client.disconnect)

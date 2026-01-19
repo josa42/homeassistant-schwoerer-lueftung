@@ -1,0 +1,5 @@
+{
+  "name": "Bau Info Center WRG",
+  "render_readme": true,
+  "domains": ["climate", "sensor"]
+}
