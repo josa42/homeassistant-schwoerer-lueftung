@@ -434,6 +434,7 @@ class BicWrgNhrStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
 
     _attr_has_entity_name = True
     _attr_name = "NHR State"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -464,6 +465,7 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
 
     _attr_has_entity_name = True
     _attr_name = "Supply Air Fan Status"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -586,6 +588,7 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
 
     _attr_has_entity_name = True
     _attr_name = "Outdoor Damper State"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -616,6 +619,7 @@ class BicWrgPreheaterStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
 
     _attr_has_entity_name = True
     _attr_name = "Preheater State"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
@@ -1233,6 +1237,7 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_native_unit_of_measurement = UnitOfTime.HOURS
     _attr_has_entity_name = True
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
