@@ -38,6 +38,8 @@ REG_EXHAUST_AIR_FAN_STATUS = 118
 REG_EWT_STATE = 121
 # Bypass Zustand (Bypass State)
 REG_BYPASS_STATE = 123
+# Aussenklappe Zustand (Outdoor Damper State)
+REG_OUTDOOR_DAMPER_STATE = 131
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -126,6 +128,11 @@ EWT_STATE_COOLING = 2
 BYPASS_STATE_CLOSED = 0
 BYPASS_STATE_OPEN_COOLING = 1
 BYPASS_STATE_OPEN_HEATING = 2
+
+# Outdoor damper state values
+# Aussenklappe Zustand: 0=geschlossen, 1=offen
+OUTDOOR_DAMPER_STATE_CLOSED = 0
+OUTDOOR_DAMPER_STATE_OPEN = 1
 
 
 class BicWrgModbusClient:
@@ -341,6 +348,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_outdoor_damper_state(self) -> int | None:
+        """Read outdoor damper state (Aussenklappe Zustand)."""
+        registers = self.read_holding_registers(REG_OUTDOOR_DAMPER_STATE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -414,5 +428,10 @@ class BicWrgModbusClient:
         bypass_state = self.read_bypass_state()
         if bypass_state is not None:
             data["bypass_state"] = bypass_state
+        
+        # Read outdoor damper state (Aussenklappe Zustand)
+        outdoor_damper_state = self.read_outdoor_damper_state()
+        if outdoor_damper_state is not None:
+            data["outdoor_damper_state"] = outdoor_damper_state
         
         return data

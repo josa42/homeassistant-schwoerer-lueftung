@@ -49,6 +49,8 @@ from .modbus_client import (
     BYPASS_STATE_CLOSED,
     BYPASS_STATE_OPEN_COOLING,
     BYPASS_STATE_OPEN_HEATING,
+    OUTDOOR_DAMPER_STATE_CLOSED,
+    OUTDOOR_DAMPER_STATE_OPEN,
 )
 
 # Current fan level mapping
@@ -129,6 +131,13 @@ BYPASS_STATES = {
     BYPASS_STATE_OPEN_HEATING: "Open (Heating)",
 }
 
+# Outdoor damper state mapping
+# Aussenklappe Zustand: 0=geschlossen, 1=offen
+OUTDOOR_DAMPER_STATES = {
+    OUTDOOR_DAMPER_STATE_CLOSED: "Closed",
+    OUTDOOR_DAMPER_STATE_OPEN: "Open",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -149,6 +158,7 @@ async def async_setup_entry(
         BicWrgExhaustAirFanStatusSensor(coordinator, entry),
         BicWrgEwtStateSensor(coordinator, entry),
         BicWrgBypassStateSensor(coordinator, entry),
+        BicWrgOutdoorDamperStateSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -480,6 +490,36 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         state = self.coordinator.data.get("bypass_state")
         if state is not None and state in BYPASS_STATES:
             return BYPASS_STATES[state]
+        return None
+
+
+class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG outdoor damper state (Aussenklappe Zustand)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Outdoor Damper State"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_outdoor_damper_state"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the outdoor damper state as text."""
+        state = self.coordinator.data.get("outdoor_damper_state")
+        if state is not None and state in OUTDOOR_DAMPER_STATES:
+            return OUTDOOR_DAMPER_STATES[state]
         return None
 
 
