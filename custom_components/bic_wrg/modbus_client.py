@@ -1167,5 +1167,10 @@ class BicWrgModbusClient:
             heating_active = self.read_room_heating_active(room_number)
             if heating_active is not None:
                 data[f"register_{460 + room_number - 1}"] = heating_active
+            
+            # Time program heating enable (registers 500-516 for rooms 1-17)
+            time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
+            if time_program_heating:
+                data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
         
         return data

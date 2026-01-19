@@ -34,6 +34,9 @@ async def async_setup_entry(
         entities.append(
             BicWrgRoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
         )
+        entities.append(
+            BicWrgRoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
+        )
     
     async_add_entities(entities)
 
@@ -196,6 +199,65 @@ class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Disable auxiliary heating."""
         register = 440 + self._room_number - 1
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_register, register, 0
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+    """Switch entity for room time program heating enable (Freigabe Zeitprogramm Heizen)."""
+
+    _attr_has_entity_name = True
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        room_number: int,
+        room_name: str,
+    ) -> None:
+        """Initialize the switch entity."""
+        super().__init__(coordinator)
+        self._room_number = room_number
+        self._room_name = room_name
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_time_program_heating_enable"
+        self._attr_name = "Time Program Heating Enable"
+        
+        # Room-specific device
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "name": room_name,
+            "manufacturer": "BIC",
+            "model": "Room Climate Control",
+            "via_device": (DOMAIN, coordinator.config_entry.entry_id),
+        }
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if time program heating is enabled."""
+        # Register 500-516 for rooms 1-17
+        register = 500 + self._room_number - 1
+        value = self.coordinator.data.get(f"register_{register}")
+        if value is not None:
+            return value == 1
+        return None
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable time program heating."""
+        register = 500 + self._room_number - 1
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_register, register, 1
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable time program heating."""
+        register = 500 + self._room_number - 1
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 0
         )
