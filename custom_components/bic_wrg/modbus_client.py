@@ -847,6 +847,25 @@ class BicWrgModbusClient:
         value = int(temperature * 10)
         return self.write_register(register, value)
 
+    def read_room_heating_enable(self, room_number: int) -> int | None:
+        """Read room heating enable (Zusatzheizung Freigabe Raum)."""
+        # Only rooms 1-12 have heating enable (registers 440-451)
+        if room_number > 12:
+            return None
+        register = 440 + room_number - 1
+        registers = self.read_holding_registers(register, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def write_room_heating_enable(self, room_number: int, enabled: int) -> bool:
+        """Write room heating enable (Zusatzheizung Freigabe Raum)."""
+        # Only rooms 1-12 have heating enable (registers 440-451)
+        if room_number > 12:
+            return False
+        register = 440 + room_number - 1
+        return self.write_register(register, enabled)
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -1089,6 +1108,7 @@ class BicWrgModbusClient:
             data["error_message"] = error_message
         
         # Read room temperatures (registers 360-376 for current, 400-416 for target)
+        # and heating enable (registers 440-451 for rooms 1-12)
         for room_number in range(1, 18):  # Rooms 1-17
             # Current temperature
             current_temp = self.read_room_temperature(room_number)
@@ -1099,5 +1119,11 @@ class BicWrgModbusClient:
             target_temp = self.read_room_target_temperature(room_number)
             if target_temp is not None:
                 data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
+            
+            # Heating enable (only for rooms 1-12)
+            if room_number <= 12:
+                heating_enable = self.read_room_heating_enable(room_number)
+                if heating_enable is not None:
+                    data[f"register_{440 + room_number - 1}"] = heating_enable
         
         return data

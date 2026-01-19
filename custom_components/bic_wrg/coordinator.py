@@ -46,6 +46,12 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self.client.write_register, address, value
         )
 
+    async def write_room_heating_enable(self, room_number: int, enabled: int) -> bool:
+        """Write room heating enable."""
+        return await self.hass.async_add_executor_job(
+            self.client.write_room_heating_enable, room_number, enabled
+        )
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from WRG device."""
         try:

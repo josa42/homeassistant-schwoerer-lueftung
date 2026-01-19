@@ -42,8 +42,8 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     """Climate entity for a room."""
 
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
-    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
-    _attr_hvac_modes = [HVACMode.HEAT]
+    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.TURN_ON | ClimateEntityFeature.TURN_OFF
+    _attr_hvac_modes = [HVACMode.OFF, HVACMode.FAN_ONLY, HVACMode.HEAT]
     _attr_min_temp = 10.0
     _attr_max_temp = 30.0
     _attr_target_temperature_step = 0.5
@@ -90,7 +90,19 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     @property
     def hvac_mode(self) -> HVACMode:
         """Return current HVAC mode."""
-        return HVACMode.HEAT
+        # Register 440-451 for rooms 1-12 (only rooms 1-12 have heating control)
+        if self._room_number > 12:
+            return HVACMode.FAN_ONLY
+            
+        register = 440 + self._room_number - 1
+        value = self.coordinator.data.get(f"register_{register}")
+        
+        if value is None:
+            return HVACMode.OFF
+        elif value == 1:
+            return HVACMode.HEAT
+        else:
+            return HVACMode.FAN_ONLY
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
@@ -111,5 +123,15 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set HVAC mode."""
-        # Only heat mode is supported
-        pass
+        # Register 440-451 for rooms 1-12 (only rooms 1-12 have heating control)
+        if self._room_number > 12:
+            return
+        
+        # Map HVAC mode to register value
+        if hvac_mode == HVACMode.HEAT:
+            value = 1  # Heizen frei
+        else:  # HVACMode.FAN_ONLY or HVACMode.OFF
+            value = 0  # Gesperrt
+        
+        await self.coordinator.write_room_heating_enable(self._room_number, value)
+        await self.coordinator.async_request_refresh()
