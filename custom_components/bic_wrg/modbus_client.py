@@ -9,6 +9,18 @@ from pymodbus.exceptions import ModbusException
 
 _LOGGER = logging.getLogger(__name__)
 
+# Register addresses
+# Betriebsart (Operation Mode)
+REG_OPERATION_MODE = 100
+
+# Operation mode values
+# Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
+OPERATION_MODE_OFF = 0
+OPERATION_MODE_MANUAL = 1
+OPERATION_MODE_WINTER = 2
+OPERATION_MODE_SUMMER = 3
+OPERATION_MODE_SUMMER_EXHAUST = 4
+
 
 class BicWrgModbusClient:
     """Modbus TCP client for WRG device."""
@@ -62,17 +74,24 @@ class BicWrgModbusClient:
             _LOGGER.error("Modbus exception writing register: %s", err)
             return False
 
+    def read_operation_mode(self) -> int | None:
+        """Read operation mode (Betriebsart)."""
+        registers = self.read_holding_registers(REG_OPERATION_MODE, 1)
+        if registers:
+            return registers[0]
+        return None
+
+    def write_operation_mode(self, mode: int) -> bool:
+        """Write operation mode (Betriebsart)."""
+        return self.write_register(REG_OPERATION_MODE, mode)
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
-        # TODO: Define actual register mappings for WRG 134-BP-HK
-        # This is a placeholder structure
         data = {}
         
-        # Example: Read temperature registers (adjust addresses as needed)
-        # registers = self.read_holding_registers(address=0, count=10)
-        # if registers:
-        #     data["supply_temp"] = registers[0] / 10.0
-        #     data["extract_temp"] = registers[1] / 10.0
-        #     data["outdoor_temp"] = registers[2] / 10.0
+        # Read operation mode (Betriebsart)
+        operation_mode = self.read_operation_mode()
+        if operation_mode is not None:
+            data["operation_mode"] = operation_mode
         
         return data
