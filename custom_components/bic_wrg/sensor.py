@@ -46,6 +46,9 @@ from .modbus_client import (
     EWT_STATE_OFF,
     EWT_STATE_HEATING,
     EWT_STATE_COOLING,
+    BYPASS_STATE_CLOSED,
+    BYPASS_STATE_OPEN_COOLING,
+    BYPASS_STATE_OPEN_HEATING,
 )
 
 # Current fan level mapping
@@ -118,6 +121,14 @@ EWT_STATES = {
     EWT_STATE_COOLING: "Cooling",
 }
 
+# Bypass state mapping
+# Bypass Zustand: 0=Bypass geschlossen, 1=Bypass offen (Kühlen), 2=Bypass offen (Heizen)
+BYPASS_STATES = {
+    BYPASS_STATE_CLOSED: "Closed",
+    BYPASS_STATE_OPEN_COOLING: "Open (Cooling)",
+    BYPASS_STATE_OPEN_HEATING: "Open (Heating)",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -137,6 +148,7 @@ async def async_setup_entry(
         BicWrgSupplyAirFanStatusSensor(coordinator, entry),
         BicWrgExhaustAirFanStatusSensor(coordinator, entry),
         BicWrgEwtStateSensor(coordinator, entry),
+        BicWrgBypassStateSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -438,6 +450,36 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         state = self.coordinator.data.get("ewt_state")
         if state is not None and state in EWT_STATES:
             return EWT_STATES[state]
+        return None
+
+
+class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG bypass state (Bypass Zustand)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Bypass State"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_bypass_state"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the bypass state as text."""
+        state = self.coordinator.data.get("bypass_state")
+        if state is not None and state in BYPASS_STATES:
+            return BYPASS_STATES[state]
         return None
 
 

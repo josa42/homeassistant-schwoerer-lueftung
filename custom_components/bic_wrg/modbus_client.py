@@ -36,6 +36,8 @@ REG_SUPPLY_AIR_FAN_STATUS = 117
 REG_EXHAUST_AIR_FAN_STATUS = 118
 # EWT Zustand (EWT State)
 REG_EWT_STATE = 121
+# Bypass Zustand (Bypass State)
+REG_BYPASS_STATE = 123
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -118,6 +120,12 @@ EXHAUST_AIR_FAN_STATUS_ERROR = 6
 EWT_STATE_OFF = 0
 EWT_STATE_HEATING = 1
 EWT_STATE_COOLING = 2
+
+# Bypass state values
+# Bypass Zustand: 0=Bypass geschlossen, 1=Bypass offen (Kühlen), 2=Bypass offen (Heizen)
+BYPASS_STATE_CLOSED = 0
+BYPASS_STATE_OPEN_COOLING = 1
+BYPASS_STATE_OPEN_HEATING = 2
 
 
 class BicWrgModbusClient:
@@ -326,6 +334,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_bypass_state(self) -> int | None:
+        """Read bypass state (Bypass Zustand)."""
+        registers = self.read_holding_registers(REG_BYPASS_STATE, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -394,5 +409,10 @@ class BicWrgModbusClient:
         ewt_state = self.read_ewt_state()
         if ewt_state is not None:
             data["ewt_state"] = ewt_state
+        
+        # Read bypass state (Bypass Zustand)
+        bypass_state = self.read_bypass_state()
+        if bypass_state is not None:
+            data["bypass_state"] = bypass_state
         
         return data
