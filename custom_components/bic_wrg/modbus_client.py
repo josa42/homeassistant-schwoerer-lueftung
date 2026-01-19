@@ -44,6 +44,8 @@ REG_OUTDOOR_DAMPER_STATE = 131
 REG_PREHEATER_STATE = 133
 # Luftstufe Zeitprogramm (Time Program Fan Level)
 REG_TIME_PROGRAM_FAN_LEVEL = 140
+# Luftstufe Sensoren (Sensor Fan Level)
+REG_SENSOR_FAN_LEVEL = 141
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -152,6 +154,14 @@ TIME_PROGRAM_FAN_LEVEL_1 = 1
 TIME_PROGRAM_FAN_LEVEL_2 = 2
 TIME_PROGRAM_FAN_LEVEL_3 = 3
 TIME_PROGRAM_FAN_LEVEL_4 = 4
+
+# Sensor fan level values
+# Luftstufe Sensoren: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+SENSOR_FAN_LEVEL_OFF = 0
+SENSOR_FAN_LEVEL_1 = 1
+SENSOR_FAN_LEVEL_2 = 2
+SENSOR_FAN_LEVEL_3 = 3
+SENSOR_FAN_LEVEL_4 = 4
 
 
 class BicWrgModbusClient:
@@ -388,6 +398,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_sensor_fan_level(self) -> int | None:
+        """Read sensor fan level (Luftstufe Sensoren)."""
+        registers = self.read_holding_registers(REG_SENSOR_FAN_LEVEL, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -476,5 +493,10 @@ class BicWrgModbusClient:
         time_program_fan_level = self.read_time_program_fan_level()
         if time_program_fan_level is not None:
             data["time_program_fan_level"] = time_program_fan_level
+        
+        # Read sensor fan level (Luftstufe Sensoren)
+        sensor_fan_level = self.read_sensor_fan_level()
+        if sensor_fan_level is not None:
+            data["sensor_fan_level"] = sensor_fan_level
         
         return data

@@ -60,6 +60,11 @@ from .modbus_client import (
     TIME_PROGRAM_FAN_LEVEL_2,
     TIME_PROGRAM_FAN_LEVEL_3,
     TIME_PROGRAM_FAN_LEVEL_4,
+    SENSOR_FAN_LEVEL_OFF,
+    SENSOR_FAN_LEVEL_1,
+    SENSOR_FAN_LEVEL_2,
+    SENSOR_FAN_LEVEL_3,
+    SENSOR_FAN_LEVEL_4,
 )
 
 # Current fan level mapping
@@ -166,6 +171,16 @@ TIME_PROGRAM_FAN_LEVELS = {
     TIME_PROGRAM_FAN_LEVEL_4: "Level 4",
 }
 
+# Sensor fan level mapping
+# Luftstufe Sensoren: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+SENSOR_FAN_LEVELS = {
+    SENSOR_FAN_LEVEL_OFF: "Off",
+    SENSOR_FAN_LEVEL_1: "Level 1",
+    SENSOR_FAN_LEVEL_2: "Level 2",
+    SENSOR_FAN_LEVEL_3: "Level 3",
+    SENSOR_FAN_LEVEL_4: "Level 4",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -189,6 +204,7 @@ async def async_setup_entry(
         BicWrgOutdoorDamperStateSensor(coordinator, entry),
         BicWrgPreheaterStateSensor(coordinator, entry),
         BicWrgTimeProgramFanLevelSensor(coordinator, entry),
+        BicWrgSensorFanLevelSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -610,6 +626,36 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         level = self.coordinator.data.get("time_program_fan_level")
         if level is not None and level in TIME_PROGRAM_FAN_LEVELS:
             return TIME_PROGRAM_FAN_LEVELS[level]
+        return None
+
+
+class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG sensor fan level (Luftstufe Sensoren)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Sensor Fan Level"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_sensor_fan_level"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the sensor fan level as text."""
+        level = self.coordinator.data.get("sensor_fan_level")
+        if level is not None and level in SENSOR_FAN_LEVELS:
+            return SENSOR_FAN_LEVELS[level]
         return None
 
 
