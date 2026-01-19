@@ -7,7 +7,7 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -70,6 +70,7 @@ async def async_setup_entry(
         BicWrgCurrentFanLevelSensor(coordinator, entry),
         BicWrgFanOverrideSensor(coordinator, entry),
         BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
+        BicWrgShockVentilationRemainingSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -193,6 +194,35 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         if level is not None and level in TIME_PROGRAM_BASE_LEVELS:
             return TIME_PROGRAM_BASE_LEVELS[level]
         return None
+
+
+class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Shock Ventilation Remaining"
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_shock_ventilation_remaining"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the shock ventilation remaining time in minutes."""
+        return self.coordinator.data.get("shock_ventilation_remaining")
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

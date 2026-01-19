@@ -24,6 +24,8 @@ REG_FAN_OVERRIDE = 104
 REG_TIME_PROGRAM_BASE_LEVEL = 110
 # Stoßlüftung (Shock Ventilation)
 REG_SHOCK_VENTILATION = 111
+# Restlaufzeit Stoßlüftung (Shock Ventilation Remaining Time)
+REG_SHOCK_VENTILATION_REMAINING = 112
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -239,6 +241,13 @@ class BicWrgModbusClient:
         """Write shock ventilation (Stoßlüftung)."""
         return self.write_register(REG_SHOCK_VENTILATION, active)
 
+    def read_shock_ventilation_remaining(self) -> int | None:
+        """Read shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
+        registers = self.read_holding_registers(REG_SHOCK_VENTILATION_REMAINING, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -277,5 +286,10 @@ class BicWrgModbusClient:
         shock_ventilation = self.read_shock_ventilation()
         if shock_ventilation is not None:
             data["shock_ventilation"] = shock_ventilation
+        
+        # Read shock ventilation remaining time (Restlaufzeit Stoßlüftung)
+        shock_ventilation_remaining = self.read_shock_ventilation_remaining()
+        if shock_ventilation_remaining is not None:
+            data["shock_ventilation_remaining"] = shock_ventilation_remaining
         
         return data
