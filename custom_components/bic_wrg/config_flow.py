@@ -101,15 +101,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Store room configuration
             data = {**self._host_data, CONF_ROOMS: []}
             
-            # Generate room names
+            # Generate room data with number and name
             for i in range(1, num_rooms + 1):
-                room_name = user_input.get(f"room_{i}_name", f"Room {i}")
-                data[CONF_ROOMS].append({"number": i, "name": room_name})
+                data[CONF_ROOMS].append({"number": i, "name": f"Room {i}"})
             
             info = {"title": f"WRG {self._host_data[CONF_HOST]}"}
             return self.async_create_entry(title=info["title"], data=data)
         
-        # Build schema dynamically for room names
+        # Build schema for number of rooms
         schema_dict = {
             vol.Required("num_rooms", default=0): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=17)
