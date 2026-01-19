@@ -12,6 +12,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     CONF_SLAVE_ID,
+    CONF_ROOMS,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
@@ -25,7 +26,7 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize."""
-        self.entry = entry
+        self.config_entry = entry
         self.client = BicWrgModbusClient(
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
@@ -37,6 +38,12 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             _LOGGER,
             name=DOMAIN,
             update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+        )
+
+    async def write_register(self, address: int, value: int) -> bool:
+        """Write a register to the device."""
+        return await self.hass.async_add_executor_job(
+            self.client.write_register, address, value
         )
 
     async def _async_update_data(self) -> dict[str, Any]:

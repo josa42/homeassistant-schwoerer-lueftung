@@ -6,6 +6,7 @@ DOMAIN = "bic_wrg"
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_SLAVE_ID = "slave_id"
+CONF_ROOMS = "rooms"
 
 # Default values
 DEFAULT_PORT = 502

@@ -12,6 +12,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
+    CONF_ROOMS,
     CONF_SLAVE_ID,
     DEFAULT_PORT,
     DEFAULT_SLAVE_ID,
@@ -62,6 +63,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self):
+        """Initialize config flow."""
+        self._host_data: dict[str, Any] = {}
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -79,10 +84,41 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 await self.async_set_unique_id(user_input[CONF_HOST])
                 self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=info["title"], data=user_input)
+                self._host_data = user_input
+                return await self.async_step_rooms()
         
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_rooms(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle room configuration."""
+        if user_input is not None:
+            num_rooms = user_input.get("num_rooms", 0)
+            
+            # Store room configuration
+            data = {**self._host_data, CONF_ROOMS: []}
+            
+            # Generate room names
+            for i in range(1, num_rooms + 1):
+                room_name = user_input.get(f"room_{i}_name", f"Room {i}")
+                data[CONF_ROOMS].append({"id": i, "name": room_name})
+            
+            info = {"title": f"WRG {self._host_data[CONF_HOST]}"}
+            return self.async_create_entry(title=info["title"], data=data)
+        
+        # Build schema dynamically for room names
+        schema_dict = {
+            vol.Required("num_rooms", default=0): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=17)
+            )
+        }
+        
+        return self.async_show_form(
+            step_id="rooms",
+            data_schema=vol.Schema(schema_dict),
         )
 
 

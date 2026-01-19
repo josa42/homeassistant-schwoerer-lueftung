@@ -65,6 +65,7 @@ from .modbus_client import (
     SENSOR_FAN_LEVEL_2,
     SENSOR_FAN_LEVEL_3,
     SENSOR_FAN_LEVEL_4,
+    ERROR_CODES,
 )
 
 # Current fan level mapping
@@ -218,6 +219,9 @@ async def async_setup_entry(
         BicWrgTemperatureT7EvaporatorSensor(coordinator, entry),
         BicWrgTemperatureT8CondenserSensor(coordinator, entry),
         BicWrgTemperatureT10OutdoorSensor(coordinator, entry),
+        BicWrgDeviceFilterRemainingSensor(coordinator, entry),
+        BicWrgUpstreamFilterRemainingSensor(coordinator, entry),
+        BicWrgErrorMessageSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -1056,6 +1060,96 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
     def native_value(self) -> float | None:
         """Return the temperature T10 outdoor."""
         return self.coordinator.data.get("temp_t10_outdoor")
+
+
+class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG device filter remaining days (Restlaufzeit Gerätefilter)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Device Filter Remaining"
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.DAYS
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_device_filter_remaining"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the device filter remaining days."""
+        return self.coordinator.data.get("device_filter_remaining")
+
+
+class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG upstream filter remaining days (Restlaufzeit Vorgelagerter Filter)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Upstream Filter Remaining"
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.DAYS
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_upstream_filter_remaining"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the upstream filter remaining days."""
+        return self.coordinator.data.get("upstream_filter_remaining")
+
+
+class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG error message (Fehlermeldung)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Error Message"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_error_message"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the error message as text."""
+        error_code = self.coordinator.data.get("error_message")
+        if error_code is not None and error_code in ERROR_CODES:
+            return ERROR_CODES[error_code]
+        if error_code == 0:
+            return "No Error"
+        return f"Unknown Error ({error_code})"
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

@@ -23,6 +23,17 @@ from .modbus_client import (
     FAN_SPEED_LEVEL_4,
     FAN_SPEED_AUTO,
     FAN_SPEED_LINEAR,
+    HEATING_COOLING_OFF,
+    HEATING_COOLING_HEATING,
+    HEATING_COOLING_COOLING,
+    HEATING_COOLING_AUTO_OUTDOOR,
+    HEATING_COOLING_AUTO_DIGITAL,
+    HEAT_PUMP_HEATING_OFF,
+    HEAT_PUMP_HEATING_ENABLED,
+    HEAT_PUMP_COOLING_OFF,
+    HEAT_PUMP_COOLING_ENABLED,
+    AUXILIARY_HEATING_OFF,
+    AUXILIARY_HEATING_ENABLED,
 )
 
 # Operation mode mapping
@@ -47,6 +58,37 @@ FAN_SPEEDS = {
     FAN_SPEED_LINEAR: "Linear",
 }
 
+# Heating/Cooling function mapping
+# Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang
+HEATING_COOLING_MODES = {
+    HEATING_COOLING_OFF: "Off",
+    HEATING_COOLING_HEATING: "Heating",
+    HEATING_COOLING_COOLING: "Cooling",
+    HEATING_COOLING_AUTO_OUTDOOR: "Auto Outdoor Temp",
+    HEATING_COOLING_AUTO_DIGITAL: "Auto Digital Input",
+}
+
+# Heat pump heating enable mapping
+# Wärmepumpe Heizen: 0=Heizen Aus, 1=Heizen frei
+HEAT_PUMP_HEATING_OPTIONS = {
+    HEAT_PUMP_HEATING_OFF: "Heating Off",
+    HEAT_PUMP_HEATING_ENABLED: "Heating Enabled",
+}
+
+# Heat pump cooling enable mapping
+# Wärmepumpe Kühlen: 0=Kühlen Aus, 1=Kühlen frei
+HEAT_PUMP_COOLING_OPTIONS = {
+    HEAT_PUMP_COOLING_OFF: "Cooling Off",
+    HEAT_PUMP_COOLING_ENABLED: "Cooling Enabled",
+}
+
+# Auxiliary heating enable mapping
+# Zusatzheizung Haus: 0=Aus, 1=ZH Haus frei
+AUXILIARY_HEATING_OPTIONS = {
+    AUXILIARY_HEATING_OFF: "Off",
+    AUXILIARY_HEATING_ENABLED: "Enabled",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -59,6 +101,10 @@ async def async_setup_entry(
     async_add_entities([
         BicWrgOperationModeSelect(coordinator, entry),
         BicWrgFanSpeedSelect(coordinator, entry),
+        BicWrgHeatingCoolingFunctionSelect(coordinator, entry),
+        BicWrgHeatPumpHeatingEnableSelect(coordinator, entry),
+        BicWrgHeatPumpCoolingEnableSelect(coordinator, entry),
+        BicWrgAuxiliaryHeatingEnableSelect(coordinator, entry),
     ])
 
 
@@ -163,4 +209,200 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
         
         if success:
             # Update coordinator data immediately
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgHeatingCoolingFunctionSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+    """Select entity for WRG heating/cooling function (Heiz-Kühlfunktion)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Heating/Cooling Function"
+    _attr_options = list(HEATING_COOLING_MODES.values())
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the select entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heating_cooling_function"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the current heating/cooling function."""
+        mode = self.coordinator.data.get("heating_cooling_function")
+        if mode is not None and mode in HEATING_COOLING_MODES:
+            return HEATING_COOLING_MODES[mode]
+        return None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the heating/cooling function."""
+        mode_value = None
+        for value, name in HEATING_COOLING_MODES.items():
+            if name == option:
+                mode_value = value
+                break
+        
+        if mode_value is None:
+            return
+        
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heating_cooling_function, mode_value
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgHeatPumpHeatingEnableSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+    """Select entity for WRG heat pump heating enable (Wärmepumpe Heizen)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Heat Pump Heating"
+    _attr_options = list(HEAT_PUMP_HEATING_OPTIONS.values())
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the select entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heat_pump_heating_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the current heat pump heating enable state."""
+        state = self.coordinator.data.get("heat_pump_heating_enable")
+        if state is not None and state in HEAT_PUMP_HEATING_OPTIONS:
+            return HEAT_PUMP_HEATING_OPTIONS[state]
+        return None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the heat pump heating enable state."""
+        state_value = None
+        for value, name in HEAT_PUMP_HEATING_OPTIONS.items():
+            if name == option:
+                state_value = value
+                break
+        
+        if state_value is None:
+            return
+        
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_heating_enable, state_value
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgHeatPumpCoolingEnableSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+    """Select entity for WRG heat pump cooling enable (Wärmepumpe Kühlen)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Heat Pump Cooling"
+    _attr_options = list(HEAT_PUMP_COOLING_OPTIONS.values())
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the select entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heat_pump_cooling_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the current heat pump cooling enable state."""
+        state = self.coordinator.data.get("heat_pump_cooling_enable")
+        if state is not None and state in HEAT_PUMP_COOLING_OPTIONS:
+            return HEAT_PUMP_COOLING_OPTIONS[state]
+        return None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the heat pump cooling enable state."""
+        state_value = None
+        for value, name in HEAT_PUMP_COOLING_OPTIONS.items():
+            if name == option:
+                state_value = value
+                break
+        
+        if state_value is None:
+            return
+        
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_cooling_enable, state_value
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgAuxiliaryHeatingEnableSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+    """Select entity for WRG auxiliary heating enable (Zusatzheizung Haus)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Auxiliary House Heating"
+    _attr_options = list(AUXILIARY_HEATING_OPTIONS.values())
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the select entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_auxiliary_heating_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the current auxiliary heating enable state."""
+        state = self.coordinator.data.get("auxiliary_heating_enable")
+        if state is not None and state in AUXILIARY_HEATING_OPTIONS:
+            return AUXILIARY_HEATING_OPTIONS[state]
+        return None
+
+    async def async_select_option(self, option: str) -> None:
+        """Change the auxiliary heating enable state."""
+        state_value = None
+        for value, name in AUXILIARY_HEATING_OPTIONS.items():
+            if name == option:
+                state_value = value
+                break
+        
+        if state_value is None:
+            return
+        
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_auxiliary_heating_enable, state_value
+        )
+        
+        if success:
             await self.coordinator.async_request_refresh()
