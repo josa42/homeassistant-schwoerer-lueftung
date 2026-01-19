@@ -33,6 +33,11 @@ from .modbus_client import (
     HEAT_PUMP_STATUS_COOLING,
     NHR_STATE_INACTIVE,
     NHR_STATE_ACTIVE,
+    SUPPLY_AIR_FAN_STATUS_DISABLED,
+    SUPPLY_AIR_FAN_STATUS_STARTUP,
+    SUPPLY_AIR_FAN_STATUS_ACTIVE,
+    SUPPLY_AIR_FAN_STATUS_STANDBY,
+    SUPPLY_AIR_FAN_STATUS_ERROR,
 )
 
 # Current fan level mapping
@@ -77,6 +82,16 @@ NHR_STATES = {
     NHR_STATE_ACTIVE: "Active",
 }
 
+# Supply air fan status mapping
+# Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
+SUPPLY_AIR_FAN_STATUSES = {
+    SUPPLY_AIR_FAN_STATUS_DISABLED: "Disabled",
+    SUPPLY_AIR_FAN_STATUS_STARTUP: "Startup",
+    SUPPLY_AIR_FAN_STATUS_ACTIVE: "Active",
+    SUPPLY_AIR_FAN_STATUS_STANDBY: "Standby",
+    SUPPLY_AIR_FAN_STATUS_ERROR: "Error",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -93,6 +108,7 @@ async def async_setup_entry(
         BicWrgShockVentilationRemainingSensor(coordinator, entry),
         BicWrgHeatPumpStatusSensor(coordinator, entry),
         BicWrgNhrStateSensor(coordinator, entry),
+        BicWrgSupplyAirFanStatusSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -304,6 +320,36 @@ class BicWrgNhrStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         state = self.coordinator.data.get("nhr_state")
         if state is not None and state in NHR_STATES:
             return NHR_STATES[state]
+        return None
+
+
+class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG supply air fan status (Status Gebläse Zuluft)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Supply Air Fan Status"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_supply_air_fan_status"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the supply air fan status as text."""
+        status = self.coordinator.data.get("supply_air_fan_status")
+        if status is not None and status in SUPPLY_AIR_FAN_STATUSES:
+            return SUPPLY_AIR_FAN_STATUSES[status]
         return None
 
 

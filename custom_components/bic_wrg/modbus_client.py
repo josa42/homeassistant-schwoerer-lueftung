@@ -30,6 +30,8 @@ REG_SHOCK_VENTILATION_REMAINING = 112
 REG_HEAT_PUMP_STATUS = 114
 # NHR Zustand (NHR State)
 REG_NHR_STATE = 116
+# Status Gebläse Zuluft (Supply Air Fan Status)
+REG_SUPPLY_AIR_FAN_STATUS = 117
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -90,6 +92,14 @@ HEAT_PUMP_STATUS_COOLING = 49
 # NHR Zustand: 0=Inaktiv, 1=Aktiv
 NHR_STATE_INACTIVE = 0
 NHR_STATE_ACTIVE = 1
+
+# Supply air fan status values
+# Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
+SUPPLY_AIR_FAN_STATUS_DISABLED = 0
+SUPPLY_AIR_FAN_STATUS_STARTUP = 1
+SUPPLY_AIR_FAN_STATUS_ACTIVE = 2
+SUPPLY_AIR_FAN_STATUS_STANDBY = 5
+SUPPLY_AIR_FAN_STATUS_ERROR = 6
 
 
 class BicWrgModbusClient:
@@ -277,6 +287,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_supply_air_fan_status(self) -> int | None:
+        """Read supply air fan status (Status Gebläse Zuluft)."""
+        registers = self.read_holding_registers(REG_SUPPLY_AIR_FAN_STATUS, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -330,5 +347,10 @@ class BicWrgModbusClient:
         nhr_state = self.read_nhr_state()
         if nhr_state is not None:
             data["nhr_state"] = nhr_state
+        
+        # Read supply air fan status (Status Gebläse Zuluft)
+        supply_air_fan_status = self.read_supply_air_fan_status()
+        if supply_air_fan_status is not None:
+            data["supply_air_fan_status"] = supply_air_fan_status
         
         return data
