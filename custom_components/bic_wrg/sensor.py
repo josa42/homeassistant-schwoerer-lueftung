@@ -830,6 +830,7 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
