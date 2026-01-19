@@ -42,6 +42,8 @@ REG_BYPASS_STATE = 123
 REG_OUTDOOR_DAMPER_STATE = 131
 # Vorheizregister Zustand (Preheater State)
 REG_PREHEATER_STATE = 133
+# Luftstufe Zeitprogramm (Time Program Fan Level)
+REG_TIME_PROGRAM_FAN_LEVEL = 140
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -142,6 +144,14 @@ PREHEATER_STATE_OFF = 0
 PREHEATER_STATE_VHR1_ACTIVE = 1
 PREHEATER_STATE_VHR2_ACTIVE = 2
 PREHEATER_STATE_VHR1_2_ACTIVE = 3
+
+# Time program fan level values
+# Luftstufe Zeitprogramm: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
+TIME_PROGRAM_FAN_LEVEL_OFF = 0
+TIME_PROGRAM_FAN_LEVEL_1 = 1
+TIME_PROGRAM_FAN_LEVEL_2 = 2
+TIME_PROGRAM_FAN_LEVEL_3 = 3
+TIME_PROGRAM_FAN_LEVEL_4 = 4
 
 
 class BicWrgModbusClient:
@@ -371,6 +381,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_time_program_fan_level(self) -> int | None:
+        """Read time program fan level (Luftstufe Zeitprogramm)."""
+        registers = self.read_holding_registers(REG_TIME_PROGRAM_FAN_LEVEL, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -454,5 +471,10 @@ class BicWrgModbusClient:
         preheater_state = self.read_preheater_state()
         if preheater_state is not None:
             data["preheater_state"] = preheater_state
+        
+        # Read time program fan level (Luftstufe Zeitprogramm)
+        time_program_fan_level = self.read_time_program_fan_level()
+        if time_program_fan_level is not None:
+            data["time_program_fan_level"] = time_program_fan_level
         
         return data
