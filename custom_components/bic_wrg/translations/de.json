@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Verbindung zu BIC WRG-Gerät herstellen",
-        "description": "Geben Sie die Verbindungsdetails für Ihr BIC WRG 134-BP-HK ein",
+        "description": "Gib die Verbindungsdetails für dein BIC WRG 134-BP-HK ein",
         "data": {
           "host": "IP-Adresse",
           "port": "Port"
@@ -11,14 +11,14 @@
       },
       "rooms": {
         "title": "Räume konfigurieren",
-        "description": "Wie viele Räume möchten Sie konfigurieren? (1-17)",
+        "description": "Wie viele Räume möchtest du konfigurieren? (1-17)",
         "data": {
           "num_rooms": "Anzahl der Räume"
         }
       }
     },
     "error": {
-      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfen Sie die IP-Adresse und den Port.",
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfe die IP-Adresse und den Port.",
       "unknown": "Unerwarteter Fehler aufgetreten"
     },
     "abort": {
