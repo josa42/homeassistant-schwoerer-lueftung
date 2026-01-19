@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Create release archive
+        run: |
+          cd custom_components
+          zip -r ../schwoerer_lueftung.zip schwoerer_lueftung/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: schwoerer_lueftung.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

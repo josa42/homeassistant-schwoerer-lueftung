@@ -1,0 +1,468 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Verbindung zu Schwörer Lüftung herstellen",
+        "description": "Gib die Verbindungsdetails für deine Schwörer Lüftungsanlage ein",
+        "data": {
+          "host": "IP-Adresse",
+          "port": "Port",
+          "device_type": "Gerätetyp",
+          "rooms": "Anzahl der Räume",
+          "enable_all_sensors_by_default": "Alle Sensoren standardmäßig aktivieren"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfe die IP-Adresse und den Port.",
+      "unknown": "Unerwarteter Fehler aufgetreten"
+    },
+    "abort": {
+      "already_configured": "Gerät ist bereits konfiguriert"
+    }
+  },
+  "entity": {
+    "device": {
+      "room": {
+        "name": "Raum"
+      }
+    },
+    "select": {
+      "operation_mode": {
+        "name": "Betriebsart",
+        "state": {
+          "off": "Aus",
+          "manual": "Handbetrieb",
+          "winter": "Winterbetrieb",
+          "summer": "Sommerbetrieb",
+          "summer_exhaust": "Sommer Abluft"
+        }
+      },
+      "manual_fan_level": {
+        "name": "Manuelle Luftstufe",
+        "state": {
+          "0": "Aus",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
+          "automatic": "Automatik",
+          "linear": "Linearbetrieb"
+        }
+      },
+      "heating_cooling_function": {
+        "name": "Heiz- Kühlfunktion",
+        "state": {
+          "off": "Aus",
+          "heating": "Heizen",
+          "cooling": "Kühlen",
+          "auto_outdoor_temp": "Auto T-Aussen",
+          "auto_digital_input": "Auto Digitaler Eingang"
+        }
+      },
+      "fan_speed": {
+        "name": "Luftstufe",
+        "state": {
+          "0": "Aus",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
+          "automatic": "Automatik",
+          "linear": "Linearbetrieb"
+        }
+      }
+    },
+    "sensor": {
+      "current_fan_level": {
+        "name": "Aktuelle Luftstufe"
+      },
+      "time_program_base_level": {
+        "name": "Zeitprogramm Basis Luftstufe"
+      },
+      "shock_ventilation_remaining_time": {
+        "name": "Restlaufzeit Stoßlüftung"
+      },
+      "heat_pump_status": {
+        "name": "Status Wärmepumpe",
+        "state": {
+          "0": "Aus",
+          "5": "Heizen",
+          "49": "Kühlen"
+        }
+      },
+      "supply_air_fan_status": {
+        "name": "Status Gebläse Zuluft",
+        "state": {
+          "0": "Deaktiviert",
+          "1": "Anlaufphase",
+          "2": "Aktiv",
+          "5": "Standby",
+          "6": "Fehler"
+        }
+      },
+      "exhaust_air_fan_status": {
+        "name": "Status Gebläse Abluft",
+        "state": {
+          "0": "Deaktiviert",
+          "1": "Anlaufphase",
+          "2": "Aktiv",
+          "5": "Standby",
+          "6": "Fehler"
+        }
+      },
+      "ground_heat_exchanger_state": {
+        "name": "EWT Zustand",
+        "state": {
+          "0": "EWT aus/geschlossen",
+          "1": "EWT im Heizbetrieb aktiv",
+          "2": "EWT im Kühlbetrieb aktiv"
+        }
+      },
+      "bypass_state": {
+        "name": "Bypass Zustand",
+        "state": {
+          "0": "Bypass geschlossen",
+          "1": "Bypass offen (Kühlen)",
+          "2": "Bypass offen (Heizen)"
+        }
+      },
+      "outdoor_damper_state": {
+        "name": "Aussenklappe Zustand",
+        "state": {
+          "0": "geschlossen",
+          "1": "offen"
+        }
+      },
+      "time_program_fan_level": {
+        "name": "Luftstufe Zeitprogramm"
+      },
+      "sensor_fan_level": {
+        "name": "Luftstufe Sensoren"
+      },
+      "current_supply_air_flow": {
+        "name": "Luftleistung aktuell Zuluft"
+      },
+      "current_exhaust_air_flow": {
+        "name": "Luftleistung aktuell Abluft"
+      },
+      "current_supply_air_rpm": {
+        "name": "Aktuelle Drehzahl Zuluft"
+      },
+      "current_exhaust_air_rpm": {
+        "name": "Aktuelle Drehzahl Abluft"
+      },
+      "temp_t1_after_ground_heat_exchanger": {
+        "name": "Temperatur nach EWT (T1)"
+      },
+      "temp_t2_after_preheating_coil": {
+        "name": "Temperatur nach VHR (T2)"
+      },
+      "temp_t3_before_reheater": {
+        "name": "Temperatur vor NE (T3)"
+      },
+      "temp_t4_after_reheater": {
+        "name": "Temperatur nach NE (T4)"
+      },
+      "temp_t5_exhaust_air": {
+        "name": "Ablufttemperatur (T5)"
+      },
+      "temp_t6_in_heat_exchanger": {
+        "name": "Temperatur im WT (T6)"
+      },
+      "temp_t7_evaporator": {
+        "name": "Temperatur im Verdampfer (T7)"
+      },
+      "temp_t8_condenser": {
+        "name": "Temperatur im Kondensator (T8)"
+      },
+      "temp_t10_outdoor": {
+        "name": "Außentemperartur (T10)"
+      },
+      "pressure_monitor_alarm": {
+        "name": "Meldung Druckwächter Aktiv",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "evu_lock_alarm": {
+        "name": "EVU Sperre Aktiv",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "door_open_alarm": {
+        "name": "Tür offen",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "device_filter_dirty_alarm": {
+        "name": "Gerätefilter verschmutzt",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "prefilter_dirty_alarm": {
+        "name": "Vorgelagerter Filter verschmutzt",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "low_tariff_disabled_alarm": {
+        "name": "Niedertarif abgeschaltet",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "supply_voltage_disabled_alarm": {
+        "name": "Versorgungsspannung abgeschaltet",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "pressostat_triggered_alarm": {
+        "name": "Pressostat ausgelöst",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "evu_lock_external_alarm": {
+        "name": "EVU Sperre extern Aktiv",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "heating_module_test_alarm": {
+        "name": "Heizmodul Testbetrieb aktiv",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "emergency_operation_alarm": {
+        "name": "Notbetrieb aktiv",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "supply_air_too_cold_alarm": {
+        "name": "Zuluft zu kalt",
+        "state": {
+          "inactive": "inaktiv",
+          "active": "Meldung steht an"
+        }
+      },
+      "device_filter_remaining_days": {
+        "name": "Restlaufzeit Gerätefilter"
+      },
+      "prefilter_remaining_days": {
+        "name": "Restlaufzeit Vorgelagerter Filter"
+      },
+      "error_message": {
+        "name": "Fehlermeldung",
+        "state": {
+          "0": "Kein Fehler",
+          "257": "Drehzahl Zuluft fehlt",
+          "258": "Drehzahl Abluft fehlt",
+          "259": "Ventilator Zuluft Mindestdrehzahl nicht erreicht",
+          "260": "Ventilator Abluft Mindestdrehzahl nicht erreicht",
+          "261": "Ventilator Zuluft max. Drehzahl überschritten",
+          "262": "Ventilator Abluft max. Drehzahl überschritten",
+          "513": "Kommunikationsfehler zur BDE",
+          "514": "Kommunikationsfehler Nebenbedieneinheit",
+          "515": "Kommunikationsfehler Heizmodul",
+          "516": "Kommunikationsfehler Sensor",
+          "517": "Kommunikationsfehler Sensor-Adapter",
+          "518": "Kommunikation Empfänger",
+          "770": "Fehler Sensorelement T1-nach-EWT",
+          "771": "Fehler Sensorelement T2-nach Vhr",
+          "772": "Fehler Sensorelement T3-vor Nhr",
+          "773": "Fehler Sensorelement T4-nach Nhr",
+          "774": "Fehler Sensorelement T5-Abluft",
+          "775": "Fehler Sensorelement T6-imWT",
+          "776": "Fehler Sensorelement T7-Verdampfer",
+          "777": "Fehler Sensorelement T8-Kondensator",
+          "779": "Fehler Sensorelement T10-Außentemperatur",
+          "1025": "Fehler Parameterspeicher",
+          "1026": "Fehler System-Bus",
+          "1281": "Wärmepumpe Hochdruck",
+          "1282": "Wärmepumpe Niederdruck",
+          "1283": "Maximale Abtauzeit überschritten",
+          "1284": "Wärmepumpe Niederdruck im Kühlbetrieb"
+        }
+      },
+      "operating_hours_fan": {
+        "name": "Betriebsstunden Lüfter"
+      },
+      "operating_hours_fan_level_1": {
+        "name": "Betriebsstunden Lüfter Stufe 1"
+      },
+      "operating_hours_fan_level_2": {
+        "name": "Betriebsstunden Lüfter Stufe 2"
+      },
+      "operating_hours_fan_level_3": {
+        "name": "Betriebsstunden Lüfter Stufe 3"
+      },
+      "operating_hours_fan_level_4": {
+        "name": "Betriebsstunden Lüfter Stufe 4"
+      },
+      "operating_hours_heat_pump": {
+        "name": "Betriebsstunden WP"
+      },
+      "operating_hours_heat_pump_cooling": {
+        "name": "Betriebsstunden WP kühlen"
+      },
+      "operating_hours_preheating_coil": {
+        "name": "Betriebsstunden VHR"
+      },
+      "operating_hours_auxiliary_heating_house": {
+        "name": "Betriebsstunden ZH Raum"
+      },
+      "operating_hours_ground_heat_exchanger": {
+        "name": "Betriebsstunden EWT"
+      },
+      "auxiliary_heating_enabled": {
+        "name": "Zusatzheizung Freigabe",
+        "state": {
+          "locked": "Gesperrt",
+          "heating_enabled": "Heizen frei"
+        }
+      },
+      "auxiliary_heating_active_room": {
+        "name": "Zusatzheizung aktiv",
+        "state": {
+          "inactive": "Inaktiv",
+          "active": "Aktiv"
+        }
+      },
+      "shock_ventilation_remaining": {
+        "name": "Restlaufzeit Stoßlüftung"
+      },
+      "device_filter_remaining": {
+        "name": "Restlaufzeit Gerätefilter"
+      },
+      "upstream_filter_remaining": {
+        "name": "Restlaufzeit Vorgelagerter Filter"
+      },
+      "operating_hours_auxiliary_heating": {
+        "name": "Betriebsstunden ZH Raum"
+      },
+      "auxiliary_heating_release": {
+        "name": "Zusatzheizung Freigabe",
+        "state": {
+          "locked": "Gesperrt",
+          "heating_enabled": "Heizen frei"
+        }
+      },
+      "current_temperature_room": {
+        "name": "Temperatur"
+      },
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
+      }
+    },
+    "number": {
+      "linear_fan_power": {
+        "name": "Manuelle Lineare Luftleistung"
+      },
+      "base_temperature_room": {
+        "name": "Grundtemperatur"
+      }
+    },
+    "switch": {
+      "shock_ventilation": {
+        "name": "Stoßlüftung"
+      },
+      "heat_pump_heating_enabled": {
+        "name": "Wärmepumpe Heizen"
+      },
+      "heat_pump_cooling_enabled": {
+        "name": "Wärmepumpe Kühlen"
+      },
+      "auxiliary_house_heating": {
+        "name": "Zusatzheizung Haus"
+      },
+      "auxiliary_heating_enabled": {
+        "name": "Zusatzheizung Freigabe"
+      },
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
+      },
+      "scheduled_heating_enabled": {
+        "name": "Freigabe Zeitprogramm Heizen"
+      }
+    },
+    "climate": {
+      "room_climate": {
+        "name": "Raumthermostat"
+      }
+    },
+    "binary_sensor": {
+      "alarm_pressure_switch": {
+        "name": "Meldung Druckwächter Aktiv"
+      },
+      "alarm_utility_lock": {
+        "name": "EVU Sperre Aktiv"
+      },
+      "alarm_door_open": {
+        "name": "Tür offen"
+      },
+      "alarm_device_filter_dirty": {
+        "name": "Gerätefilter verschmutzt"
+      },
+      "alarm_upstream_filter_dirty": {
+        "name": "Vorgelagerter Filter verschmutzt"
+      },
+      "alarm_off_peak_disabled": {
+        "name": "Niedertarif abgeschaltet"
+      },
+      "alarm_supply_voltage_off": {
+        "name": "Versorgungsspannung abgeschaltet"
+      },
+      "alarm_pressostat_triggered": {
+        "name": "Pressostat ausgelöst"
+      },
+      "alarm_external_utility_lock": {
+        "name": "EVU Sperre extern Aktiv"
+      },
+      "alarm_heating_module_test": {
+        "name": "Heizmodul Testbetrieb aktiv"
+      },
+      "alarm_emergency_mode": {
+        "name": "Notbetrieb aktiv"
+      },
+      "alarm_supply_air_cold": {
+        "name": "Zuluft zu kalt"
+      },
+      "auxiliary_heating_active_room": {
+        "name": "Zusatzheizung aktiv"
+      },
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
+      },
+      "fan_override": {
+        "name": "Luftstufen Überschreibung"
+      },
+      "reheater_state": {
+        "name": "NHR Zustand"
+      },
+      "preheater_1": {
+        "name": "Vorheizregister 1"
+      },
+      "preheater_2": {
+        "name": "Vorheizregister 2"
+      }
+    }
+  }
+}
