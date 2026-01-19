@@ -28,6 +28,9 @@ from .modbus_client import (
     TIME_PROGRAM_BASE_LEVEL_2,
     TIME_PROGRAM_BASE_LEVEL_3,
     TIME_PROGRAM_BASE_LEVEL_4,
+    HEAT_PUMP_STATUS_OFF,
+    HEAT_PUMP_STATUS_HEATING,
+    HEAT_PUMP_STATUS_COOLING,
 )
 
 # Current fan level mapping
@@ -57,6 +60,14 @@ TIME_PROGRAM_BASE_LEVELS = {
     TIME_PROGRAM_BASE_LEVEL_4: "Level 4",
 }
 
+# Heat pump status mapping
+# Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
+HEAT_PUMP_STATUSES = {
+    HEAT_PUMP_STATUS_OFF: "Off",
+    HEAT_PUMP_STATUS_HEATING: "Heating",
+    HEAT_PUMP_STATUS_COOLING: "Cooling",
+}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -71,6 +82,7 @@ async def async_setup_entry(
         BicWrgFanOverrideSensor(coordinator, entry),
         BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
         BicWrgShockVentilationRemainingSensor(coordinator, entry),
+        BicWrgHeatPumpStatusSensor(coordinator, entry),
     ]
     
     async_add_entities(entities)
@@ -223,6 +235,36 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
     def native_value(self) -> int | None:
         """Return the shock ventilation remaining time in minutes."""
         return self.coordinator.data.get("shock_ventilation_remaining")
+
+
+class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for WRG heat pump status (Status Wärmepumpe)."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Heat Pump Status"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heat_pump_status"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the heat pump status as text."""
+        status = self.coordinator.data.get("heat_pump_status")
+        if status is not None and status in HEAT_PUMP_STATUSES:
+            return HEAT_PUMP_STATUSES[status]
+        return None
 
 
 class BicWrgTemperatureSensor(BicWrgSensorBase):

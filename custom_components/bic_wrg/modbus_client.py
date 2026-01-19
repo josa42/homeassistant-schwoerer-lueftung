@@ -26,6 +26,8 @@ REG_TIME_PROGRAM_BASE_LEVEL = 110
 REG_SHOCK_VENTILATION = 111
 # Restlaufzeit Stoßlüftung (Shock Ventilation Remaining Time)
 REG_SHOCK_VENTILATION_REMAINING = 112
+# Status Wärmepumpe (Heat Pump Status)
+REG_HEAT_PUMP_STATUS = 114
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -75,6 +77,12 @@ TIME_PROGRAM_BASE_LEVEL_4 = 4
 # Stoßlüftung: 0=Inaktiv, 1=Aktiv
 SHOCK_VENTILATION_INACTIVE = 0
 SHOCK_VENTILATION_ACTIVE = 1
+
+# Heat pump status values
+# Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
+HEAT_PUMP_STATUS_OFF = 0
+HEAT_PUMP_STATUS_HEATING = 5
+HEAT_PUMP_STATUS_COOLING = 49
 
 
 class BicWrgModbusClient:
@@ -248,6 +256,13 @@ class BicWrgModbusClient:
             return registers[0]
         return None
 
+    def read_heat_pump_status(self) -> int | None:
+        """Read heat pump status (Status Wärmepumpe)."""
+        registers = self.read_holding_registers(REG_HEAT_PUMP_STATUS, 1)
+        if registers:
+            return registers[0]
+        return None
+
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
@@ -291,5 +306,10 @@ class BicWrgModbusClient:
         shock_ventilation_remaining = self.read_shock_ventilation_remaining()
         if shock_ventilation_remaining is not None:
             data["shock_ventilation_remaining"] = shock_ventilation_remaining
+        
+        # Read heat pump status (Status Wärmepumpe)
+        heat_pump_status = self.read_heat_pump_status()
+        if heat_pump_status is not None:
+            data["heat_pump_status"] = heat_pump_status
         
         return data
