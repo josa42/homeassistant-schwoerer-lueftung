@@ -990,14 +990,9 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the error message as text."""
-        error_code = self.coordinator.data.get("error_message")
-        if error_code is not None and error_code in ERROR_CODES:
-            return ERROR_CODES[error_code]
-        if error_code == 0:
-            return "No Error"
-        return f"Unknown Error ({error_code})"
+    def native_value(self) -> int | None:
+        """Return the error code as number."""
+        return self.coordinator.data.get("error_message")
 
 
 class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
