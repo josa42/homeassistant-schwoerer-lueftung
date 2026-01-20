@@ -14,7 +14,7 @@ from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_ROOMS, DOMAIN
+from .const import CONF_ROOMS, DOMAIN, MANUFACTURER
 from .coordinator import BicWrgCoordinator
 from .entity import BicWrgEntity
 
