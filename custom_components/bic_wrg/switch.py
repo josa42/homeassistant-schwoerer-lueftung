@@ -12,7 +12,16 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL
 from .coordinator import BicWrgCoordinator
-from .modbus_client import SHOCK_VENTILATION_INACTIVE, SHOCK_VENTILATION_ACTIVE
+from .modbus_client import (
+    SHOCK_VENTILATION_INACTIVE,
+    SHOCK_VENTILATION_ACTIVE,
+    HEAT_PUMP_HEATING_OFF,
+    HEAT_PUMP_HEATING_ENABLED,
+    HEAT_PUMP_COOLING_OFF,
+    HEAT_PUMP_COOLING_ENABLED,
+    AUXILIARY_HEATING_OFF,
+    AUXILIARY_HEATING_ENABLED,
+)
 
 
 async def async_setup_entry(
@@ -23,7 +32,12 @@ async def async_setup_entry(
     """Set up WRG switch entities from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
     
-    entities = [BicWrgShockVentilationSwitch(coordinator, entry)]
+    entities = [
+        BicWrgShockVentilationSwitch(coordinator, entry),
+        BicWrgHeatPumpHeatingSwitch(coordinator, entry),
+        BicWrgHeatPumpCoolingSwitch(coordinator, entry),
+        BicWrgAuxiliaryHeatingSwitch(coordinator, entry),
+    ]
     
     # Add room heating switches
     rooms = entry.data.get("rooms", [])
@@ -198,6 +212,150 @@ class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinat
         register = 500 + self._room_number - 1
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 0
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+    """Switch entity for WRG heat pump heating (Wärmepumpe Heizen)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "heat_pump_heating"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the switch entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heat_pump_heating_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if heat pump heating is enabled."""
+        value = self.coordinator.data.get("heat_pump_heating_enable")
+        if value is not None:
+            return value == HEAT_PUMP_HEATING_ENABLED
+        return None
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable heat pump heating."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_heating_enable, HEAT_PUMP_HEATING_ENABLED
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable heat pump heating."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_heating_enable, HEAT_PUMP_HEATING_OFF
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+    """Switch entity for WRG heat pump cooling (Wärmepumpe Kühlen)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "heat_pump_cooling"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the switch entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_heat_pump_cooling_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if heat pump cooling is enabled."""
+        value = self.coordinator.data.get("heat_pump_cooling_enable")
+        if value is not None:
+            return value == HEAT_PUMP_COOLING_ENABLED
+        return None
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable heat pump cooling."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_cooling_enable, HEAT_PUMP_COOLING_ENABLED
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable heat pump cooling."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_heat_pump_cooling_enable, HEAT_PUMP_COOLING_OFF
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+
+class BicWrgAuxiliaryHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+    """Switch entity for WRG auxiliary house heating (Zusatzheizung Haus)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "auxiliary_house_heating"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the switch entity."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_auxiliary_heating_enable"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if auxiliary house heating is enabled."""
+        value = self.coordinator.data.get("auxiliary_heating_enable")
+        if value is not None:
+            return value == AUXILIARY_HEATING_ENABLED
+        return None
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable auxiliary house heating."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_auxiliary_heating_enable, AUXILIARY_HEATING_ENABLED
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable auxiliary house heating."""
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_auxiliary_heating_enable, AUXILIARY_HEATING_OFF
         )
         
         if success:

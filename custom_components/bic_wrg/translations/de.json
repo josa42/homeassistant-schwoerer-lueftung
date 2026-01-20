@@ -75,27 +75,6 @@
           "automatic": "Automatik",
           "linear": "Linearbetrieb"
         }
-      },
-      "heat_pump_heating": {
-        "name": "Wärmepumpe Heizen",
-        "state": {
-          "heating_off": "Heizen Aus",
-          "heating_enabled": "Heizen frei"
-        }
-      },
-      "heat_pump_cooling": {
-        "name": "Wärmepumpe Kühlen",
-        "state": {
-          "cooling_off": "Kühlen Aus",
-          "cooling_enabled": "Kühlen frei"
-        }
-      },
-      "auxiliary_house_heating": {
-        "name": "Zusatzheizung Haus",
-        "state": {
-          "off": "Aus",
-          "enabled": "ZH Haus frei"
-        }
       }
     },
     "sensor": {
@@ -407,39 +386,19 @@
         "name": "Stoßlüftung"
       },
       "heat_pump_heating": {
-        "name": "Wärmepumpe Heizen",
-        "state": {
-          "off": "Heizen Aus",
-          "on": "Heizen frei"
-        }
+        "name": "Wärmepumpe Heizen"
       },
       "heat_pump_cooling": {
-        "name": "Wärmepumpe Kühlen",
-        "state": {
-          "off": "Kühlen Aus",
-          "on": "Kühlen frei"
-        }
+        "name": "Wärmepumpe Kühlen"
       },
       "auxiliary_house_heating": {
-        "name": "Zusatzheizung Haus",
-        "state": {
-          "off": "Aus",
-          "on": "ZH Haus frei"
-        }
+        "name": "Zusatzheizung Haus"
       },
       "time_program_heating_enabled": {
-        "name": "Freigabe Zeitprogramm Heizen",
-        "state": {
-          "off": "Inaktiv",
-          "on": "Aktiv"
-        }
+        "name": "Freigabe Zeitprogramm Heizen"
       },
       "auxiliary_heating_enable": {
-        "name": "Zusatzheizung Freigabe",
-        "state": {
-          "off": "Gesperrt",
-          "on": "Heizen frei"
-        }
+        "name": "Zusatzheizung Freigabe"
       },
       "time_program_heating_enable": {
         "name": "Freigabe Zeitprogramm Heizen"

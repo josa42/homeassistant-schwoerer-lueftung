@@ -37,27 +37,6 @@
           "auto_outdoor_temp": "Auto Outdoor Temp",
           "auto_digital_input": "Auto Digital Input"
         }
-      },
-      "heat_pump_heating": {
-        "name": "Heat Pump Heating",
-        "state": {
-          "heating_off": "Heating Off",
-          "heating_enabled": "Heating Enabled"
-        }
-      },
-      "heat_pump_cooling": {
-        "name": "Heat Pump Cooling",
-        "state": {
-          "cooling_off": "Cooling Off",
-          "cooling_enabled": "Cooling Enabled"
-        }
-      },
-      "auxiliary_house_heating": {
-        "name": "Auxiliary House Heating",
-        "state": {
-          "off": "Off",
-          "enabled": "Enabled"
-        }
       }
     },
     "binary_sensor": {
@@ -266,6 +245,15 @@
     "switch": {
       "shock_ventilation": {
         "name": "Shock Ventilation"
+      },
+      "heat_pump_heating": {
+        "name": "Heat Pump Heating"
+      },
+      "heat_pump_cooling": {
+        "name": "Heat Pump Cooling"
+      },
+      "auxiliary_house_heating": {
+        "name": "Auxiliary House Heating"
       },
       "auxiliary_heating_enable": {
         "name": "Auxiliary Heating Enable"
