@@ -45,11 +45,11 @@
       "manual_fan_level": {
         "name": "Manuelle Luftstufe",
         "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4",
+          "0": "Aus",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
           "automatic": "Automatik",
           "linear": "Linearbetrieb"
         }
@@ -67,11 +67,11 @@
       "fan_speed": {
         "name": "Manuelle Luftstufe",
         "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4",
+          "0": "Aus",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
           "automatic": "Automatik",
           "linear": "Linearbetrieb"
         }

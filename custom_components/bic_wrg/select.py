@@ -49,11 +49,11 @@ OPERATION_MODES = {
 # Fan speed mapping
 # Manuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4, 5=Automatik, 6=Linearbetrieb
 FAN_SPEEDS = {
-    FAN_SPEED_OFF: "off",
-    FAN_SPEED_LEVEL_1: "level_1",
-    FAN_SPEED_LEVEL_2: "level_2",
-    FAN_SPEED_LEVEL_3: "level_3",
-    FAN_SPEED_LEVEL_4: "level_4",
+    FAN_SPEED_OFF: "0",
+    FAN_SPEED_LEVEL_1: "1",
+    FAN_SPEED_LEVEL_2: "2",
+    FAN_SPEED_LEVEL_3: "3",
+    FAN_SPEED_LEVEL_4: "4",
     FAN_SPEED_AUTO: "automatic",
     FAN_SPEED_LINEAR: "linear",
 }
