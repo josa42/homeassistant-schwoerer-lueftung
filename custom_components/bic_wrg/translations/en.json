@@ -99,35 +99,20 @@
       },
       "auxiliary_heating_active": {
         "name": "Auxiliary Heating Active"
+      },
+      "fan_override": {
+        "name": "Fan Override"
+      },
+      "nhr_state": {
+        "name": "NHR State"
       }
     },
     "sensor": {
       "current_fan_level": {
-        "name": "Current Fan Level",
-        "state": {
-          "off": "Off",
-          "level_1": "Level 1",
-          "level_2": "Level 2",
-          "level_3": "Level 3",
-          "level_4": "Level 4"
-        }
-      },
-      "fan_override": {
-        "name": "Fan Override",
-        "state": {
-          "inactive": "Inactive",
-          "active": "Active"
-        }
+        "name": "Current Fan Level"
       },
       "time_program_base_level": {
-        "name": "Time Program Base Level",
-        "state": {
-          "off": "Off",
-          "level_1": "Level 1",
-          "level_2": "Level 2",
-          "level_3": "Level 3",
-          "level_4": "Level 4"
-        }
+        "name": "Time Program Base Level"
       },
       "shock_ventilation_remaining": {
         "name": "Shock Ventilation Remaining"
@@ -140,13 +125,7 @@
           "cooling": "Cooling"
         }
       },
-      "nhr_state": {
-        "name": "NHR State",
-        "state": {
-          "inactive": "Inactive",
-          "active": "Active"
-        }
-      },
+
       "supply_air_fan_status": {
         "name": "Supply Air Fan Status",
         "state": {
@@ -200,24 +179,10 @@
         }
       },
       "time_program_fan_level": {
-        "name": "Time Program Fan Level",
-        "state": {
-          "off": "Off",
-          "level_1": "Level 1",
-          "level_2": "Level 2",
-          "level_3": "Level 3",
-          "level_4": "Level 4"
-        }
+        "name": "Time Program Fan Level"
       },
       "sensor_fan_level": {
-        "name": "Sensor Fan Level",
-        "state": {
-          "off": "Off",
-          "level_1": "Level 1",
-          "level_2": "Level 2",
-          "level_3": "Level 3",
-          "level_4": "Level 4"
-        }
+        "name": "Sensor Fan Level"
       },
       "current_supply_air_flow": {
         "name": "Current Supply Air Flow"

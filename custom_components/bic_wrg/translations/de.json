@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Verbindung zu BIC WRG-Gerät herstellen",
-        "description": "Gib die Verbindungsdetails für dein BIC WRG 134-BP-HK ein",
+        "title": "Verbindung zu Schwörer Lüftung herstellen",
+        "description": "Gib die Verbindungsdetails für dein Schwörer WRG 134-BP-HK ein",
         "data": {
           "host": "IP-Adresse",
           "port": "Port"
@@ -100,31 +100,10 @@
     },
     "sensor": {
       "current_fan_level": {
-        "name": "Aktuelle Luftstufe",
-        "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4"
-        }
-      },
-      "fan_override": {
-        "name": "Luftstufen Überschreibung",
-        "state": {
-          "inactive": "Inaktiv",
-          "active": "Aktiv"
-        }
+        "name": "Aktuelle Luftstufe"
       },
       "time_program_base_level": {
-        "name": "Zeitprogramm Basis Luftstufe",
-        "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4"
-        }
+        "name": "Zeitprogramm Basis Luftstufe"
       },
       "shock_ventilation_remaining_time": {
         "name": "Restlaufzeit Stoßlüftung"
@@ -137,13 +116,7 @@
           "cooling": "WP Kühlen"
         }
       },
-      "nhr_state": {
-        "name": "NHR Zustand",
-        "state": {
-          "inactive": "Inaktiv",
-          "active": "Aktiv"
-        }
-      },
+
       "supply_air_fan_status": {
         "name": "Status Gebläse Zuluft",
         "state": {
@@ -197,24 +170,10 @@
         }
       },
       "time_program_fan_level": {
-        "name": "Luftstufe Zeitprogramm",
-        "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4"
-        }
+        "name": "Luftstufe Zeitprogramm"
       },
       "sensor_fan_level": {
-        "name": "Luftstufe Sensoren",
-        "state": {
-          "off": "Aus",
-          "level_1": "Stufe 1",
-          "level_2": "Stufe 2",
-          "level_3": "Stufe 3",
-          "level_4": "Stufe 4"
-        }
+        "name": "Luftstufe Sensoren"
       },
       "current_supply_air_flow": {
         "name": "Luftleistung aktuell Zuluft"
@@ -530,6 +489,12 @@
       },
       "auxiliary_heating_active": {
         "name": "Zusatzheizung aktiv"
+      },
+      "fan_override": {
+        "name": "Luftstufen Überschreibung"
+      },
+      "nhr_state": {
+        "name": "NHR Zustand"
       }
     }
   }
