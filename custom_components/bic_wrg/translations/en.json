@@ -84,6 +84,12 @@
       },
       "nhr_state": {
         "name": "NHR State"
+      },
+      "preheater_1": {
+        "name": "Preheater 1"
+      },
+      "preheater_2": {
+        "name": "Preheater 2"
       }
     },
     "sensor": {
@@ -146,15 +152,6 @@
         "state": {
           "closed": "Closed",
           "open": "Open"
-        }
-      },
-      "preheater_state": {
-        "name": "Preheater State",
-        "state": {
-          "off": "Off",
-          "vhr1_active": "VHR 1 Active",
-          "vhr2_active": "VHR 2 Active",
-          "vhr1_2_active": "VHR 1 & 2 Active"
         }
       },
       "time_program_fan_level": {

@@ -13,7 +13,14 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL
 from .coordinator import BicWrgCoordinator
-from .modbus_client import ALARM_ACTIVE, FAN_OVERRIDE_ACTIVE, NHR_STATE_ACTIVE
+from .modbus_client import (
+    ALARM_ACTIVE,
+    FAN_OVERRIDE_ACTIVE,
+    NHR_STATE_ACTIVE,
+    PREHEATER_STATE_VHR1_ACTIVE,
+    PREHEATER_STATE_VHR2_ACTIVE,
+    PREHEATER_STATE_VHR1_2_ACTIVE,
+)
 
 
 async def async_setup_entry(
@@ -27,6 +34,8 @@ async def async_setup_entry(
     entities = [
         BicWrgFanOverrideBinarySensor(coordinator, entry),
         BicWrgNhrStateBinarySensor(coordinator, entry),
+        BicWrgPreheater1BinarySensor(coordinator, entry),
+        BicWrgPreheater2BinarySensor(coordinator, entry),
         BicWrgAlarmBinarySensor(
             coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
         ),
@@ -133,6 +142,68 @@ class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySen
         value = self.coordinator.data.get("nhr_state")
         if value is not None:
             return value == NHR_STATE_ACTIVE
+        return None
+
+
+class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+    """Binary sensor for WRG preheater 1 state (Vorheizregister 1)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "preheater_1"
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_preheater_1"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if preheater 1 (VHR 1) is active."""
+        value = self.coordinator.data.get("preheater_state")
+        if value is not None:
+            return value in (PREHEATER_STATE_VHR1_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE)
+        return None
+
+
+class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+    """Binary sensor for WRG preheater 2 state (Vorheizregister 2)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "preheater_2"
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_preheater_2"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if preheater 2 (VHR 2) is active."""
+        value = self.coordinator.data.get("preheater_state")
+        if value is not None:
+            return value in (PREHEATER_STATE_VHR2_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE)
         return None
 
 

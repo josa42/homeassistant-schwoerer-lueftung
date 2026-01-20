@@ -139,15 +139,6 @@
           "open": "offen"
         }
       },
-      "preheater_state": {
-        "name": "Vorheizregister Zustand",
-        "state": {
-          "off": "Aus",
-          "vhr1_active": "VHR 1 aktiv",
-          "vhr2_active": "VHR 2 aktiv",
-          "vhr1_2_active": "VHR 1 & 2 aktiv"
-        }
-      },
       "time_program_fan_level": {
         "name": "Luftstufe Zeitprogramm"
       },
@@ -454,6 +445,12 @@
       },
       "nhr_state": {
         "name": "NHR Zustand"
+      },
+      "preheater_1": {
+        "name": "Vorheizregister 1"
+      },
+      "preheater_2": {
+        "name": "Vorheizregister 2"
       }
     }
   }

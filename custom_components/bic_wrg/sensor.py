@@ -39,10 +39,6 @@ from .modbus_client import (
     BYPASS_STATE_OPEN_HEATING,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
-    PREHEATER_STATE_OFF,
-    PREHEATER_STATE_VHR1_ACTIVE,
-    PREHEATER_STATE_VHR2_ACTIVE,
-    PREHEATER_STATE_VHR1_2_ACTIVE,
     ERROR_CODES,
 )
 
@@ -102,15 +98,6 @@ OUTDOOR_DAMPER_STATES = {
     OUTDOOR_DAMPER_STATE_OPEN: "Open",
 }
 
-# Preheater state mapping
-# Vorheizregister Zustand: 0=Aus, 1=VHR 1 aktiv, 2=VHR 2 aktiv, 3=VHR 1 & 2 aktiv
-PREHEATER_STATES = {
-    PREHEATER_STATE_OFF: "Off",
-    PREHEATER_STATE_VHR1_ACTIVE: "VHR 1 Active",
-    PREHEATER_STATE_VHR2_ACTIVE: "VHR 2 Active",
-    PREHEATER_STATE_VHR1_2_ACTIVE: "VHR 1 & 2 Active",
-}
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -131,7 +118,6 @@ async def async_setup_entry(
         BicWrgEwtStateSensor(coordinator, entry),
         BicWrgBypassStateSensor(coordinator, entry),
         BicWrgOutdoorDamperStateSensor(coordinator, entry),
-        BicWrgPreheaterStateSensor(coordinator, entry),
         BicWrgTimeProgramFanLevelSensor(coordinator, entry),
         BicWrgSensorFanLevelSensor(coordinator, entry),
         BicWrgCurrentSupplyAirFlowSensor(coordinator, entry),
@@ -471,37 +457,6 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         state = self.coordinator.data.get("outdoor_damper_state")
         if state is not None and state in OUTDOOR_DAMPER_STATES:
             return OUTDOOR_DAMPER_STATES[state]
-        return None
-
-
-class BicWrgPreheaterStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
-    """Sensor for WRG preheater state (Vorheizregister Zustand)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "preheater_state"
-    _attr_entity_registry_enabled_default = False
-
-    def __init__(
-        self,
-        coordinator: BicWrgCoordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_preheater_state"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
-            manufacturer=MANUFACTURER,
-            model=MODEL,
-        )
-
-    @property
-    def native_value(self) -> str | None:
-        """Return the preheater state as text."""
-        state = self.coordinator.data.get("preheater_state")
-        if state is not None and state in PREHEATER_STATES:
-            return PREHEATER_STATES[state]
         return None
 
 
