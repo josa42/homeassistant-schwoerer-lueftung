@@ -1,6 +1,6 @@
 {
   "domain": "bic_wrg",
-  "name": "BIC WRG",
+  "name": "Schwörer Lüftung",
   "codeowners": ["@josa42"],
   "config_flow": true,
   "documentation": "https://github.com/josa42/homeassistant-bic-wrg",

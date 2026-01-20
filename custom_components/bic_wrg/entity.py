@@ -1,4 +1,4 @@
-"""Base entity for BIC WRG."""
+"""Base entity for Schwörer Lüftung."""
 from __future__ import annotations
 
 from homeassistant.helpers.entity import DeviceInfo
@@ -9,14 +9,14 @@ from .coordinator import BicWrgCoordinator
 
 
 class BicWrgEntity(CoordinatorEntity[BicWrgCoordinator]):
-    """Base entity for BIC WRG."""
+    """Base entity for Schwörer Lüftung."""
 
     def __init__(self, coordinator: BicWrgCoordinator) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.config_entry.entry_id)},
-            name="BIC WRG",
+            name="Schwörer Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
