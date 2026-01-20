@@ -263,3 +263,85 @@ All temperature and status registers are read-only.
 ---
 
 **Last Updated:** 2026-01-20
+
+---
+
+## Investigation of Registers 480-485
+
+**Date:** 2026-01-20  
+**Method:** Bit analysis, correlation, and monitoring
+
+### Current Values
+
+| Register | Value | Hex | Binary | Set Bits | Correlation |
+|----------|-------|-----|--------|----------|-------------|
+| 480 | 7 | 0x0007 | 0000000000000111 | [0, 1, 2] | - |
+| 481 | 3 | 0x0003 | 0000000000000011 | [0, 1] | Matches R102 (Manual Fan Level=3) |
+| 482 | 8 | 0x0008 | 0000000000001000 | [3] | - |
+| 483 | 8 | 0x0008 | 0000000000001000 | [3] | - |
+| 484 | 3 | 0x0003 | 0000000000000011 | [0, 1] | Matches R102 (Manual Fan Level=3) |
+| 485 | 11 | 0x000B | 0000000000001011 | [0, 1, 3] | - |
+
+### Analysis
+
+**R481 and R484 Correlation:**
+- Both registers have value 3
+- Both match R102 (Manual Fan Level = 3)
+- **Hypothesis:** These may be related to fan level settings or fan group indicators
+- Could be fan level targets for different zones or time periods
+
+**R482 and R483:**
+- Both have value 8 (bit 3 set)
+- Identical values suggest related functionality
+- Could be paired settings or dual-zone configuration
+
+**R480:**
+- Value 7 = bits 0, 1, 2 all set (0b111)
+- Could be a bitmask/flags register
+- Three flags enabled simultaneously
+
+**R485:**
+- Value 11 = bits 0, 1, 3 set (0b1011)
+- Could be time-related (11 minutes?)
+- Or configuration value with multiple flags
+
+**Monitoring Results:**
+- No changes during 30-second observation
+- Values are static or change slowly
+- Likely configuration values rather than real-time sensors
+
+### Possible Interpretations
+
+1. **Fan Configuration Array:**
+   - R481, R484: Fan level targets (both = 3)
+   - R482, R483: Fan mode or zone settings (both = 8)
+   - R480, R485: Additional configuration flags
+
+2. **Time Program Settings:**
+   - Could be time program-related values
+   - R485 (11) might be related to time intervals
+   - R481/R484 (3) could be time program fan levels
+
+3. **System Configuration:**
+   - Static configuration values set during installation
+   - Device-specific parameters
+   - Factory settings or user preferences
+
+### Recommendations
+
+1. **Change fan level** (R102) and re-scan R480-485 to see if R481/R484 follow
+2. **Switch time programs** and monitor for changes
+3. **Try different operation modes** and check if values update
+4. **Test with different room configurations** to see if they're zone-related
+
+### Next Steps
+
+- Monitor during mode/level changes
+- Test writing to these registers (if safe)
+- Compare with other WRG devices to see if values differ
+- Consult Schwörer documentation for register definitions
+
+---
+
+**Investigation Tool:** `investigate_registers.py`  
+**Command:** `python3 investigate_registers.py 10.0.0.139 all`
