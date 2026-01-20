@@ -105,53 +105,53 @@
       "heat_pump_status": {
         "name": "Heat Pump Status",
         "state": {
-          "off": "Off",
-          "heating": "Heating",
-          "cooling": "Cooling"
+          "0": "Off",
+          "5": "Heating",
+          "49": "Cooling"
         }
       },
 
       "supply_air_fan_status": {
         "name": "Supply Air Fan Status",
         "state": {
-          "deactivated": "Deactivated",
-          "startup": "Startup",
-          "active": "Active",
-          "standby": "Standby",
-          "error": "Error"
+          "0": "Deactivated",
+          "1": "Startup",
+          "2": "Active",
+          "5": "Standby",
+          "6": "Error"
         }
       },
       "exhaust_air_fan_status": {
         "name": "Exhaust Air Fan Status",
         "state": {
-          "deactivated": "Deactivated",
-          "startup": "Startup",
-          "active": "Active",
-          "standby": "Standby",
-          "error": "Error"
+          "0": "Deactivated",
+          "1": "Startup",
+          "2": "Active",
+          "5": "Standby",
+          "6": "Error"
         }
       },
       "ewt_state": {
         "name": "EWT State",
         "state": {
-          "closed": "Closed",
-          "heating": "Heating Active",
-          "cooling": "Cooling Active"
+          "0": "Closed",
+          "1": "Heating Active",
+          "2": "Cooling Active"
         }
       },
       "bypass_state": {
         "name": "Bypass State",
         "state": {
-          "closed": "Closed",
-          "open_cooling": "Open (Cooling)",
-          "open_heating": "Open (Heating)"
+          "0": "Closed",
+          "1": "Open (Cooling)",
+          "2": "Open (Heating)"
         }
       },
       "outdoor_damper_state": {
         "name": "Outdoor Damper State",
         "state": {
-          "closed": "Closed",
-          "open": "Open"
+          "0": "Closed",
+          "1": "Open"
         }
       },
       "time_program_fan_level": {

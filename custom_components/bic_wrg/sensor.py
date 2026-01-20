@@ -299,12 +299,9 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the heat pump status as text."""
-        status = self.coordinator.data.get("heat_pump_status")
-        if status is not None and status in HEAT_PUMP_STATUSES:
-            return HEAT_PUMP_STATUSES[status]
-        return None
+    def native_value(self) -> int | None:
+        """Return the heat pump status code."""
+        return self.coordinator.data.get("heat_pump_status")
 
 
 class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -330,12 +327,9 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the supply air fan status as text."""
-        status = self.coordinator.data.get("supply_air_fan_status")
-        if status is not None and status in SUPPLY_AIR_FAN_STATUSES:
-            return SUPPLY_AIR_FAN_STATUSES[status]
-        return None
+    def native_value(self) -> int | None:
+        """Return the supply air fan status code."""
+        return self.coordinator.data.get("supply_air_fan_status")
 
 
 class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -361,12 +355,9 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the exhaust air fan status as text."""
-        status = self.coordinator.data.get("exhaust_air_fan_status")
-        if status is not None and status in EXHAUST_AIR_FAN_STATUSES:
-            return EXHAUST_AIR_FAN_STATUSES[status]
-        return None
+    def native_value(self) -> int | None:
+        """Return the exhaust air fan status code."""
+        return self.coordinator.data.get("exhaust_air_fan_status")
 
 
 class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -392,12 +383,9 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the EWT state as text."""
-        state = self.coordinator.data.get("ewt_state")
-        if state is not None and state in EWT_STATES:
-            return EWT_STATES[state]
-        return None
+    def native_value(self) -> int | None:
+        """Return the EWT state code."""
+        return self.coordinator.data.get("ewt_state")
 
 
 class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -422,12 +410,9 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the bypass state as text."""
-        state = self.coordinator.data.get("bypass_state")
-        if state is not None and state in BYPASS_STATES:
-            return BYPASS_STATES[state]
-        return None
+    def native_value(self) -> int | None:
+        """Return the bypass state code."""
+        return self.coordinator.data.get("bypass_state")
 
 
 class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -453,12 +438,9 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the outdoor damper state as text."""
-        state = self.coordinator.data.get("outdoor_damper_state")
-        if state is not None and state in OUTDOOR_DAMPER_STATES:
-            return OUTDOOR_DAMPER_STATES[state]
-        return None
+    def native_value(self) -> int | None:
+        """Return the outdoor damper state code."""
+        return self.coordinator.data.get("outdoor_damper_state")
 
 
 class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):

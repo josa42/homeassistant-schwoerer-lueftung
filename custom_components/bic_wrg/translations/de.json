@@ -90,53 +90,53 @@
       "heat_pump_status": {
         "name": "Status Wärmepumpe",
         "state": {
-          "off": "Aus",
-          "heating": "WP Heizen",
-          "cooling": "WP Kühlen"
+          "0": "Aus",
+          "5": "WP Heizen",
+          "49": "WP Kühlen"
         }
       },
 
       "supply_air_fan_status": {
         "name": "Status Gebläse Zuluft",
         "state": {
-          "deactivated": "Deaktiviert",
-          "startup": "Anlaufphase",
-          "active": "Aktiv",
-          "standby": "Standby",
-          "error": "Fehler"
+          "0": "Deaktiviert",
+          "1": "Anlaufphase",
+          "2": "Aktiv",
+          "5": "Standby",
+          "6": "Fehler"
         }
       },
       "exhaust_air_fan_status": {
         "name": "Status Gebläse Abluft",
         "state": {
-          "deactivated": "Deaktiviert",
-          "startup": "Anlaufphase",
-          "active": "Aktiv",
-          "standby": "Standby",
-          "error": "Fehler"
+          "0": "Deaktiviert",
+          "1": "Anlaufphase",
+          "2": "Aktiv",
+          "5": "Standby",
+          "6": "Fehler"
         }
       },
       "ewt_state": {
         "name": "EWT Zustand",
         "state": {
-          "closed": "EWT aus/geschlossen",
-          "heating": "EWT im Heizbetrieb aktiv",
-          "cooling": "EWT im Kühlbetrieb aktiv"
+          "0": "EWT aus/geschlossen",
+          "1": "EWT im Heizbetrieb aktiv",
+          "2": "EWT im Kühlbetrieb aktiv"
         }
       },
       "bypass_state": {
         "name": "Bypass Zustand",
         "state": {
-          "closed": "Bypass geschlossen",
-          "open_cooling": "Bypass offen (Kühlen)",
-          "open_heating": "Bypass offen (Heizen)"
+          "0": "Bypass geschlossen",
+          "1": "Bypass offen (Kühlen)",
+          "2": "Bypass offen (Heizen)"
         }
       },
       "outdoor_damper_state": {
         "name": "Aussenklappe Zustand",
         "state": {
-          "closed": "geschlossen",
-          "open": "offen"
+          "0": "geschlossen",
+          "1": "offen"
         }
       },
       "time_program_fan_level": {
