@@ -466,13 +466,7 @@
       "auxiliary_heating_active": {
         "name": "Zusatzheizung aktiv"
       },
-      "auxiliary_heating_enabled": {
-        "name": "Zusatzheizung Freigabe",
-        "state": {
-          "off": "Gesperrt",
-          "on": "Heizen frei"
-        }
-      },
+
       "time_program_heating_enabled": {
         "name": "Freigabe Zeitprogramm Heizen",
         "state": {
@@ -481,7 +475,11 @@
         }
       },
       "auxiliary_heating_enable": {
-        "name": "Zusatzheizung Freigabe"
+        "name": "Zusatzheizung Freigabe",
+        "state": {
+          "off": "Gesperrt",
+          "on": "Heizen frei"
+        }
       },
       "time_program_heating_enable": {
         "name": "Freigabe Zeitprogramm Heizen"
