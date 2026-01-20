@@ -13,7 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL
 from .coordinator import BicWrgCoordinator
-from .modbus_client import ALARM_ACTIVE
+from .modbus_client import ALARM_ACTIVE, FAN_OVERRIDE_ACTIVE, NHR_STATE_ACTIVE
 
 
 async def async_setup_entry(
@@ -25,6 +25,8 @@ async def async_setup_entry(
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
     
     entities = [
+        BicWrgFanOverrideBinarySensor(coordinator, entry),
+        BicWrgNhrStateBinarySensor(coordinator, entry),
         BicWrgAlarmBinarySensor(
             coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
         ),
@@ -71,6 +73,67 @@ async def async_setup_entry(
         )
     
     async_add_entities(entities)
+
+
+class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+    """Binary sensor for WRG fan override (Luftstufen Überschreibung)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "fan_override"
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_fan_override"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if fan override is active."""
+        value = self.coordinator.data.get("fan_override")
+        if value is not None:
+            return value == FAN_OVERRIDE_ACTIVE
+        return None
+
+
+class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+    """Binary sensor for WRG NHR state (NHR Zustand)."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "nhr_state"
+    _attr_entity_registry_enabled_default = False
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        entry: ConfigEntry,
+    ) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_nhr_state"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="WRG 134-BP-HK",
+            manufacturer=MANUFACTURER,
+            model=MODEL,
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if NHR is active."""
+        value = self.coordinator.data.get("nhr_state")
+        if value is not None:
+            return value == NHR_STATE_ACTIVE
+        return None
 
 
 class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
@@ -134,7 +197,7 @@ class BicWrgRoomAuxiliaryHeatingActiveBinarySensor(
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
             "name": room_name,
-            "manufacturer": "BIC",
+            "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
             "via_device": (DOMAIN, coordinator.config_entry.entry_id),
         }
