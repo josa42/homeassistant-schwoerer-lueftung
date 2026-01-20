@@ -1,5 +1,5 @@
 {
-  "domain": "bic_wrg",
+  "domain": "schwoerer_lueftung",
   "name": "Schwörer Lüftung",
   "codeowners": ["@josa42"],
   "config_flow": true,

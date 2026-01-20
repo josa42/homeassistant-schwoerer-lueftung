@@ -1,6 +1,6 @@
-"""Constants for the Bau Info Center WRG integration."""
+"""Constants for the Schwörer Lüftung integration."""
 
-DOMAIN = "bic_wrg"
+DOMAIN = "schwoerer_lueftung"
 
 # Configuration
 CONF_HOST = "host"

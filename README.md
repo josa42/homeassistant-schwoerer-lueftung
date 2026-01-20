@@ -20,7 +20,7 @@ This is a custom Home Assistant integration for the BIC WRG 134-BP-HK ventilatio
 
 ### Manual Installation
 
-1. Copy the `custom_components/bic_wrg` directory to your Home Assistant's `custom_components` directory
+1. Copy the `custom_components/schwoerer_lueftung` directory to your Home Assistant's `custom_components` directory
 2. Restart Home Assistant
 
 ## Configuration
