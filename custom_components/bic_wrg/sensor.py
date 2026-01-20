@@ -18,23 +18,9 @@ from typing import Any
 from .const import DOMAIN, MANUFACTURER, MODEL, CONF_ROOMS
 from .coordinator import BicWrgCoordinator
 from .modbus_client import (
-    CURRENT_FAN_LEVEL_OFF,
-    CURRENT_FAN_LEVEL_1,
-    CURRENT_FAN_LEVEL_2,
-    CURRENT_FAN_LEVEL_3,
-    CURRENT_FAN_LEVEL_4,
-    FAN_OVERRIDE_INACTIVE,
-    FAN_OVERRIDE_ACTIVE,
-    TIME_PROGRAM_BASE_LEVEL_OFF,
-    TIME_PROGRAM_BASE_LEVEL_1,
-    TIME_PROGRAM_BASE_LEVEL_2,
-    TIME_PROGRAM_BASE_LEVEL_3,
-    TIME_PROGRAM_BASE_LEVEL_4,
     HEAT_PUMP_STATUS_OFF,
     HEAT_PUMP_STATUS_HEATING,
     HEAT_PUMP_STATUS_COOLING,
-    NHR_STATE_INACTIVE,
-    NHR_STATE_ACTIVE,
     SUPPLY_AIR_FAN_STATUS_DISABLED,
     SUPPLY_AIR_FAN_STATUS_STARTUP,
     SUPPLY_AIR_FAN_STATUS_ACTIVE,
@@ -57,37 +43,13 @@ from .modbus_client import (
     PREHEATER_STATE_VHR1_ACTIVE,
     PREHEATER_STATE_VHR2_ACTIVE,
     PREHEATER_STATE_VHR1_2_ACTIVE,
-    TIME_PROGRAM_FAN_LEVEL_OFF,
-    TIME_PROGRAM_FAN_LEVEL_1,
-    TIME_PROGRAM_FAN_LEVEL_2,
-    TIME_PROGRAM_FAN_LEVEL_3,
-    TIME_PROGRAM_FAN_LEVEL_4,
-    SENSOR_FAN_LEVEL_OFF,
-    SENSOR_FAN_LEVEL_1,
-    SENSOR_FAN_LEVEL_2,
-    SENSOR_FAN_LEVEL_3,
-    SENSOR_FAN_LEVEL_4,
     ERROR_CODES,
 )
 
 # Current fan level is now numeric (0-4)
-
-# Fan override mapping
-# Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
-FAN_OVERRIDE_STATES = {
-    FAN_OVERRIDE_INACTIVE: "Inactive",
-    FAN_OVERRIDE_ACTIVE: "Active",
-}
-
-# Time program base level mapping
-# Zeitprogramm Basis Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-TIME_PROGRAM_BASE_LEVELS = {
-    TIME_PROGRAM_BASE_LEVEL_OFF: "Off",
-    TIME_PROGRAM_BASE_LEVEL_1: "Level 1",
-    TIME_PROGRAM_BASE_LEVEL_2: "Level 2",
-    TIME_PROGRAM_BASE_LEVEL_3: "Level 3",
-    TIME_PROGRAM_BASE_LEVEL_4: "Level 4",
-}
+# Time program base level is now numeric (0-4)
+# Time program fan level is now numeric (0-4)
+# Sensor fan level is now numeric (0-4)
 
 # Heat pump status mapping
 # Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
@@ -95,13 +57,6 @@ HEAT_PUMP_STATUSES = {
     HEAT_PUMP_STATUS_OFF: "Off",
     HEAT_PUMP_STATUS_HEATING: "Heating",
     HEAT_PUMP_STATUS_COOLING: "Cooling",
-}
-
-# NHR state mapping
-# NHR Zustand: 0=Inaktiv, 1=Aktiv
-NHR_STATES = {
-    NHR_STATE_INACTIVE: "Inactive",
-    NHR_STATE_ACTIVE: "Active",
 }
 
 # Supply air fan status mapping
@@ -156,26 +111,6 @@ PREHEATER_STATES = {
     PREHEATER_STATE_VHR1_2_ACTIVE: "VHR 1 & 2 Active",
 }
 
-# Time program fan level mapping
-# Luftstufe Zeitprogramm: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-TIME_PROGRAM_FAN_LEVELS = {
-    TIME_PROGRAM_FAN_LEVEL_OFF: "Off",
-    TIME_PROGRAM_FAN_LEVEL_1: "Level 1",
-    TIME_PROGRAM_FAN_LEVEL_2: "Level 2",
-    TIME_PROGRAM_FAN_LEVEL_3: "Level 3",
-    TIME_PROGRAM_FAN_LEVEL_4: "Level 4",
-}
-
-# Sensor fan level mapping
-# Luftstufe Sensoren: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-SENSOR_FAN_LEVELS = {
-    SENSOR_FAN_LEVEL_OFF: "Off",
-    SENSOR_FAN_LEVEL_1: "Level 1",
-    SENSOR_FAN_LEVEL_2: "Level 2",
-    SENSOR_FAN_LEVEL_3: "Level 3",
-    SENSOR_FAN_LEVEL_4: "Level 4",
-}
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -188,11 +123,9 @@ async def async_setup_entry(
     
     entities = [
         BicWrgCurrentFanLevelSensor(coordinator, entry),
-        BicWrgFanOverrideSensor(coordinator, entry),
         BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
         BicWrgShockVentilationRemainingSensor(coordinator, entry),
         BicWrgHeatPumpStatusSensor(coordinator, entry),
-        BicWrgNhrStateSensor(coordinator, entry),
         BicWrgSupplyAirFanStatusSensor(coordinator, entry),
         BicWrgExhaustAirFanStatusSensor(coordinator, entry),
         BicWrgEwtStateSensor(coordinator, entry),
@@ -300,41 +233,12 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         return self.coordinator.data.get("current_fan_level")
 
 
-class BicWrgFanOverrideSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
-    """Sensor for WRG fan override (Luftstufen Überschreibung)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "fan_override"
-
-    def __init__(
-        self,
-        coordinator: BicWrgCoordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_fan_override"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
-            manufacturer=MANUFACTURER,
-            model=MODEL,
-        )
-
-    @property
-    def native_value(self) -> str | None:
-        """Return the fan override state as text."""
-        override = self.coordinator.data.get("fan_override")
-        if override is not None and override in FAN_OVERRIDE_STATES:
-            return FAN_OVERRIDE_STATES[override]
-        return None
-
-
 class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
     """Sensor for WRG time program base level (Zeitprogramm Basis Luftstufe)."""
 
     _attr_has_entity_name = True
     _attr_translation_key = "time_program_base_level"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
         self,
@@ -352,12 +256,9 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the time program base level as text."""
-        level = self.coordinator.data.get("time_program_base_level")
-        if level is not None and level in TIME_PROGRAM_BASE_LEVELS:
-            return TIME_PROGRAM_BASE_LEVELS[level]
-        return None
+    def native_value(self) -> int | None:
+        """Return the time program base level as number (0-4)."""
+        return self.coordinator.data.get("time_program_base_level")
 
 
 class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -416,37 +317,6 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         status = self.coordinator.data.get("heat_pump_status")
         if status is not None and status in HEAT_PUMP_STATUSES:
             return HEAT_PUMP_STATUSES[status]
-        return None
-
-
-class BicWrgNhrStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
-    """Sensor for WRG NHR state (NHR Zustand)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "nhr_state"
-    _attr_entity_registry_enabled_default = False
-
-    def __init__(
-        self,
-        coordinator: BicWrgCoordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_nhr_state"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
-            manufacturer=MANUFACTURER,
-            model=MODEL,
-        )
-
-    @property
-    def native_value(self) -> str | None:
-        """Return the NHR state as text."""
-        state = self.coordinator.data.get("nhr_state")
-        if state is not None and state in NHR_STATES:
-            return NHR_STATES[state]
         return None
 
 
@@ -640,6 +510,7 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
 
     _attr_has_entity_name = True
     _attr_translation_key = "time_program_fan_level"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
         self,
@@ -657,12 +528,9 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the time program fan level as text."""
-        level = self.coordinator.data.get("time_program_fan_level")
-        if level is not None and level in TIME_PROGRAM_FAN_LEVELS:
-            return TIME_PROGRAM_FAN_LEVELS[level]
-        return None
+    def native_value(self) -> int | None:
+        """Return the time program fan level as number (0-4)."""
+        return self.coordinator.data.get("time_program_fan_level")
 
 
 class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -671,6 +539,7 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
     _attr_has_entity_name = True
     _attr_translation_key = "sensor_fan_level"
     _attr_entity_registry_enabled_default = False
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
         self,
@@ -688,12 +557,9 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the sensor fan level as text."""
-        level = self.coordinator.data.get("sensor_fan_level")
-        if level is not None and level in SENSOR_FAN_LEVELS:
-            return SENSOR_FAN_LEVELS[level]
-        return None
+    def native_value(self) -> int | None:
+        """Return the sensor fan level as number (0-4)."""
+        return self.coordinator.data.get("sensor_fan_level")
 
 
 class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
@@ -1199,7 +1065,7 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
             "name": room_name,
-            "manufacturer": "BIC",
+            "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
             "via_device": (DOMAIN, coordinator.config_entry.entry_id),
         }
