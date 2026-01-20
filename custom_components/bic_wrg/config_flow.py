@@ -10,6 +10,7 @@ from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import translation
 
 from .const import (
     CONF_ROOMS,
@@ -100,9 +101,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Store room configuration with default slave ID
             data = {**self._host_data, CONF_SLAVE_ID: DEFAULT_SLAVE_ID, CONF_ROOMS: []}
             
-            # Generate room data with number and name
+            # Get translations to use the correct room prefix
+            translations = await translation.async_get_translations(
+                self.hass, self.hass.config.language, "entity", {DOMAIN}
+            )
+            room_key = f"component.{DOMAIN}.entity.device.room.name"
+            room_prefix = translations.get(room_key, "Room")
+            
             for i in range(1, num_rooms + 1):
-                data[CONF_ROOMS].append({"number": i, "name": f"Room {i}"})
+                data[CONF_ROOMS].append({"number": i, "name": f"{room_prefix} {i}"})
             
             info = {"title": f"WRG {self._host_data[CONF_HOST]}"}
             return self.async_create_entry(title=info["title"], data=data)

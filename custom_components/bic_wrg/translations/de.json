@@ -26,6 +26,11 @@
     }
   },
   "entity": {
+    "device": {
+      "room": {
+        "name": "Raum"
+      }
+    },
     "select": {
       "operation_mode": {
         "name": "Betriebsart",

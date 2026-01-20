@@ -1,5 +1,10 @@
 {
   "entity": {
+    "device": {
+      "room": {
+        "name": "Room"
+      }
+    },
     "select": {
       "operation_mode": {
         "name": "Operation Mode",
