@@ -539,6 +539,11 @@
       "supply_air_cold_alarm": {
         "name": "Zuluft zu kalt"
       }
+    },
+    "climate": {
+      "room_climate": {
+        "name": "{room_name} Klima"
+      }
     }
   }
 }
