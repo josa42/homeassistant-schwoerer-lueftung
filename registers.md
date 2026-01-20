@@ -345,3 +345,150 @@ All temperature and status registers are read-only.
 
 **Investigation Tool:** `investigate_registers.py`  
 **Command:** `python3 investigate_registers.py 10.0.0.139 all`
+
+---
+
+## Investigation of Registers 320-345
+
+**Date:** 2026-01-20  
+**Method:** Scanning, correlation analysis, and monitoring
+
+### Current Values
+
+#### Group 1: Configuration Registers (320-325)
+
+| Register | Value | Hex | Binary | Possible Meaning |
+|----------|-------|-----|--------|------------------|
+| 320 | 9 | 0x0009 | 0000000000001001 | Counter/Config value |
+| 321 | 14 | 0x000E | 0000000000001110 | ⚡ Matches R209 (Outdoor temp 1.4°C) |
+| 322 | 7 | 0x0007 | 0000000000000111 | 3 bits set, config value |
+| 323 | 1 | 0x0001 | 0000000000000001 | ⚡ Matches R100 (Mode) & R122 (EWT) |
+| 324 | 5 | 0x0005 | 0000000000000101 | Config value |
+| 325 | 4 | 0x0004 | 0000000000000100 | Config value |
+
+**Gap of 17 registers (326-342) - all zeros**
+
+#### Group 2: Enable Flags (343-345)
+
+| Register | Value | Hex | Binary | Possible Meaning |
+|----------|-------|-----|--------|------------------|
+| 343 | 1 | 0x0001 | 0000000000000001 | Enable flag |
+| 344 | 1 | 0x0001 | 0000000000000001 | Enable flag |
+| 345 | 1 | 0x0001 | 0000000000000001 | Enable flag |
+
+### Correlations Found
+
+**Strong Correlations:**
+
+1. **R321 (14) = R209 (Outdoor Temperature)**
+   - R209 = 14 (1.4°C outdoor temperature)
+   - R321 = 14 (exact match)
+   - **Hypothesis:** R321 stores outdoor temperature value (possibly last reading or average)
+
+2. **R343-345 (all 1) - Room Configuration**
+   - 3 consecutive registers with value 1
+   - **Hypothesis:** Room enable flags (3 rooms configured/active)
+   - Aligns with typical home ventilation setup
+
+3. **R323 (1) matches multiple:**
+   - R100 = 1 (Manual operation mode)
+   - R122 = 1 (EWT heating active)
+   - Could be state-derived value
+
+### Analysis
+
+**Pattern 1: Configuration Array (320-325)**
+- Values range from 1 to 14
+- Mixed small integers
+- R321 = outdoor temperature suggests this might be a status/config array
+- Possible interpretations:
+  - R320 (9): Number of something (sensors, zones?)
+  - R321 (14): Outdoor temperature copy/cache
+  - R322 (7): Bitmask (bits 0,1,2 set)
+  - R323 (1): Mode indicator
+  - R324 (5): Config parameter
+  - R325 (4): Config parameter
+
+**Pattern 2: Room Enable Flags (343-345)**
+- All three registers = 1
+- Consecutive positioning suggests array
+- Most likely: 3 rooms enabled/configured
+- Could also be 3 zones or 3 features enabled
+
+**Monitoring Results:**
+- No changes during observation period
+- Static configuration values
+- Not real-time sensor data (except possibly R321)
+
+### Hypothesis Summary
+
+**Most Likely Interpretations:**
+
+1. **R320-325: Device Configuration Block**
+   - R320: Capability or count value (9)
+   - R321: **Cached outdoor temperature** (matches R209)
+   - R322-325: Various configuration parameters
+
+2. **R343-345: Room/Zone Enable Flags**
+   - **Indicates 3 rooms are configured/active**
+   - Each register represents one room
+   - Value 1 = enabled, 0 = disabled
+   - Matches typical residential setup
+
+3. **R326-342: Reserved/Unused**
+   - 17 registers all zero
+   - Gap between config groups
+   - Reserved for future use or expansion
+
+### Comparison with Known Configuration
+
+From integration config flow, users configure:
+- Number of rooms (1-17 possible)
+- Current device likely has 3 rooms configured
+- **R343-345 perfectly matches 3 active rooms!**
+
+### Potential Use Cases
+
+**If hypothesis is correct:**
+
+1. **Auto-detect number of rooms** from R343-345
+   - Count consecutive registers with value 1
+   - Use during integration setup
+
+2. **Validate configuration**
+   - Check if user-configured rooms match device registers
+   - Warn if mismatch detected
+
+3. **Enhanced diagnostics**
+   - Monitor R321 for outdoor temp consistency
+   - Use R320-325 for device capability detection
+
+### Next Steps
+
+1. **Test room hypothesis:**
+   - Configure different number of rooms on device
+   - Re-scan R343-345 to see if count changes
+
+2. **Monitor R321:**
+   - Track if it follows R209 (outdoor temp)
+   - Check update frequency
+
+3. **Investigate R320:**
+   - Value 9 could be significant
+   - Total sensors? Max zones?
+
+4. **Test R322-325:**
+   - Try changing device settings
+   - Monitor for value changes
+
+### Confidence Level
+
+- **R343-345 = Room Count: HIGH** (3 consecutive 1s, matches typical config)
+- **R321 = Outdoor Temp Cache: MEDIUM** (exact match, but needs monitoring)
+- **R320-325 = Config Array: LOW** (need more data to confirm purpose)
+
+---
+
+**Investigation completed:** 2026-01-20  
+**Registers analyzed:** 320-345 (26 registers, 9 non-zero)  
+**Key discoveries:** Room count indicators (343-345), possible temp cache (321)
