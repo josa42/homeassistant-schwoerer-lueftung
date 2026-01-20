@@ -164,7 +164,7 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
     """Select entity for WRG fan speed (Manuelle Luftstufe)."""
 
     _attr_has_entity_name = True
-    _attr_translation_key = "fan_speed"
+    _attr_translation_key = "manual_fan_level"
     _attr_options = list(FAN_SPEEDS.values())
 
     def __init__(
