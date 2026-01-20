@@ -468,10 +468,6 @@
           "on": "ZH Haus frei"
         }
       },
-      "auxiliary_heating_active": {
-        "name": "Zusatzheizung aktiv"
-      },
-
       "time_program_heating_enabled": {
         "name": "Freigabe Zeitprogramm Heizen",
         "state": {
@@ -492,17 +488,7 @@
     },
     "climate": {
       "room_climate": {
-        "state_attributes": {
-          "preset_mode": {
-            "name": "Voreinstellung",
-            "state": {
-              "none": "Keine"
-            }
-          }
-        }
-      },
-      "climate": {
-        "name": "Klima"
+        "name": "{room_name} Klima"
       }
     },
     "binary_sensor": {
@@ -541,11 +527,9 @@
       },
       "supply_air_cold_alarm": {
         "name": "Zuluft zu kalt"
-      }
-    },
-    "climate": {
-      "room_climate": {
-        "name": "{room_name} Klima"
+      },
+      "auxiliary_heating_active": {
+        "name": "Zusatzheizung aktiv"
       }
     }
   }

@@ -293,14 +293,14 @@
       },
       "supply_air_cold_alarm": {
         "name": "Supply Air Too Cold"
+      },
+      "auxiliary_heating_active": {
+        "name": "Auxiliary Heating Active"
       }
     },
     "switch": {
       "shock_ventilation": {
         "name": "Shock Ventilation"
-      },
-      "auxiliary_heating_active": {
-        "name": "Auxiliary Heating Active"
       },
       "auxiliary_heating_enable": {
         "name": "Auxiliary Heating Enable"
