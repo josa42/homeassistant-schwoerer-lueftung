@@ -109,7 +109,7 @@ class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
             "name": room_name,
-            "manufacturer": "BIC",
+            "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
             "via_device": (DOMAIN, coordinator.config_entry.entry_id),
         }
@@ -168,7 +168,7 @@ class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinat
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
             "name": room_name,
-            "manufacturer": "BIC",
+            "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
             "via_device": (DOMAIN, coordinator.config_entry.entry_id),
         }
