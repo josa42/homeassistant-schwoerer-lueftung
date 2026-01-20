@@ -206,7 +206,37 @@
         "name": "Pre-Filter Remaining"
       },
       "error_message": {
-        "name": "Error Message"
+        "name": "Error Message",
+        "state": {
+          "0": "No Error",
+          "257": "Supply Air Fan Speed Missing",
+          "258": "Exhaust Air Fan Speed Missing",
+          "259": "Supply Air Fan Minimum Speed Not Reached",
+          "260": "Exhaust Air Fan Minimum Speed Not Reached",
+          "261": "Supply Air Fan Maximum Speed Exceeded",
+          "262": "Exhaust Air Fan Maximum Speed Exceeded",
+          "513": "Communication Error with BDE",
+          "514": "Communication Error Auxiliary Control Unit",
+          "515": "Communication Error Heating Module",
+          "516": "Communication Error Sensor",
+          "517": "Communication Error Sensor Adapter",
+          "518": "Communication Receiver",
+          "770": "Error Sensor Element T1 After EWT",
+          "771": "Error Sensor Element T2 After VHR",
+          "772": "Error Sensor Element T3 Before NHR",
+          "773": "Error Sensor Element T4 After NHR",
+          "774": "Error Sensor Element T5 Exhaust Air",
+          "775": "Error Sensor Element T6 In WT",
+          "776": "Error Sensor Element T7 Evaporator",
+          "777": "Error Sensor Element T8 Condenser",
+          "779": "Error Sensor Element T10 Outdoor Temperature",
+          "1025": "Error Parameter Memory",
+          "1026": "Error System Bus",
+          "1281": "Heat Pump High Pressure",
+          "1282": "Heat Pump Low Pressure",
+          "1283": "Maximum Defrost Time Exceeded",
+          "1284": "Heat Pump Low Pressure in Cooling Mode"
+        }
       },
       "operating_hours_fan": {
         "name": "Operating Hours Fan"
