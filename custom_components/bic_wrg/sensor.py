@@ -225,6 +225,7 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     _attr_has_entity_name = True
     _attr_translation_key = "time_program_base_level"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
