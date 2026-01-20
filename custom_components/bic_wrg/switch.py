@@ -45,7 +45,7 @@ class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
     """Switch entity for WRG shock ventilation (Stoßlüftung)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Shock Ventilation"
+    _attr_translation_key = "shock_ventilation"
 
     def __init__(
         self,
@@ -106,7 +106,7 @@ class BicWrgRoomAuxiliaryHeatingActiveSwitch(CoordinatorEntity[BicWrgCoordinator
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating_active"
-        self._attr_name = "Auxiliary Heating Active"
+        self._attr_translation_key = "auxiliary_heating_active"
         
         # Room-specific device
         self._attr_device_info = {
@@ -165,7 +165,7 @@ class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating_enable"
-        self._attr_name = "Auxiliary Heating Enable"
+        self._attr_translation_key = "auxiliary_heating_enable"
         
         # Room-specific device
         self._attr_device_info = {
@@ -224,7 +224,7 @@ class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinat
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_time_program_heating_enable"
-        self._attr_name = "Time Program Heating Enable"
+        self._attr_translation_key = "time_program_heating_enable"
         
         # Room-specific device
         self._attr_device_info = {

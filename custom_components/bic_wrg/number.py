@@ -39,7 +39,7 @@ class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEnt
     """Number entity for WRG linear fan power (Manuelle Lineare Luftleistung)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Linear Fan Power"
+    _attr_translation_key = "linear_fan_power"
     _attr_native_min_value = LINEAR_FAN_POWER_MIN
     _attr_native_max_value = LINEAR_FAN_POWER_MAX
     _attr_native_step = 1
@@ -101,7 +101,7 @@ class BicWrgRoomBaseTemperatureNumber(CoordinatorEntity[BicWrgCoordinator], Numb
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_name = "Base Temperature"
+        self._attr_translation_key = "base_temperature"
         self._attr_unique_id = f"{entry.entry_id}_room_{room_number}_base_temp"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{entry.entry_id}_room_{room_number}")},

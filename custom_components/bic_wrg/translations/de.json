@@ -58,6 +58,39 @@
           "auto_outdoor_temp": "Auto T-Aussen",
           "auto_digital_input": "Auto Digitaler Eingang"
         }
+      },
+      "fan_speed": {
+        "name": "Manuelle Luftstufe",
+        "state": {
+          "off": "Aus",
+          "level_1": "Stufe 1",
+          "level_2": "Stufe 2",
+          "level_3": "Stufe 3",
+          "level_4": "Stufe 4",
+          "automatic": "Automatik",
+          "linear": "Linearbetrieb"
+        }
+      },
+      "heat_pump_heating": {
+        "name": "Wärmepumpe Heizen",
+        "state": {
+          "heating_off": "Heizen Aus",
+          "heating_enabled": "Heizen frei"
+        }
+      },
+      "heat_pump_cooling": {
+        "name": "Wärmepumpe Kühlen",
+        "state": {
+          "cooling_off": "Kühlen Aus",
+          "cooling_enabled": "Kühlen frei"
+        }
+      },
+      "auxiliary_house_heating": {
+        "name": "Zusatzheizung Haus",
+        "state": {
+          "off": "Aus",
+          "enabled": "ZH Haus frei"
+        }
       }
     },
     "sensor": {
@@ -129,9 +162,9 @@
       "ewt_state": {
         "name": "EWT Zustand",
         "state": {
-          "off_closed": "EWT aus/geschlossen",
-          "heating_active": "EWT im Heizbetrieb aktiv",
-          "cooling_active": "EWT im Kühlbetrieb aktiv"
+          "closed": "EWT aus/geschlossen",
+          "heating": "EWT im Heizbetrieb aktiv",
+          "cooling": "EWT im Kühlbetrieb aktiv"
         }
       },
       "bypass_state": {
@@ -155,7 +188,7 @@
           "off": "Aus",
           "vhr1_active": "VHR 1 aktiv",
           "vhr2_active": "VHR 2 aktiv",
-          "vhr1_and_2_active": "VHR 1 & 2 aktiv"
+          "vhr1_2_active": "VHR 1 & 2 aktiv"
         }
       },
       "time_program_fan_level": {
@@ -383,6 +416,18 @@
           "inactive": "Inaktiv",
           "active": "Aktiv"
         }
+      },
+      "shock_ventilation_remaining": {
+        "name": "Restlaufzeit Stoßlüftung"
+      },
+      "device_filter_remaining": {
+        "name": "Restlaufzeit Gerätefilter"
+      },
+      "pre_filter_remaining": {
+        "name": "Restlaufzeit Vorgelagerter Filter"
+      },
+      "operating_hours_auxiliary_heating": {
+        "name": "Betriebsstunden ZH Raum"
       }
     },
     "number": {
@@ -419,11 +464,7 @@
         }
       },
       "auxiliary_heating_active": {
-        "name": "Zusatzheizung aktiv",
-        "state": {
-          "off": "Inaktiv",
-          "on": "Aktiv"
-        }
+        "name": "Zusatzheizung aktiv"
       },
       "auxiliary_heating_enabled": {
         "name": "Zusatzheizung Freigabe",
@@ -438,6 +479,12 @@
           "off": "Inaktiv",
           "on": "Aktiv"
         }
+      },
+      "auxiliary_heating_enable": {
+        "name": "Zusatzheizung Freigabe"
+      },
+      "time_program_heating_enable": {
+        "name": "Freigabe Zeitprogramm Heizen"
       }
     },
     "climate": {
@@ -450,6 +497,47 @@
             }
           }
         }
+      },
+      "climate": {
+        "name": "Klima"
+      }
+    },
+    "binary_sensor": {
+      "pressure_monitor_alarm": {
+        "name": "Meldung Druckwächter Aktiv"
+      },
+      "evu_lock_alarm": {
+        "name": "EVU Sperre Aktiv"
+      },
+      "door_open_alarm": {
+        "name": "Tür offen"
+      },
+      "device_filter_dirty_alarm": {
+        "name": "Gerätefilter verschmutzt"
+      },
+      "pre_filter_dirty_alarm": {
+        "name": "Vorgelagerter Filter verschmutzt"
+      },
+      "low_tariff_alarm": {
+        "name": "Niedertarif abgeschaltet"
+      },
+      "power_supply_alarm": {
+        "name": "Versorgungsspannung abgeschaltet"
+      },
+      "pressostat_alarm": {
+        "name": "Pressostat ausgelöst"
+      },
+      "evu_lock_external_alarm": {
+        "name": "EVU Sperre extern Aktiv"
+      },
+      "heating_module_test_alarm": {
+        "name": "Heizmodul Testbetrieb aktiv"
+      },
+      "emergency_mode_alarm": {
+        "name": "Notbetrieb aktiv"
+      },
+      "supply_air_cold_alarm": {
+        "name": "Zuluft zu kalt"
       }
     }
   }

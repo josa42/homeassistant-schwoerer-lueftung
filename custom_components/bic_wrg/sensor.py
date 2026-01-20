@@ -284,7 +284,7 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
     """Sensor for WRG current fan level (Aktuelle Luftstufe)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Fan Level"
+    _attr_translation_key = "current_fan_level"
 
     def __init__(
         self,
@@ -314,7 +314,7 @@ class BicWrgFanOverrideSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
     """Sensor for WRG fan override (Luftstufen Überschreibung)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Fan Override"
+    _attr_translation_key = "fan_override"
 
     def __init__(
         self,
@@ -344,7 +344,7 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     """Sensor for WRG time program base level (Zeitprogramm Basis Luftstufe)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Time Program Base Level"
+    _attr_translation_key = "time_program_base_level"
 
     def __init__(
         self,
@@ -374,7 +374,7 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
     """Sensor for WRG shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Shock Ventilation Remaining"
+    _attr_translation_key = "shock_ventilation_remaining"
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
@@ -403,7 +403,7 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
     """Sensor for WRG heat pump status (Status Wärmepumpe)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Heat Pump Status"
+    _attr_translation_key = "heat_pump_status"
 
     def __init__(
         self,
@@ -433,7 +433,7 @@ class BicWrgNhrStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
     """Sensor for WRG NHR state (NHR Zustand)."""
 
     _attr_has_entity_name = True
-    _attr_name = "NHR State"
+    _attr_translation_key = "nhr_state"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -464,7 +464,7 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
     """Sensor for WRG supply air fan status (Status Gebläse Zuluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Supply Air Fan Status"
+    _attr_translation_key = "supply_air_fan_status"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -495,7 +495,7 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
     """Sensor for WRG exhaust air fan status (Status Gebläse Abluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Exhaust Air Fan Status"
+    _attr_translation_key = "exhaust_air_fan_status"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -526,7 +526,7 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
     """Sensor for WRG EWT state (EWT Zustand)."""
 
     _attr_has_entity_name = True
-    _attr_name = "EWT State"
+    _attr_translation_key = "ewt_state"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -557,7 +557,7 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
     """Sensor for WRG bypass state (Bypass Zustand)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Bypass State"
+    _attr_translation_key = "bypass_state"
 
     def __init__(
         self,
@@ -587,7 +587,7 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
     """Sensor for WRG outdoor damper state (Aussenklappe Zustand)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Outdoor Damper State"
+    _attr_translation_key = "outdoor_damper_state"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -618,7 +618,7 @@ class BicWrgPreheaterStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
     """Sensor for WRG preheater state (Vorheizregister Zustand)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Preheater State"
+    _attr_translation_key = "preheater_state"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -649,7 +649,7 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
     """Sensor for WRG time program fan level (Luftstufe Zeitprogramm)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Time Program Fan Level"
+    _attr_translation_key = "time_program_fan_level"
 
     def __init__(
         self,
@@ -679,7 +679,7 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
     """Sensor for WRG sensor fan level (Luftstufe Sensoren)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Sensor Fan Level"
+    _attr_translation_key = "sensor_fan_level"
     _attr_entity_registry_enabled_default = False
 
     def __init__(
@@ -710,7 +710,7 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     """Sensor for WRG current supply air flow (Luftleistung aktuell Zuluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Supply Air Flow"
+    _attr_translation_key = "current_supply_air_flow"
     _attr_native_unit_of_measurement = "%"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_registry_enabled_default = False
@@ -740,7 +740,7 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG current exhaust air flow (Luftleistung aktuell Abluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Exhaust Air Flow"
+    _attr_translation_key = "current_exhaust_air_flow"
     _attr_native_unit_of_measurement = "%"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_registry_enabled_default = False
@@ -770,7 +770,7 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
     """Sensor for WRG current supply air RPM (Aktuelle Drehzahl Zuluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Supply Air RPM"
+    _attr_translation_key = "current_supply_air_rpm"
     _attr_native_unit_of_measurement = "rpm"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_registry_enabled_default = False
@@ -800,7 +800,7 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     """Sensor for WRG current exhaust air RPM (Aktuelle Drehzahl Abluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Current Exhaust Air RPM"
+    _attr_translation_key = "current_exhaust_air_rpm"
     _attr_native_unit_of_measurement = "rpm"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_registry_enabled_default = False
@@ -830,7 +830,7 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG temperature T1 after EWT (T1 nach EWT)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T1 After EWT"
+    _attr_translation_key = "temperature_t1_after_ewt"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -861,7 +861,7 @@ class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG temperature T2 after VHR (T2 nach VHR)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T2 After VHR"
+    _attr_translation_key = "temperature_t2_after_vhr"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -891,7 +891,7 @@ class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG temperature T3 before NE (T3 vor NE)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T3 Before NE"
+    _attr_translation_key = "temperature_t3_before_ne"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -921,7 +921,7 @@ class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], Sen
     """Sensor for WRG temperature T4 after NE (T4 nach NE)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T4 After NE"
+    _attr_translation_key = "temperature_t4_after_ne"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -951,7 +951,7 @@ class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], 
     """Sensor for WRG temperature T5 exhaust air (T5 Abluft)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T5 Exhaust Air"
+    _attr_translation_key = "temperature_t5_exhaust_air"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -981,7 +981,7 @@ class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], Sensor
     """Sensor for WRG temperature T6 in WT (T6 im WT)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T6 In WT"
+    _attr_translation_key = "temperature_t6_in_wt"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -1011,7 +1011,7 @@ class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], 
     """Sensor for WRG temperature T7 evaporator (T7 Verdampfer)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T7 Evaporator"
+    _attr_translation_key = "temperature_t7_evaporator"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -1041,7 +1041,7 @@ class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], S
     """Sensor for WRG temperature T8 condenser (T8 Kondensator)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T8 Condenser"
+    _attr_translation_key = "temperature_t8_condenser"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -1071,7 +1071,7 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG temperature T10 outdoor (T10 Aussen)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Temperature T10 Outdoor"
+    _attr_translation_key = "temperature_t10_outdoor"
     _attr_native_unit_of_measurement = "°C"
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -1101,7 +1101,7 @@ class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], Se
     """Sensor for WRG device filter remaining days (Restlaufzeit Gerätefilter)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Device Filter Remaining"
+    _attr_translation_key = "device_filter_remaining"
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_native_unit_of_measurement = UnitOfTime.DAYS
 
@@ -1130,7 +1130,7 @@ class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], 
     """Sensor for WRG upstream filter remaining days (Restlaufzeit Vorgelagerter Filter)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Upstream Filter Remaining"
+    _attr_translation_key = "upstream_filter_remaining"
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_native_unit_of_measurement = UnitOfTime.DAYS
 
@@ -1159,7 +1159,7 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
     """Sensor for WRG error message (Fehlermeldung)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Error Message"
+    _attr_translation_key = "error_message"
 
     def __init__(
         self,

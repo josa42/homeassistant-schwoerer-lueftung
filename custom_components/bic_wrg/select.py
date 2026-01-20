@@ -112,7 +112,7 @@ class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEnti
     """Select entity for WRG operation mode (Betriebsart)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Operation Mode"
+    _attr_translation_key = "operation_mode"
     _attr_options = list(OPERATION_MODES.values())
 
     def __init__(
@@ -164,7 +164,7 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
     """Select entity for WRG fan speed (Manuelle Luftstufe)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Fan Speed"
+    _attr_translation_key = "fan_speed"
     _attr_options = list(FAN_SPEEDS.values())
 
     def __init__(
@@ -216,7 +216,7 @@ class BicWrgHeatingCoolingFunctionSelect(CoordinatorEntity[BicWrgCoordinator], S
     """Select entity for WRG heating/cooling function (Heiz-Kühlfunktion)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Heating/Cooling Function"
+    _attr_translation_key = "heating_cooling_function"
     _attr_options = list(HEATING_COOLING_MODES.values())
 
     def __init__(
@@ -265,7 +265,7 @@ class BicWrgHeatPumpHeatingEnableSelect(CoordinatorEntity[BicWrgCoordinator], Se
     """Select entity for WRG heat pump heating enable (Wärmepumpe Heizen)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Heat Pump Heating"
+    _attr_translation_key = "heat_pump_heating"
     _attr_options = list(HEAT_PUMP_HEATING_OPTIONS.values())
 
     def __init__(
@@ -314,7 +314,7 @@ class BicWrgHeatPumpCoolingEnableSelect(CoordinatorEntity[BicWrgCoordinator], Se
     """Select entity for WRG heat pump cooling enable (Wärmepumpe Kühlen)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Heat Pump Cooling"
+    _attr_translation_key = "heat_pump_cooling"
     _attr_options = list(HEAT_PUMP_COOLING_OPTIONS.values())
 
     def __init__(
@@ -363,7 +363,7 @@ class BicWrgAuxiliaryHeatingEnableSelect(CoordinatorEntity[BicWrgCoordinator], S
     """Select entity for WRG auxiliary heating enable (Zusatzheizung Haus)."""
 
     _attr_has_entity_name = True
-    _attr_name = "Auxiliary House Heating"
+    _attr_translation_key = "auxiliary_house_heating"
     _attr_options = list(AUXILIARY_HEATING_OPTIONS.values())
 
     def __init__(
