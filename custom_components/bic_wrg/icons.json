@@ -1,0 +1,27 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "fan_override": {
+        "default": "mdi:fan-auto"
+      },
+      "nhr_state": {
+        "default": "mdi:heating-coil"
+      }
+    },
+    "sensor": {
+      "current_fan_level": {
+        "default": "mdi:fan"
+      },
+      "time_program_base_level": {
+        "default": "mdi:fan-clock"
+      },
+      "time_program_fan_level": {
+        "default": "mdi:fan-clock"
+      },
+      "sensor_fan_level": {
+        "default": "mdi:fan"
+      }
+    }
+  },
+  "services": {}
+}
