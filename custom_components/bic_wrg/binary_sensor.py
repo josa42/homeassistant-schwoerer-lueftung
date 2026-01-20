@@ -26,40 +26,40 @@ async def async_setup_entry(
     
     entities = [
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_pressure_switch", "Pressure Switch Alarm"
+            coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_utility_lock", "Utility Lock Alarm"
+            coordinator, entry, "alarm_utility_lock", "alarm_utility_lock"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_door_open", "Door Open Alarm"
+            coordinator, entry, "alarm_door_open", "alarm_door_open"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_device_filter_dirty", "Device Filter Dirty Alarm"
+            coordinator, entry, "alarm_device_filter_dirty", "alarm_device_filter_dirty"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_upstream_filter_dirty", "Upstream Filter Dirty Alarm"
+            coordinator, entry, "alarm_upstream_filter_dirty", "alarm_upstream_filter_dirty"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_off_peak_disabled", "Off-Peak Disabled Alarm"
+            coordinator, entry, "alarm_off_peak_disabled", "alarm_off_peak_disabled"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_supply_voltage_off", "Supply Voltage Off Alarm"
+            coordinator, entry, "alarm_supply_voltage_off", "alarm_supply_voltage_off"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_pressostat_triggered", "Pressostat Triggered Alarm"
+            coordinator, entry, "alarm_pressostat_triggered", "alarm_pressostat_triggered"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_external_utility_lock", "External Utility Lock Alarm"
+            coordinator, entry, "alarm_external_utility_lock", "alarm_external_utility_lock"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_heating_module_test", "Heating Module Test Alarm", enabled_by_default=False
+            coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_emergency_mode", "Emergency Mode Alarm"
+            coordinator, entry, "alarm_emergency_mode", "alarm_emergency_mode"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_supply_air_cold", "Supply Air Too Cold Alarm"
+            coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
         ),
     ]
     
@@ -84,13 +84,13 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
         coordinator: BicWrgCoordinator,
         entry: ConfigEntry,
         key: str,
-        name: str,
+        translation_key: str,
         enabled_by_default: bool = True,
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._key = key
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_entity_registry_enabled_default = enabled_by_default
         self._attr_device_info = DeviceInfo(

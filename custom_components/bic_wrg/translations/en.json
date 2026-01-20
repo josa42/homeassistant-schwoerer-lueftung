@@ -60,6 +60,47 @@
         }
       }
     },
+    "binary_sensor": {
+      "alarm_pressure_switch": {
+        "name": "Pressure Switch Alarm"
+      },
+      "alarm_utility_lock": {
+        "name": "Utility Lock Alarm"
+      },
+      "alarm_door_open": {
+        "name": "Door Open Alarm"
+      },
+      "alarm_device_filter_dirty": {
+        "name": "Device Filter Dirty Alarm"
+      },
+      "alarm_upstream_filter_dirty": {
+        "name": "Upstream Filter Dirty Alarm"
+      },
+      "alarm_off_peak_disabled": {
+        "name": "Off-Peak Disabled Alarm"
+      },
+      "alarm_supply_voltage_off": {
+        "name": "Supply Voltage Off Alarm"
+      },
+      "alarm_pressostat_triggered": {
+        "name": "Pressostat Triggered Alarm"
+      },
+      "alarm_external_utility_lock": {
+        "name": "External Utility Lock Alarm"
+      },
+      "alarm_heating_module_test": {
+        "name": "Heating Module Test Alarm"
+      },
+      "alarm_emergency_mode": {
+        "name": "Emergency Mode Alarm"
+      },
+      "alarm_supply_air_cold": {
+        "name": "Supply Air Too Cold Alarm"
+      },
+      "auxiliary_heating_active": {
+        "name": "Auxiliary Heating Active"
+      }
+    },
     "sensor": {
       "current_fan_level": {
         "name": "Current Fan Level",
@@ -250,52 +291,11 @@
       "operating_hours_vhr": {
         "name": "Operating Hours VHR"
       },
-      "operating_hours_auxiliary_heating": {
-        "name": "Operating Hours Auxiliary Heating"
+      "operating_hours_auxiliary_heating_house": {
+        "name": "Operating Hours Auxiliary Heating House"
       },
       "operating_hours_ewt": {
         "name": "Operating Hours EWT"
-      }
-    },
-    "binary_sensor": {
-      "pressure_monitor_alarm": {
-        "name": "Pressure Monitor Alarm"
-      },
-      "evu_lock_alarm": {
-        "name": "EVU Lock Alarm"
-      },
-      "door_open_alarm": {
-        "name": "Door Open Alarm"
-      },
-      "device_filter_dirty_alarm": {
-        "name": "Device Filter Dirty"
-      },
-      "pre_filter_dirty_alarm": {
-        "name": "Pre-Filter Dirty"
-      },
-      "low_tariff_alarm": {
-        "name": "Low Tariff Alarm"
-      },
-      "power_supply_alarm": {
-        "name": "Power Supply Alarm"
-      },
-      "pressostat_alarm": {
-        "name": "Pressostat Alarm"
-      },
-      "evu_lock_external_alarm": {
-        "name": "EVU Lock External Alarm"
-      },
-      "heating_module_test_alarm": {
-        "name": "Heating Module Test Alarm"
-      },
-      "emergency_mode_alarm": {
-        "name": "Emergency Mode Alarm"
-      },
-      "supply_air_cold_alarm": {
-        "name": "Supply Air Too Cold"
-      },
-      "auxiliary_heating_active": {
-        "name": "Auxiliary Heating Active"
       }
     },
     "switch": {

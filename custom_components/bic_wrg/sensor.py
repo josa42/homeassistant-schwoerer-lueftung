@@ -227,16 +227,16 @@ async def async_setup_entry(
     
     # Add operating hours sensors
     entities.extend([
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan", 800, "Fan"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "Fan Level 1"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "Fan Level 2"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "Fan Level 3"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "Fan Level 4"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "Heat Pump"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "Heat Pump Cooling"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "VHR"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "Auxiliary Heating House"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "EWT"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan", 800, "operating_hours_fan"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "operating_hours_fan_level_1"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "operating_hours_fan_level_2"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "operating_hours_fan_level_3"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "operating_hours_fan_level_4"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
+        BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
     ])
     
     async_add_entities(entities)
@@ -1235,14 +1235,14 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         entry: ConfigEntry,
         key: str,
         register: int,
-        name: str,
+        translation_key: str,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._key = key
         self._register = register
         self._attr_unique_id = f"{entry.entry_id}_operating_hours_{key}"
-        self._attr_name = f"Operating Hours {name}"
+        self._attr_translation_key = translation_key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="WRG 134-BP-HK",

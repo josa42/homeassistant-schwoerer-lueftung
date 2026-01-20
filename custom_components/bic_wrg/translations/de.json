@@ -402,7 +402,7 @@
       "operating_hours_vhr": {
         "name": "Betriebsstunden VHR"
       },
-      "operating_hours_room_heating": {
+      "operating_hours_auxiliary_heating_house": {
         "name": "Betriebsstunden ZH Raum"
       },
       "operating_hours_ewt": {
@@ -492,40 +492,40 @@
       }
     },
     "binary_sensor": {
-      "pressure_monitor_alarm": {
+      "alarm_pressure_switch": {
         "name": "Meldung Druckwächter Aktiv"
       },
-      "evu_lock_alarm": {
+      "alarm_utility_lock": {
         "name": "EVU Sperre Aktiv"
       },
-      "door_open_alarm": {
+      "alarm_door_open": {
         "name": "Tür offen"
       },
-      "device_filter_dirty_alarm": {
+      "alarm_device_filter_dirty": {
         "name": "Gerätefilter verschmutzt"
       },
-      "pre_filter_dirty_alarm": {
+      "alarm_upstream_filter_dirty": {
         "name": "Vorgelagerter Filter verschmutzt"
       },
-      "low_tariff_alarm": {
+      "alarm_off_peak_disabled": {
         "name": "Niedertarif abgeschaltet"
       },
-      "power_supply_alarm": {
+      "alarm_supply_voltage_off": {
         "name": "Versorgungsspannung abgeschaltet"
       },
-      "pressostat_alarm": {
+      "alarm_pressostat_triggered": {
         "name": "Pressostat ausgelöst"
       },
-      "evu_lock_external_alarm": {
+      "alarm_external_utility_lock": {
         "name": "EVU Sperre extern Aktiv"
       },
-      "heating_module_test_alarm": {
+      "alarm_heating_module_test": {
         "name": "Heizmodul Testbetrieb aktiv"
       },
-      "emergency_mode_alarm": {
+      "alarm_emergency_mode": {
         "name": "Notbetrieb aktiv"
       },
-      "supply_air_cold_alarm": {
+      "alarm_supply_air_cold": {
         "name": "Zuluft zu kalt"
       },
       "auxiliary_heating_active": {
