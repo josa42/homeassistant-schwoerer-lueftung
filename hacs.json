@@ -1,5 +1,5 @@
 {
-  "name": "BIC WRG",
+  "name": "Schwörer Lüftung",
   "render_readme": true,
-  "domains": ["climate", "sensor"]
+  "domains": ["climate", "sensor", "binary_sensor", "switch", "select", "number"]
 }
