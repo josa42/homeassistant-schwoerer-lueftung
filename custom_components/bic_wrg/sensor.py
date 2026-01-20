@@ -70,15 +70,7 @@ from .modbus_client import (
     ERROR_CODES,
 )
 
-# Current fan level mapping
-# Aktuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-CURRENT_FAN_LEVELS = {
-    CURRENT_FAN_LEVEL_OFF: "Off",
-    CURRENT_FAN_LEVEL_1: "Level 1",
-    CURRENT_FAN_LEVEL_2: "Level 2",
-    CURRENT_FAN_LEVEL_3: "Level 3",
-    CURRENT_FAN_LEVEL_4: "Level 4",
-}
+# Current fan level is now numeric (0-4)
 
 # Fan override mapping
 # Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
@@ -285,6 +277,7 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
 
     _attr_has_entity_name = True
     _attr_translation_key = "current_fan_level"
+    _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(
         self,
@@ -302,12 +295,9 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         )
 
     @property
-    def native_value(self) -> str | None:
-        """Return the current fan level as text."""
-        level = self.coordinator.data.get("current_fan_level")
-        if level is not None and level in CURRENT_FAN_LEVELS:
-            return CURRENT_FAN_LEVELS[level]
-        return None
+    def native_value(self) -> int | None:
+        """Return the current fan level as number (0-4)."""
+        return self.coordinator.data.get("current_fan_level")
 
 
 class BicWrgFanOverrideSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
