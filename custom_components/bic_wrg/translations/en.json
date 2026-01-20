@@ -313,8 +313,8 @@
       }
     },
     "climate": {
-      "climate": {
-        "name": "Climate"
+      "room_climate": {
+        "name": "{room_name} Climate"
       }
     }
   }
