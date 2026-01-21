@@ -398,28 +398,53 @@ class BicWrgModbusClient:
             return False
 
     def detect_room_count(self) -> int | None:
-        """Detect the number of configured rooms by reading registers 343-345.
+        """Detect the number of configured rooms by checking room temperature registers.
         
-        These registers appear to indicate room count configuration.
+        Reads room actual temperature registers (360-376) which are documented.
+        Counts rooms that have unique/varying temperature readings, indicating active sensors.
         Returns the detected room count or None if detection fails.
         """
         try:
-            # Read registers 343-345 (room count indicators)
-            registers = self.read_holding_registers(343, 3)
+            # Read room actual temperature registers 360-376 (17 rooms max)
+            # Register 360 = Room 1, 361 = Room 2, ... 376 = Room 17
+            registers = self.read_holding_registers(360, 17)
             if not registers:
-                _LOGGER.warning("Failed to read room count registers")
+                _LOGGER.warning("Failed to read room temperature registers")
                 return None
             
-            # The registers typically contain the same value indicating room count
-            # Use the first non-zero value
-            room_count = registers[0]
+            # Find the last room with a unique temperature reading
+            # Many systems report a default temperature (like 200 = 20.0°C) for unconfigured rooms
+            # We look for the last room that has a different value from the common default
+            room_count = 0
             
-            # Validate room count is reasonable (1-17 according to documentation)
-            if 1 <= room_count <= 17:
-                _LOGGER.info("Detected %d rooms from registers 343-345: %s", room_count, registers)
+            # First, find the most common temperature value (likely the default)
+            temp_counts = {}
+            for temp in registers:
+                if temp != 0:
+                    temp_counts[temp] = temp_counts.get(temp, 0) + 1
+            
+            # If we have a value that appears 5+ times, consider it the default
+            default_temp = None
+            for temp, count in temp_counts.items():
+                if count >= 5:
+                    default_temp = temp
+                    break
+            
+            # Count rooms with non-default temperatures
+            for i, temp_value in enumerate(registers, start=1):
+                # Room has an active sensor if:
+                # - Temperature is non-zero, AND
+                # - Temperature is different from default (or no default found)
+                if temp_value != 0:
+                    if default_temp is None or temp_value != default_temp:
+                        room_count = i
+            
+            if room_count >= 1:
+                _LOGGER.info("Detected %d configured rooms from temperature registers (default temp: %s)", 
+                           room_count, default_temp)
                 return room_count
             
-            _LOGGER.warning("Room count detection returned invalid value: %d (registers: %s)", room_count, registers)
+            _LOGGER.warning("No rooms detected from temperature registers")
             return None
             
         except Exception as err:
