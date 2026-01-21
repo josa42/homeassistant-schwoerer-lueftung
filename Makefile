@@ -53,6 +53,13 @@ lint:
 	fi
 	$(VENV_BIN)/ruff check custom_components/ tests/
 
+lint-fix:
+	@if [ ! -d "$(VENV)" ]; then \
+		echo "Virtual environment not found. Run 'make install' first."; \
+		exit 1; \
+	fi
+	$(VENV_BIN)/ruff check --fix custom_components/ tests/
+
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
@@ -61,6 +68,10 @@ clean:
 
 dev-up:
 	@echo "Starting Home Assistant..."
+	@echo "Setting up configuration..."
+	@mkdir -p config
+	@cp -n config.template.yaml config/configuration.yaml 2>/dev/null || true
+	@touch config/automations.yaml config/scripts.yaml config/scenes.yaml config/secrets.yaml 2>/dev/null || true
 	@echo "Access at: http://localhost:8123"
 	docker-compose up -d
 	@echo ""
