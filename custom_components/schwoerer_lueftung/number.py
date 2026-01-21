@@ -23,14 +23,15 @@ async def async_setup_entry(
     
     entities = [BicWrgLinearFanPowerNumber(coordinator, entry)]
     
-    # Add base temperature numbers for each configured room
-    rooms = entry.data.get("rooms", [])
-    for room in rooms:
-        entities.append(
-            BicWrgRoomBaseTemperatureNumber(
-                coordinator, entry, room["number"], room["name"]
+    # Add base temperature numbers for each configured room (WGT only)
+    if coordinator.has_heating():
+        rooms = entry.data.get("rooms", [])
+        for room in rooms:
+            entities.append(
+                BicWrgRoomBaseTemperatureNumber(
+                    coordinator, entry, room["number"], room["name"]
+                )
             )
-        )
     
     async_add_entities(entities)
 
