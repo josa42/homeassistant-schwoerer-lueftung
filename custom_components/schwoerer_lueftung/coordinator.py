@@ -11,9 +11,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
+    CONF_DEVICE_TYPE,
     CONF_SLAVE_ID,
     CONF_ROOMS,
     DEFAULT_SCAN_INTERVAL,
+    DEVICE_TYPE_WGT,
     DOMAIN,
 )
 from .modbus_client import BicWrgModbusClient
@@ -39,6 +41,10 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             name=DOMAIN,
             update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         )
+
+    def has_heating(self) -> bool:
+        """Check if device has heating capabilities (WGT)."""
+        return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT) == DEVICE_TYPE_WGT
 
     async def write_register(self, address: int, value: int) -> bool:
         """Write a register to the device."""

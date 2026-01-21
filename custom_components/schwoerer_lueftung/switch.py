@@ -31,23 +31,30 @@ async def async_setup_entry(
 ) -> None:
     """Set up WRG switch entities from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    has_heating = coordinator.has_heating()
     
     entities = [
         BicWrgShockVentilationSwitch(coordinator, entry),
-        BicWrgHeatPumpHeatingSwitch(coordinator, entry),
-        BicWrgHeatPumpCoolingSwitch(coordinator, entry),
-        BicWrgAuxiliaryHeatingSwitch(coordinator, entry),
     ]
     
-    # Add room heating switches
-    rooms = entry.data.get("rooms", [])
-    for room in rooms:
-        entities.append(
-            BicWrgRoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
-        )
-        entities.append(
-            BicWrgRoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
-        )
+    # Add heating-related switches only for WGT devices
+    if has_heating:
+        entities.extend([
+            BicWrgHeatPumpHeatingSwitch(coordinator, entry),
+            BicWrgHeatPumpCoolingSwitch(coordinator, entry),
+            BicWrgAuxiliaryHeatingSwitch(coordinator, entry),
+        ])
+    
+    # Add room heating switches (only for WGT)
+    if has_heating:
+        rooms = entry.data.get("rooms", [])
+        for room in rooms:
+            entities.append(
+                BicWrgRoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
+            )
+            entities.append(
+                BicWrgRoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
+            )
     
     async_add_entities(entities)
 

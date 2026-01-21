@@ -97,12 +97,18 @@ async def async_setup_entry(
 ) -> None:
     """Set up WRG select entities from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    has_heating = coordinator.has_heating()
     
-    async_add_entities([
+    entities = [
         BicWrgOperationModeSelect(coordinator, entry),
         BicWrgFanSpeedSelect(coordinator, entry),
-        BicWrgHeatingCoolingFunctionSelect(coordinator, entry),
-    ])
+    ]
+    
+    # Add heating-related select entities only for WGT devices
+    if has_heating:
+        entities.append(BicWrgHeatingCoolingFunctionSelect(coordinator, entry))
+    
+    async_add_entities(entities)
 
 
 class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):

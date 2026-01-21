@@ -107,15 +107,14 @@ async def async_setup_entry(
     """Set up WRG sensors from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
+    has_heating = coordinator.has_heating()
     
     entities = [
         BicWrgCurrentFanLevelSensor(coordinator, entry),
         BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
         BicWrgShockVentilationRemainingSensor(coordinator, entry),
-        BicWrgHeatPumpStatusSensor(coordinator, entry),
         BicWrgSupplyAirFanStatusSensor(coordinator, entry),
         BicWrgExhaustAirFanStatusSensor(coordinator, entry),
-        BicWrgEwtStateSensor(coordinator, entry),
         BicWrgBypassStateSensor(coordinator, entry),
         BicWrgOutdoorDamperStateSensor(coordinator, entry),
         BicWrgTimeProgramFanLevelSensor(coordinator, entry),
@@ -125,24 +124,32 @@ async def async_setup_entry(
         BicWrgCurrentSupplyAirRpmSensor(coordinator, entry),
         BicWrgCurrentExhaustAirRpmSensor(coordinator, entry),
         BicWrgTemperatureT1AfterEwtSensor(coordinator, entry),
-        BicWrgTemperatureT2AfterVhrSensor(coordinator, entry),
-        BicWrgTemperatureT3BeforeNeSensor(coordinator, entry),
-        BicWrgTemperatureT4AfterNeSensor(coordinator, entry),
         BicWrgTemperatureT5ExhaustAirSensor(coordinator, entry),
         BicWrgTemperatureT6InWtSensor(coordinator, entry),
-        BicWrgTemperatureT7EvaporatorSensor(coordinator, entry),
-        BicWrgTemperatureT8CondenserSensor(coordinator, entry),
         BicWrgTemperatureT10OutdoorSensor(coordinator, entry),
         BicWrgDeviceFilterRemainingSensor(coordinator, entry),
         BicWrgUpstreamFilterRemainingSensor(coordinator, entry),
         BicWrgErrorMessageSensor(coordinator, entry),
     ]
     
-    # Add room-specific sensors
-    for room in rooms:
-        entities.append(
-            BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
-        )
+    # Add heating-related sensors only for WGT devices
+    if has_heating:
+        entities.extend([
+            BicWrgHeatPumpStatusSensor(coordinator, entry),
+            BicWrgEwtStateSensor(coordinator, entry),
+            BicWrgTemperatureT2AfterVhrSensor(coordinator, entry),
+            BicWrgTemperatureT3BeforeNeSensor(coordinator, entry),
+            BicWrgTemperatureT4AfterNeSensor(coordinator, entry),
+            BicWrgTemperatureT7EvaporatorSensor(coordinator, entry),
+            BicWrgTemperatureT8CondenserSensor(coordinator, entry),
+        ])
+    
+    # Add room-specific sensors (only for WGT)
+    if has_heating:
+        for room in rooms:
+            entities.append(
+                BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
+            )
     
     # Add operating hours sensors
     entities.extend([
@@ -151,12 +158,17 @@ async def async_setup_entry(
         BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "operating_hours_fan_level_2"),
         BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "operating_hours_fan_level_3"),
         BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "operating_hours_fan_level_4"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
     ])
+    
+    # Add heating-related operating hours sensors only for WGT
+    if has_heating:
+        entities.extend([
+            BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
+            BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
+            BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
+            BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
+            BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
+        ])
     
     async_add_entities(entities)
 

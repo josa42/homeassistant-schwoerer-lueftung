@@ -13,10 +13,14 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import translation
 
 from .const import (
+    CONF_DEVICE_TYPE,
     CONF_ROOMS,
     CONF_SLAVE_ID,
+    DEFAULT_DEVICE_TYPE,
     DEFAULT_PORT,
     DEFAULT_SLAVE_ID,
+    DEVICE_TYPE_WGT,
+    DEVICE_TYPE_WRT,
     DOMAIN,
 )
 
@@ -79,6 +83,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize config flow."""
         self._host_data: dict[str, Any] = {}
         self._detected_rooms: int | None = None
+        self._device_type: str = DEFAULT_DEVICE_TYPE
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -100,14 +105,34 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._host_data = user_input
                 self._detected_rooms = info.get("detected_rooms")
                 
-                # If room count was auto-detected, skip the room config step
-                if self._detected_rooms is not None:
-                    return await self.async_step_rooms(user_input={"num_rooms": self._detected_rooms})
-                
-                return await self.async_step_rooms()
+                # Go to device type selection
+                return await self.async_step_device_type()
         
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_device_type(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle device type selection."""
+        if user_input is not None:
+            self._device_type = user_input[CONF_DEVICE_TYPE]
+            
+            # If room count was auto-detected, skip the room config step
+            if self._detected_rooms is not None:
+                return await self.async_step_rooms(user_input={"num_rooms": self._detected_rooms})
+            
+            return await self.async_step_rooms()
+        
+        return self.async_show_form(
+            step_id="device_type",
+            data_schema=vol.Schema({
+                vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): vol.In({
+                    DEVICE_TYPE_WGT: "WGT (mit Heizung)",
+                    DEVICE_TYPE_WRT: "WRT (nur Lüftung)",
+                }),
+            }),
         )
 
     async def async_step_rooms(
@@ -117,8 +142,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             num_rooms = user_input.get("num_rooms", 0)
             
-            # Store room configuration with default slave ID
-            data = {**self._host_data, CONF_SLAVE_ID: DEFAULT_SLAVE_ID, CONF_ROOMS: []}
+            # Store room configuration with default slave ID and device type
+            data = {
+                **self._host_data,
+                CONF_SLAVE_ID: DEFAULT_SLAVE_ID,
+                CONF_DEVICE_TYPE: self._device_type,
+                CONF_ROOMS: [],
+            }
             
             # Get translations to use the correct room prefix
             translations = await translation.async_get_translations(

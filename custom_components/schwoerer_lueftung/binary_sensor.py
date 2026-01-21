@@ -30,12 +30,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up WRG binary sensors from a config entry."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    has_heating = coordinator.has_heating()
     
     entities = [
         BicWrgFanOverrideBinarySensor(coordinator, entry),
-        BicWrgNhrStateBinarySensor(coordinator, entry),
-        BicWrgPreheater1BinarySensor(coordinator, entry),
-        BicWrgPreheater2BinarySensor(coordinator, entry),
         BicWrgAlarmBinarySensor(
             coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
         ),
@@ -64,10 +62,23 @@ async def async_setup_entry(
             coordinator, entry, "alarm_external_utility_lock", "alarm_external_utility_lock"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
+            coordinator, entry, "alarm_emergency_mode", "alarm_emergency_mode"
         ),
         BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_emergency_mode", "alarm_emergency_mode"
+            coordinator, entry, "alarm_supply_air_too_cold", "alarm_supply_air_too_cold"
+        ),
+    ]
+    
+    # Add heating-related binary sensors only for WGT devices
+    if has_heating:
+        entities.extend([
+            BicWrgNhrStateBinarySensor(coordinator, entry),
+            BicWrgPreheater1BinarySensor(coordinator, entry),
+            BicWrgPreheater2BinarySensor(coordinator, entry),
+            BicWrgAlarmBinarySensor(
+                coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
+            ),
+        ])
         ),
         BicWrgAlarmBinarySensor(
             coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
