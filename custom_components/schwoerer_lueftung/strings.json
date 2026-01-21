@@ -2,27 +2,329 @@
   "config": {
     "step": {
       "user": {
-        "title": "Connect to Schwörer Lüftung Device",
-        "description": "Enter the connection details for your Schwörer ventilation system",
+        "title": "Connect to Schwörer Ventilation System",
+        "description": "Enter connection details for your Schwörer ventilation system",
         "data": {
           "host": "IP Address",
-          "port": "Port"
-        }
-      },
-      "rooms": {
-        "title": "Configure Rooms",
-        "description": "How many rooms do you want to configure? (1-17){detected_rooms, select, other {\n\nAuto-detected: {detected_rooms} rooms}}",
-        "data": {
-          "num_rooms": "Number of Rooms"
+          "port": "Port",
+          "device_type": "Device Type",
+          "rooms": "Number of Rooms"
         }
       }
     },
     "error": {
-      "cannot_connect": "Failed to connect to the device. Please check the IP address and port.",
+      "cannot_connect": "Failed to connect to the device",
       "unknown": "Unexpected error occurred"
     },
     "abort": {
       "already_configured": "Device is already configured"
+    }
+  },
+  "entity": {
+    "device": {
+      "room": {
+        "name": "Room"
+      }
+    },
+    "select": {
+      "operation_mode": {
+        "name": "Operation Mode",
+        "state": {
+          "off": "Off",
+          "manual": "Manual",
+          "winter": "Winter",
+          "summer": "Summer",
+          "summer_exhaust": "Summer Exhaust"
+        }
+      },
+      "fan_speed": {
+        "name": "Fan Speed",
+        "state": {
+          "0": "Off",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
+          "automatic": "Automatic",
+          "linear": "Linear"
+        }
+      },
+      "heating_cooling_function": {
+        "name": "Heating/Cooling Function",
+        "state": {
+          "off": "Off",
+          "heating": "Heating",
+          "cooling": "Cooling",
+          "auto_outdoor_temp": "Auto Outdoor Temp",
+          "auto_digital_input": "Auto Digital Input"
+        }
+      }
+    },
+    "binary_sensor": {
+      "alarm_pressure_switch": {
+        "name": "Pressure Switch Alarm"
+      },
+      "alarm_utility_lock": {
+        "name": "Utility Lock Alarm"
+      },
+      "alarm_door_open": {
+        "name": "Door Open Alarm"
+      },
+      "alarm_device_filter_dirty": {
+        "name": "Device Filter Dirty Alarm"
+      },
+      "alarm_upstream_filter_dirty": {
+        "name": "Upstream Filter Dirty Alarm"
+      },
+      "alarm_off_peak_disabled": {
+        "name": "Off-Peak Disabled Alarm"
+      },
+      "alarm_supply_voltage_off": {
+        "name": "Supply Voltage Off Alarm"
+      },
+      "alarm_pressostat_triggered": {
+        "name": "Pressostat Triggered Alarm"
+      },
+      "alarm_external_utility_lock": {
+        "name": "External Utility Lock Alarm"
+      },
+      "alarm_heating_module_test": {
+        "name": "Heating Module Test Alarm"
+      },
+      "alarm_emergency_mode": {
+        "name": "Emergency Mode Alarm"
+      },
+      "alarm_supply_air_cold": {
+        "name": "Supply Air Too Cold Alarm"
+      },
+      "auxiliary_heating_active": {
+        "name": "Auxiliary Heating Active"
+      },
+      "fan_override": {
+        "name": "Fan Override"
+      },
+      "nhr_state": {
+        "name": "NHR State"
+      },
+      "preheater_1": {
+        "name": "Preheater 1"
+      },
+      "preheater_2": {
+        "name": "Preheater 2"
+      }
+    },
+    "sensor": {
+      "current_fan_level": {
+        "name": "Current Fan Level"
+      },
+      "time_program_base_level": {
+        "name": "Time Program Base Level"
+      },
+      "shock_ventilation_remaining": {
+        "name": "Shock Ventilation Remaining"
+      },
+      "heat_pump_status": {
+        "name": "Heat Pump Status",
+        "state": {
+          "0": "Off",
+          "5": "Heating",
+          "49": "Cooling"
+        }
+      },
+
+      "supply_air_fan_status": {
+        "name": "Supply Air Fan Status",
+        "state": {
+          "0": "Deactivated",
+          "1": "Startup",
+          "2": "Active",
+          "5": "Standby",
+          "6": "Error"
+        }
+      },
+      "exhaust_air_fan_status": {
+        "name": "Exhaust Air Fan Status",
+        "state": {
+          "0": "Deactivated",
+          "1": "Startup",
+          "2": "Active",
+          "5": "Standby",
+          "6": "Error"
+        }
+      },
+      "ewt_state": {
+        "name": "EWT State",
+        "state": {
+          "0": "Closed",
+          "1": "Heating Active",
+          "2": "Cooling Active"
+        }
+      },
+      "bypass_state": {
+        "name": "Bypass State",
+        "state": {
+          "0": "Closed",
+          "1": "Open (Cooling)",
+          "2": "Open (Heating)"
+        }
+      },
+      "outdoor_damper_state": {
+        "name": "Outdoor Damper State",
+        "state": {
+          "0": "Closed",
+          "1": "Open"
+        }
+      },
+      "time_program_fan_level": {
+        "name": "Time Program Fan Level"
+      },
+      "sensor_fan_level": {
+        "name": "Sensor Fan Level"
+      },
+      "current_supply_air_flow": {
+        "name": "Current Supply Air Flow"
+      },
+      "current_exhaust_air_flow": {
+        "name": "Current Exhaust Air Flow"
+      },
+      "current_supply_air_rpm": {
+        "name": "Current Supply Air RPM"
+      },
+      "current_exhaust_air_rpm": {
+        "name": "Current Exhaust Air RPM"
+      },
+      "temperature_t1_after_ewt": {
+        "name": "Temperature T1 After EWT"
+      },
+      "temperature_t2_after_vhr": {
+        "name": "Temperature T2 After VHR"
+      },
+      "temperature_t3_before_ne": {
+        "name": "Temperature T3 Before NE"
+      },
+      "temperature_t4_after_ne": {
+        "name": "Temperature T4 After NE"
+      },
+      "temperature_t5_exhaust_air": {
+        "name": "Temperature T5 Exhaust Air"
+      },
+      "temperature_t6_in_wt": {
+        "name": "Temperature T6 in WT"
+      },
+      "temperature_t7_evaporator": {
+        "name": "Temperature T7 Evaporator"
+      },
+      "temperature_t8_condenser": {
+        "name": "Temperature T8 Condenser"
+      },
+      "temperature_t10_outdoor": {
+        "name": "Temperature T10 Outdoor"
+      },
+      "device_filter_remaining": {
+        "name": "Device Filter Remaining"
+      },
+      "upstream_filter_remaining": {
+        "name": "Upstream Filter Remaining"
+      },
+      "error_message": {
+        "name": "Error Message",
+        "state": {
+          "0": "No Error",
+          "257": "Supply Air Fan Speed Missing",
+          "258": "Exhaust Air Fan Speed Missing",
+          "259": "Supply Air Fan Minimum Speed Not Reached",
+          "260": "Exhaust Air Fan Minimum Speed Not Reached",
+          "261": "Supply Air Fan Maximum Speed Exceeded",
+          "262": "Exhaust Air Fan Maximum Speed Exceeded",
+          "513": "Communication Error with BDE",
+          "514": "Communication Error Auxiliary Control Unit",
+          "515": "Communication Error Heating Module",
+          "516": "Communication Error Sensor",
+          "517": "Communication Error Sensor Adapter",
+          "518": "Communication Receiver",
+          "770": "Error Sensor Element T1 After EWT",
+          "771": "Error Sensor Element T2 After VHR",
+          "772": "Error Sensor Element T3 Before NHR",
+          "773": "Error Sensor Element T4 After NHR",
+          "774": "Error Sensor Element T5 Exhaust Air",
+          "775": "Error Sensor Element T6 In WT",
+          "776": "Error Sensor Element T7 Evaporator",
+          "777": "Error Sensor Element T8 Condenser",
+          "779": "Error Sensor Element T10 Outdoor Temperature",
+          "1025": "Error Parameter Memory",
+          "1026": "Error System Bus",
+          "1281": "Heat Pump High Pressure",
+          "1282": "Heat Pump Low Pressure",
+          "1283": "Maximum Defrost Time Exceeded",
+          "1284": "Heat Pump Low Pressure in Cooling Mode"
+        }
+      },
+      "operating_hours_fan": {
+        "name": "Operating Hours Fan"
+      },
+      "operating_hours_fan_level_1": {
+        "name": "Operating Hours Fan Level 1"
+      },
+      "operating_hours_fan_level_2": {
+        "name": "Operating Hours Fan Level 2"
+      },
+      "operating_hours_fan_level_3": {
+        "name": "Operating Hours Fan Level 3"
+      },
+      "operating_hours_fan_level_4": {
+        "name": "Operating Hours Fan Level 4"
+      },
+      "operating_hours_heat_pump": {
+        "name": "Operating Hours Heat Pump"
+      },
+      "operating_hours_heat_pump_cooling": {
+        "name": "Operating Hours Heat Pump Cooling"
+      },
+      "operating_hours_vhr": {
+        "name": "Operating Hours VHR"
+      },
+      "operating_hours_auxiliary_heating_house": {
+        "name": "Operating Hours Auxiliary Heating House"
+      },
+      "operating_hours_ewt": {
+        "name": "Operating Hours EWT"
+      },
+      "room_temperature": {
+        "name": "Temperature"
+      }
+    },
+    "switch": {
+      "shock_ventilation": {
+        "name": "Shock Ventilation"
+      },
+      "heat_pump_heating": {
+        "name": "Heat Pump Heating"
+      },
+      "heat_pump_cooling": {
+        "name": "Heat Pump Cooling"
+      },
+      "auxiliary_house_heating": {
+        "name": "Auxiliary House Heating"
+      },
+      "auxiliary_heating_enable": {
+        "name": "Auxiliary Heating Enable"
+      },
+      "time_program_heating_enable": {
+        "name": "Time Program Heating Enable"
+      }
+    },
+    "number": {
+      "linear_fan_power": {
+        "name": "Linear Fan Power"
+      },
+      "base_temperature": {
+        "name": "Base Temperature"
+      }
+    },
+    "climate": {
+      "room_climate": {
+        "name": "{room_name} Climate"
+      }
     }
   }
 }
