@@ -1011,7 +1011,7 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating"
-        self._attr_name = "Auxiliary Heating Release"
+        self._attr_translation_key = "auxiliary_heating_release"
         
         # Room-specific device
         self._attr_device_info = {

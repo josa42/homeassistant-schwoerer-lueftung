@@ -358,6 +358,13 @@
       "operating_hours_auxiliary_heating": {
         "name": "Betriebsstunden ZH Raum"
       },
+      "auxiliary_heating_release": {
+        "name": "Zusatzheizung Freigabe",
+        "state": {
+          "locked": "Gesperrt",
+          "heating_enabled": "Heizen frei"
+        }
+      },
       "room_temperature": {
         "name": "Temperatur"
       }

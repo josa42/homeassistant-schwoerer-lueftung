@@ -14,9 +14,11 @@ class BicWrgEntity(CoordinatorEntity[BicWrgCoordinator]):
     def __init__(self, coordinator: BicWrgCoordinator) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
+        # Set device name based on device type
+        device_name = "Schwörer Heizung" if coordinator.has_heating() else "Schwörer Lüftung"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.config_entry.entry_id)},
-            name="Schwörer Lüftung",
+            name=device_name,
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
