@@ -357,7 +357,7 @@
       "device_filter_remaining": {
         "name": "Restlaufzeit Gerätefilter"
       },
-      "pre_filter_remaining": {
+      "upstream_filter_remaining": {
         "name": "Restlaufzeit Vorgelagerter Filter"
       },
       "operating_hours_auxiliary_heating": {

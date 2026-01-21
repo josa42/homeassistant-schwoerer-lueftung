@@ -202,8 +202,8 @@
       "device_filter_remaining": {
         "name": "Device Filter Remaining"
       },
-      "pre_filter_remaining": {
-        "name": "Pre-Filter Remaining"
+      "upstream_filter_remaining": {
+        "name": "Upstream Filter Remaining"
       },
       "error_message": {
         "name": "Error Message",
