@@ -33,6 +33,7 @@ class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
             slave_id=entry.data[CONF_SLAVE_ID],
+            device_type=entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT),
         )
         
         super().__init__(

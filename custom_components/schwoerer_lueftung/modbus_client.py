@@ -310,11 +310,12 @@ ERROR_CODES = {
 class BicWrgModbusClient:
     """Modbus TCP client for WRG device."""
 
-    def __init__(self, host: str, port: int, slave_id: int) -> None:
+    def __init__(self, host: str, port: int, slave_id: int, device_type: str = "wgt") -> None:
         """Initialize the Modbus client."""
         self.host = host
         self.port = port
         self.slave_id = slave_id
+        self.device_type = device_type
         self._client = ModbusTcpClient(
             host=host,
             port=port,
@@ -1192,12 +1193,18 @@ class BicWrgModbusClient:
             (802, REG_OPERATING_HOURS_FAN_LEVEL_2),
             (803, REG_OPERATING_HOURS_FAN_LEVEL_3),
             (804, REG_OPERATING_HOURS_FAN_LEVEL_4),
-            (805, REG_OPERATING_HOURS_HEAT_PUMP),
-            (806, REG_OPERATING_HOURS_HEAT_PUMP_COOLING),
-            (809, REG_OPERATING_HOURS_VHR),
-            (810, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
-            (813, REG_OPERATING_HOURS_EWT),
         ]
+        
+        # Add WGT-specific operating hours only for WGT devices
+        if self.device_type == "wgt":
+            operating_hours_registers.extend([
+                (805, REG_OPERATING_HOURS_HEAT_PUMP),
+                (806, REG_OPERATING_HOURS_HEAT_PUMP_COOLING),
+                (809, REG_OPERATING_HOURS_VHR),
+                (810, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
+                (813, REG_OPERATING_HOURS_EWT),
+            ])
+        
         for reg_num, reg_const in operating_hours_registers:
             registers = self.read_holding_registers(reg_const, 1)
             if registers:
