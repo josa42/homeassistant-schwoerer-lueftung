@@ -1,4 +1,25 @@
 {
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Schwörer Ventilation System",
+        "description": "Enter connection details for your Schwörer ventilation system",
+        "data": {
+          "host": "IP Address",
+          "port": "Port",
+          "device_type": "Device Type",
+          "rooms": "Number of Rooms"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the device",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
   "entity": {
     "device": {
       "room": {

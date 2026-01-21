@@ -6,14 +6,9 @@
         "description": "Gib die Verbindungsdetails für dein Schwörer WRG 134-BP-HK ein",
         "data": {
           "host": "IP-Adresse",
-          "port": "Port"
-        }
-      },
-      "rooms": {
-        "title": "Räume konfigurieren",
-        "description": "Wie viele Räume möchtest du konfigurieren? (1-17)",
-        "data": {
-          "num_rooms": "Anzahl der Räume"
+          "port": "Port",
+          "device_type": "Gerätetyp",
+          "rooms": "Anzahl der Räume"
         }
       }
     },
