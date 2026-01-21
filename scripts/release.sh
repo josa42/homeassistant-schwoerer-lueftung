@@ -69,7 +69,7 @@ git pull origin "$CURRENT_BRANCH"
 
 # Update version in manifest.json
 print_info "Updating version in manifest.json..."
-MANIFEST_FILE="custom_components/bic_wrg/manifest.json"
+MANIFEST_FILE="custom_components/schwoerer_lueftung/manifest.json"
 if [ ! -f "$MANIFEST_FILE" ]; then
     print_error "Manifest file not found: $MANIFEST_FILE"
     exit 1
