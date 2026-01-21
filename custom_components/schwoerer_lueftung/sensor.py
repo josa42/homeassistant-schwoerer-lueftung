@@ -164,49 +164,21 @@ async def async_setup_entry(
 
     # Add operating hours sensors
     entities.extend([
-        OperatingHoursSensor(
-            coordinator, entry, "fan", REG_OPERATING_HOURS_FAN, "operating_hours_fan"
-        ),
-        OperatingHoursSensor(
-            coordinator, entry, "fan_level_1", REG_OPERATING_HOURS_FAN_LEVEL_1, "operating_hours_fan_level_1"
-        ),
-        OperatingHoursSensor(
-            coordinator, entry, "fan_level_2", REG_OPERATING_HOURS_FAN_LEVEL_2, "operating_hours_fan_level_2"
-        ),
-        OperatingHoursSensor(
-            coordinator, entry, "fan_level_3", REG_OPERATING_HOURS_FAN_LEVEL_3, "operating_hours_fan_level_3"
-        ),
-        OperatingHoursSensor(
-            coordinator, entry, "fan_level_4", REG_OPERATING_HOURS_FAN_LEVEL_4, "operating_hours_fan_level_4"
-        ),
+        OperatingHoursSensor( coordinator, entry, "operating_hours_fan"),
+        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_1"),
+        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_2"),
+        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_3"),
+        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_4"),
     ])
 
     # Add heating-related operating hours sensors only for WGT
     if has_heating:
         entities.extend([
-            OperatingHoursSensor(
-                coordinator, entry, "heat_pump", REG_OPERATING_HOURS_HEAT_PUMP, "operating_hours_heat_pump"
-            ),
-            OperatingHoursSensor(
-                coordinator,
-                entry,
-                "heat_pump_cooling",
-                REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
-                "operating_hours_heat_pump_cooling",
-            ),
-            OperatingHoursSensor(
-                coordinator, entry, "vhr", REG_OPERATING_HOURS_VHR, "operating_hours_vhr"
-            ),
-            OperatingHoursSensor(
-                coordinator,
-                entry,
-                "auxiliary_heating_house",
-                REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
-                "operating_hours_auxiliary_heating_house",
-            ),
-            OperatingHoursSensor(
-                coordinator, entry, "ewt", REG_OPERATING_HOURS_EWT, "operating_hours_ewt"
-            ),
+            OperatingHoursSensor(coordinator, entry, "operating_hours_heat_pump"),
+            OperatingHoursSensor(coordinator, entry, "operating_hours_heat_pump_cooling",),
+            OperatingHoursSensor(coordinator, entry, "operating_hours_vhr"),
+            OperatingHoursSensor(coordinator, entry, "operating_hours_auxiliary_heating_house"),
+            OperatingHoursSensor(coordinator, entry, "operating_hours_ewt"),
         ])
 
     async_add_entities(entities)
@@ -1123,8 +1095,7 @@ class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     def native_value(self) -> str | None:
         """Return the auxiliary heating status."""
         # Register 440-456 for rooms 1-17
-        register = 440 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
+        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
         if value == 0:
             return "Blocked"
         elif value == 1:
@@ -1166,14 +1137,7 @@ class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
     def native_value(self) -> float | None:
         """Return the room temperature."""
         # Register 360-376 for rooms 1-17
-        register = 360 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        if value is None:
-            return None
-        return value / 10.0
-
-
-
+        return self.coordinator.data.get(f"current_temp_temperature_{self._room_number}")
 
 
 class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -1190,15 +1154,12 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
         coordinator: Coordinator,
         entry: ConfigEntry,
         key: str,
-        register: int,
-        translation_key: str,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._key = key
-        self._register = register
-        self._attr_unique_id = f"{entry.entry_id}_operating_hours_{key}"
-        self._attr_translation_key = translation_key
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_translation_key = key
 
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
@@ -1211,7 +1172,7 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the operating hours."""
-        return self.coordinator.data.get(f"register_{self._register}")
+        return self.coordinator.data.get(self._key)
 
 
 class TemperatureSensor(SensorBase):

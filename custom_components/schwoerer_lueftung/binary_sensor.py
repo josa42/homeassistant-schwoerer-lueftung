@@ -31,7 +31,7 @@ async def async_setup_entry(
     """Set up WRG binary sensors from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
-    
+
     entities = [
         FanOverrideBinarySensor(coordinator, entry),
         AlarmBinarySensor(
@@ -68,7 +68,7 @@ async def async_setup_entry(
             coordinator, entry, "alarm_supply_air_too_cold", "alarm_supply_air_too_cold"
         ),
     ]
-    
+
     # Add heating-related binary sensors only for WGT devices
     if has_heating:
         entities.extend([
@@ -83,7 +83,7 @@ async def async_setup_entry(
             ),
         ]
     )
-    
+
     # Add room auxiliary heating active binary sensors (only for WGT devices)
     device_type = entry.data.get("device_type", "wgt")
     if device_type == "wgt":
@@ -92,7 +92,7 @@ async def async_setup_entry(
             entities.append(
                 RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"], room["name"])
             )
-    
+
     async_add_entities(entities)
 
 
@@ -280,7 +280,7 @@ class RoomAuxiliaryHeatingActiveBinarySensor(
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating_active"
         self._attr_translation_key = "auxiliary_heating_active"
-        
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
@@ -294,8 +294,4 @@ class RoomAuxiliaryHeatingActiveBinarySensor(
     def is_on(self) -> bool | None:
         """Return true if auxiliary heating is active."""
         # Register 460-476 for rooms 1-17
-        register = 460 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        if value is not None:
-            return value == 1
-        return None
+        return self.coordinator.data.get(f"heating_active_{self._room_number}")

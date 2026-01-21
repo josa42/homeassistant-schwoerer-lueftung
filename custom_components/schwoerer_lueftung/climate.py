@@ -28,11 +28,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up BIC WRG climate entities."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
-    
+
     # Only create climate entities for WGT devices (with heating)
     if not coordinator.has_heating():
         return
-    
+
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
 
     entities = [
@@ -58,20 +58,20 @@ class RoomClimate(Entity, ClimateEntity):
     ) -> None:
         """Initialize the climate entity."""
         super().__init__(coordinator)
-        
+
         # Validate room number (1-17 as per Modbus documentation)
         if not 1 <= room_number <= 17:
             raise ValueError(f"Room number must be between 1 and 17, got {room_number}")
-        
+
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{room_name.lower().replace(' ', '_')}_climate"
         self._attr_translation_key = "room_climate"
         self._attr_translation_placeholders = {"room_name": room_name}
-        
+
         # Determine model based on device type
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
@@ -85,23 +85,13 @@ class RoomClimate(Entity, ClimateEntity):
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
         # Register 360-376 for rooms 1-17 (actual temp)
-        # Using dynamic register access as register number depends on room_number
-        register = 360 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        if value is None:
-            return None
-        return value / 10.0
+        return self.coordinator.data.get(f"current_temp_temperature_{self._room_number}")
 
     @property
     def target_temperature(self) -> float | None:
         """Return the target temperature."""
         # Register 400-416 for rooms 1-17 (target temp setpoint)
-        # Using dynamic register access as register number depends on room_number
-        register = 400 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        if value is None:
-            return None
-        return value / 10.0
+        return self.coordinator.data.get(f"target_temperature_{self._room_number}")
 
     @property
     def hvac_mode(self) -> HVACMode:
@@ -111,10 +101,9 @@ class RoomClimate(Entity, ClimateEntity):
         # Using dynamic register access as register number depends on room_number
         if self._room_number > 12:
             return HVACMode.FAN_ONLY
-            
-        register = 440 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        
+
+        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
+
         if value == 1:
             return HVACMode.HEAT
         else:
@@ -127,13 +116,13 @@ class RoomClimate(Entity, ClimateEntity):
 
         # Clamp temperature to valid range
         temperature = max(self._attr_min_temp, min(self._attr_max_temp, temperature))
-        
+
         # Convert to register value (multiply by 10)
         value = int(temperature * 10)
-        
+
         # Register 400-416 for rooms 1-17
         register = 400 + self._room_number - 1
-        
+
         await self.coordinator.write_register(register, value)
         await self.coordinator.async_request_refresh()
 
@@ -142,12 +131,12 @@ class RoomClimate(Entity, ClimateEntity):
         # Register 440-451 for rooms 1-12 (only rooms 1-12 have heating control)
         if self._room_number > 12:
             return
-        
+
         # Map HVAC mode to register value
         if hvac_mode == HVACMode.HEAT:
             value = 1  # Heizen frei
         else:  # HVACMode.FAN_ONLY
             value = 0  # Gesperrt
-        
+
         await self.coordinator.write_room_heating_enable(self._room_number, value)
         await self.coordinator.async_request_refresh()

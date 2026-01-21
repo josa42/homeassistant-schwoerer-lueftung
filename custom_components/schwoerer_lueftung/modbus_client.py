@@ -335,25 +335,6 @@ class ModbusClient:
         """Check if connected to the Modbus device."""
         return self._client.is_socket_open()
 
-
-    # async def async_read_register(
-    #     self, address: int, count: int = 1
-    # ) -> int | None:
-    #     """Read holding registers from the device."""
-    #     try:
-    #         result = self._client.read_holding_registers(address=address, count=count)
-    #         if result.isError():
-    #             _LOGGER.error("Error reading registers at %s: %s", address, result)
-    #             return None
-    #         _LOGGER.info("Read registers at %s: %s", address, result.registers)
-    #         return result.registers[0] if result.registers else None
-    #     except ModbusException as err:
-    #         _LOGGER.error("Modbus exception reading registers: %s", err)
-    #         return None
-    #     except Exception as err:
-    #         _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
-    #         return None
-
     def read_register(
         self, address: int, count: int = 1
     ) -> int | None:
@@ -379,10 +360,16 @@ class ModbusClient:
             return int.from_bytes(value.to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
+    def read_bool_register(self, address: int) -> float | None:
+        """Read bool (1/0) holding registers from the device."""
+        value = self.read_register(address, 1)
+        if value is not None:
+            return value == 1
 
 
-    def read_holding_registers(
-        self, address: int, count: int = 1
+
+    def read_registers(
+        self, addresses: int, count: int = 1
     ) -> list[int] | None:
         """Read holding registers from the device."""
         try:
@@ -454,62 +441,6 @@ class ModbusClient:
     def write_auxiliary_heating_enable(self, enabled: int) -> bool:
         """Write auxiliary heating enable (Zusatzheizung Haus)."""
         return self.write_register(REG_AUXILIARY_HEATING_ENABLE, enabled)
-
-    def read_room_temperature(self, room_number: int) -> float | None:
-        """Read room current temperature (Ist Temp Raum)."""
-        # Rooms 1-17 use registers 360-376
-        register = 360 + room_number - 1
-        return self.read_temperature_register(register)
-
-    def read_room_target_temperature(self, room_number: int) -> float | None:
-        """Read room target temperature (Soll Temp Raum)."""
-        # Rooms 1-17 use registers 400-416
-        register = 400 + room_number - 1
-        return self.read_temperature_register(register)
-
-    def write_room_target_temperature(self, room_number: int, temperature: float) -> bool:
-        """Write room target temperature (Soll Temp Raum)."""
-        # Rooms 1-17 use registers 400-416
-        # Temperature range: 10-30°C, stored as value * 10
-        register = 400 + room_number - 1
-        value = int(temperature * 10)
-        return self.write_register(register, value)
-
-    def read_room_heating_enable(self, room_number: int) -> int | None:
-        """Read room heating enable (Zusatzheizung Freigabe Raum)."""
-        # Rooms 1-17 have heating enable (registers 440-456)
-        if room_number < 1 or room_number > 17:
-            return None
-        register = 440 + room_number - 1
-        registers = self.read_holding_registers(register, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def write_room_heating_enable(self, room_number: int, enabled: int) -> bool:
-        """Write room heating enable (Zusatzheizung Freigabe Raum)."""
-        # Rooms 1-17 have heating enable (registers 440-456)
-        if room_number < 1 or room_number > 17:
-            return False
-        register = 440 + room_number - 1
-        return self.write_register(register, enabled)
-
-    def read_room_heating_active(self, room_number: int) -> int | None:
-        """Read room heating active state (Zusatzheizung aktiv Raum)."""
-        # Rooms 1-17 have heating active state (registers 460-476)
-        if room_number < 1 or room_number > 17:
-            return None
-        register = 460 + room_number - 1
-        registers = self.read_holding_registers(register, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_room_base_temperature(self, room_number: int) -> float | None:
-        """Read room base temperature (Grundtemperatur Raum)."""
-        # Rooms 1-17 use registers 420-436
-        register = 420 + room_number - 1
-        return self.read_temperature_register(register)
 
     def write_room_base_temperature(self, room_number: int, temperature: float) -> bool:
         """Write room base temperature (Grundtemperatur Raum)."""
@@ -583,64 +514,29 @@ class ModbusClient:
         data["upstream_filter_remaining"] = self.read_register(REG_UPSTREAM_FILTER_REMAINING, 1)
         data["error_message"] = self.read_register(REG_ERROR_MESSAGE, 1)
 
-        # Read room temperatures (registers 360-376 for current, 400-416 for target)
-        # and heating enable (registers 440-456 for rooms 1-17)
-        # and heating active (registers 460-476 for rooms 1-17)
         for room_number in range(1, 18):  # Rooms 1-17
-            # Current temperature
-            current_temp = self.read_room_temperature(room_number)
-            if current_temp is not None:
-                data[f"register_{360 + room_number - 1}"] = int(current_temp * 10)
+            data[f"current_temp_temperature_{room_number}"] = self.read_temperature_register(360 + room_number - 1)
 
             # WGT-only: target and base temperatures, heating controls
             if self.device_type == "wgt":
-                # Target temperature
-                target_temp = self.read_room_target_temperature(room_number)
-                if target_temp is not None:
-                    data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
+                data[f"target_temperature_{room_number}"] = self.read_temperature_register(400 + room_number - 1)
+                data[f"room_{room_number}_base_temp"] = self.read_temperature_register(420 + room_number - 1)
+                data[f"heating_enable_{room_number}"] = self.read_bool_register(440 + room_number - 1)
+                data[f"heating_active_{room_number}"] = self.read_register(460 + room_number - 1)
+                data[f"time_program_heating_enable_{room_number}"] = self.read_bool_register(500 + room_number - 1)
 
-                # Base temperature
-                base_temp = self.read_room_base_temperature(room_number)
-                if base_temp is not None:
-                    data[f"room_{room_number}_base_temp"] = base_temp
+        data["operating_hours_fan"] = self.read_register(REG_OPERATING_HOURS_FAN)
+        data["operating_hours_fan_level_1"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_1)
+        data["operating_hours_fan_level_2"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_2)
+        data["operating_hours_fan_level_3"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_3)
+        data["operating_hours_fan_level_4"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_4)
 
-                # Heating enable (registers 440-456 for rooms 1-17)
-                heating_enable = self.read_room_heating_enable(room_number)
-                if heating_enable is not None:
-                    data[f"register_{440 + room_number - 1}"] = heating_enable
-
-                # Heating active (registers 460-476 for rooms 1-17)
-                heating_active = self.read_room_heating_active(room_number)
-                if heating_active is not None:
-                    data[f"register_{460 + room_number - 1}"] = heating_active
-
-                # Time program heating enable (registers 500-516 for rooms 1-17)
-                time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
-                if time_program_heating:
-                    data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
-
-        # Read operating hours (Betriebsstunden)
-        operating_hours_registers = [
-            (800, REG_OPERATING_HOURS_FAN),
-            (801, REG_OPERATING_HOURS_FAN_LEVEL_1),
-            (802, REG_OPERATING_HOURS_FAN_LEVEL_2),
-            (803, REG_OPERATING_HOURS_FAN_LEVEL_3),
-            (804, REG_OPERATING_HOURS_FAN_LEVEL_4),
-        ]
-
-        # Add WGT-specific operating hours only for WGT devices
-        if self.device_type == "wgt":
-            operating_hours_registers.extend([
-                (805, REG_OPERATING_HOURS_HEAT_PUMP),
-                (806, REG_OPERATING_HOURS_HEAT_PUMP_COOLING),
-                (809, REG_OPERATING_HOURS_VHR),
-                (810, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
-                (813, REG_OPERATING_HOURS_EWT),
-            ])
-
-        for reg_num, reg_const in operating_hours_registers:
-            registers = self.read_holding_registers(reg_const, 1)
-            if registers:
-                data[f"register_{reg_num}"] = registers[0]
+        data["operating_hours_heat_pump"] = self.read_register(REG_OPERATING_HOURS_HEAT_PUMP)
+        data["operating_hours_heat_pump_cooling"] = self.read_register(REG_OPERATING_HOURS_HEAT_PUMP_COOLING)
+        data["operating_hours_vhr"] = self.read_register(REG_OPERATING_HOURS_VHR)
+        data["operating_hours_auxiliary_heating_house"] = self.read_register(
+            REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE
+        )
+        data["operating_hours_ewt"] = self.read_register(REG_OPERATING_HOURS_EWT)
 
         return data

@@ -147,8 +147,7 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
     def is_on(self) -> bool | None:
         """Return true if auxiliary heating is enabled."""
         # Register 440-456 for rooms 1-17
-        register = 440 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
+        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
         if value is not None:
             return value == 1
         return None
@@ -212,11 +211,7 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
     def is_on(self) -> bool | None:
         """Return true if time program heating is enabled."""
         # Register 500-516 for rooms 1-17
-        register = 500 + self._room_number - 1
-        value = self.coordinator.data.get(f"register_{register}")
-        if value is not None:
-            return value == 1
-        return None
+        return self.coordinator.data.get(f"time_program_heating_enable_{self._room_number}")
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Enable time program heating."""
