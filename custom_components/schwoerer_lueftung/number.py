@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 from .modbus_client import LINEAR_FAN_POWER_MIN, LINEAR_FAN_POWER_MAX
 
 
@@ -19,16 +19,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up WRG number entities from a config entry."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     
-    entities = [BicWrgLinearFanPowerNumber(coordinator, entry)]
+    entities = [LinearFanPowerNumber(coordinator, entry)]
     
     # Add base temperature numbers for each configured room (WGT only)
     if coordinator.has_heating():
         rooms = entry.data.get("rooms", [])
         for room in rooms:
             entities.append(
-                BicWrgRoomBaseTemperatureNumber(
+                RoomBaseTemperatureNumber(
                     coordinator, entry, room["number"], room["name"]
                 )
             )
@@ -36,7 +36,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEntity):
+class LinearFanPowerNumber(CoordinatorEntity[Coordinator], NumberEntity):
     """Number entity for WRG linear fan power (Manuelle Lineare Luftleistung)."""
 
     _attr_has_entity_name = True
@@ -50,7 +50,7 @@ class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEnt
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the number entity."""
@@ -81,7 +81,7 @@ class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEnt
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgRoomBaseTemperatureNumber(CoordinatorEntity[BicWrgCoordinator], NumberEntity):
+class RoomBaseTemperatureNumber(CoordinatorEntity[Coordinator], NumberEntity):
     """Number entity for room base temperature (Grundtemperatur)."""
 
     _attr_has_entity_name = True
@@ -94,7 +94,7 @@ class BicWrgRoomBaseTemperatureNumber(CoordinatorEntity[BicWrgCoordinator], Numb
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
         room_number: int,
         room_name: str,

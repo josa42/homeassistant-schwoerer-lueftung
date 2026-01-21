@@ -18,18 +18,18 @@ from .const import (
     DEVICE_TYPE_WGT,
     DOMAIN,
 )
-from .modbus_client import BicWrgModbusClient
+from .modbus_client import ModbusClient
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class BicWrgCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching WRG data."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize."""
         self.config_entry = entry
-        self.client = BicWrgModbusClient(
+        self.client = ModbusClient(
             host=entry.data[CONF_HOST],
             port=entry.data[CONF_PORT],
             slave_id=entry.data[CONF_SLAVE_ID],

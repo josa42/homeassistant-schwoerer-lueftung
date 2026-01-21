@@ -5,13 +5,13 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 
 
-class BicWrgEntity(CoordinatorEntity[BicWrgCoordinator]):
+class Entity(CoordinatorEntity[Coordinator]):
     """Base entity for Schwörer Lüftung."""
 
-    def __init__(self, coordinator: BicWrgCoordinator) -> None:
+    def __init__(self, coordinator: Coordinator) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
         # Set device name and model based on device type

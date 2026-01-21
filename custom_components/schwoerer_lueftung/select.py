@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 from .modbus_client import (
     OPERATION_MODE_OFF,
     OPERATION_MODE_MANUAL,
@@ -96,22 +96,22 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up WRG select entities from a config entry."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
     
     entities = [
-        BicWrgOperationModeSelect(coordinator, entry),
-        BicWrgFanSpeedSelect(coordinator, entry),
+        OperationModeSelect(coordinator, entry),
+        FanSpeedSelect(coordinator, entry),
     ]
     
     # Add heating-related select entities only for WGT devices
     if has_heating:
-        entities.append(BicWrgHeatingCoolingFunctionSelect(coordinator, entry))
+        entities.append(HeatingCoolingFunctionSelect(coordinator, entry))
     
     async_add_entities(entities)
 
 
-class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+class OperationModeSelect(CoordinatorEntity[Coordinator], SelectEntity):
     """Select entity for WRG operation mode (Betriebsart)."""
 
     _attr_has_entity_name = True
@@ -120,7 +120,7 @@ class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEnti
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the select entity."""
@@ -164,7 +164,7 @@ class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEnti
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+class FanSpeedSelect(CoordinatorEntity[Coordinator], SelectEntity):
     """Select entity for WRG fan speed (Manuelle Luftstufe)."""
 
     _attr_has_entity_name = True
@@ -173,7 +173,7 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the select entity."""
@@ -217,7 +217,7 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgHeatingCoolingFunctionSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
+class HeatingCoolingFunctionSelect(CoordinatorEntity[Coordinator], SelectEntity):
     """Select entity for WRG heating/cooling function (Heiz-Kühlfunktion)."""
 
     _attr_has_entity_name = True
@@ -226,7 +226,7 @@ class BicWrgHeatingCoolingFunctionSelect(CoordinatorEntity[BicWrgCoordinator], S
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the select entity."""

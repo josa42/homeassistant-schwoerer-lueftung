@@ -44,12 +44,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
     try:
-        from .modbus_client import BicWrgModbusClient
+        from .modbus_client import ModbusClient
     except ImportError as err:
         _LOGGER.error("Failed to import modbus client: %s", err)
         raise CannotConnect from err
     
-    client = BicWrgModbusClient(
+    client = ModbusClient(
         data[CONF_HOST],
         data[CONF_PORT],
         DEFAULT_SLAVE_ID,

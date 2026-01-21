@@ -15,8 +15,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
-from .entity import BicWrgEntity
+from .coordinator import Coordinator
+from .entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up BIC WRG climate entities."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     
     # Only create climate entities for WGT devices (with heating)
     if not coordinator.has_heating():
@@ -36,14 +36,14 @@ async def async_setup_entry(
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
 
     entities = [
-        BicWrgRoomClimate(coordinator, room["number"], room["name"])
+        RoomClimate(coordinator, room["number"], room["name"])
         for room in rooms
     ]
 
     async_add_entities(entities)
 
 
-class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
+class RoomClimate(Entity, ClimateEntity):
     """Climate entity for a room."""
 
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -54,7 +54,7 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     _attr_target_temperature_step = 0.5
 
     def __init__(
-        self, coordinator: BicWrgCoordinator, room_number: int, room_name: str
+        self, coordinator: Coordinator, room_number: int, room_name: str
     ) -> None:
         """Initialize the climate entity."""
         super().__init__(coordinator)

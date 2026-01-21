@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 from .modbus_client import (
     SHOCK_VENTILATION_INACTIVE,
     SHOCK_VENTILATION_ACTIVE,
@@ -30,19 +30,19 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up WRG switch entities from a config entry."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
     
     entities = [
-        BicWrgShockVentilationSwitch(coordinator, entry),
+        ShockVentilationSwitch(coordinator, entry),
     ]
     
     # Add heating-related switches only for WGT devices
     if has_heating:
         entities.extend([
-            BicWrgHeatPumpHeatingSwitch(coordinator, entry),
-            BicWrgHeatPumpCoolingSwitch(coordinator, entry),
-            BicWrgAuxiliaryHeatingSwitch(coordinator, entry),
+            HeatPumpHeatingSwitch(coordinator, entry),
+            HeatPumpCoolingSwitch(coordinator, entry),
+            AuxiliaryHeatingSwitch(coordinator, entry),
         ])
     
     # Add room heating switches (only for WGT)
@@ -50,16 +50,16 @@ async def async_setup_entry(
         rooms = entry.data.get("rooms", [])
         for room in rooms:
             entities.append(
-                BicWrgRoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
+                RoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
             )
             entities.append(
-                BicWrgRoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
+                RoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
             )
     
     async_add_entities(entities)
 
 
-class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class ShockVentilationSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for WRG shock ventilation (Stoßlüftung)."""
 
     _attr_has_entity_name = True
@@ -67,7 +67,7 @@ class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the switch entity."""
@@ -108,7 +108,7 @@ class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for room auxiliary heating enable (Zusatzheizung Freigabe)."""
 
     _attr_has_entity_name = True
@@ -116,7 +116,7 @@ class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         room_number: int,
         room_name: str,
     ) -> None:
@@ -167,7 +167,7 @@ class BicWrgRoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for room time program heating enable (Freigabe Zeitprogramm Heizen)."""
 
     _attr_has_entity_name = True
@@ -175,7 +175,7 @@ class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinat
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         room_number: int,
         room_name: str,
     ) -> None:
@@ -226,7 +226,7 @@ class BicWrgRoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[BicWrgCoordinat
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for WRG heat pump heating (Wärmepumpe Heizen)."""
 
     _attr_has_entity_name = True
@@ -234,7 +234,7 @@ class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the switch entity."""
@@ -275,7 +275,7 @@ class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for WRG heat pump cooling (Wärmepumpe Kühlen)."""
 
     _attr_has_entity_name = True
@@ -283,7 +283,7 @@ class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the switch entity."""
@@ -324,7 +324,7 @@ class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
             await self.coordinator.async_request_refresh()
 
 
-class BicWrgAuxiliaryHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEntity):
+class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for WRG auxiliary house heating (Zusatzheizung Haus)."""
 
     _attr_has_entity_name = True
@@ -332,7 +332,7 @@ class BicWrgAuxiliaryHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the switch entity."""

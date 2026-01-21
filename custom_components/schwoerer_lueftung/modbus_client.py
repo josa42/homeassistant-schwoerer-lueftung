@@ -307,7 +307,7 @@ ERROR_CODES = {
 }
 
 
-class BicWrgModbusClient:
+class ModbusClient:
     """Modbus TCP client for WRG device."""
 
     def __init__(self, host: str, port: int, slave_id: int, device_type: str = "wgt") -> None:

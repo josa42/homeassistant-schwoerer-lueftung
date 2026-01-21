@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 from .modbus_client import (
     ALARM_ACTIVE,
     FAN_OVERRIDE_ACTIVE,
@@ -29,42 +29,42 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up WRG binary sensors from a config entry."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
     
     entities = [
-        BicWrgFanOverrideBinarySensor(coordinator, entry),
-        BicWrgAlarmBinarySensor(
+        FanOverrideBinarySensor(coordinator, entry),
+        AlarmBinarySensor(
             coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_utility_lock", "alarm_utility_lock"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_door_open", "alarm_door_open"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_device_filter_dirty", "alarm_device_filter_dirty"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_upstream_filter_dirty", "alarm_upstream_filter_dirty"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_off_peak_disabled", "alarm_off_peak_disabled"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_supply_voltage_off", "alarm_supply_voltage_off"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_pressostat_triggered", "alarm_pressostat_triggered"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_external_utility_lock", "alarm_external_utility_lock"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_emergency_mode", "alarm_emergency_mode"
         ),
-        BicWrgAlarmBinarySensor(
+        AlarmBinarySensor(
             coordinator, entry, "alarm_supply_air_too_cold", "alarm_supply_air_too_cold"
         ),
     ]
@@ -72,13 +72,13 @@ async def async_setup_entry(
     # Add heating-related binary sensors only for WGT devices
     if has_heating:
         entities.extend([
-            BicWrgNhrStateBinarySensor(coordinator, entry),
-            BicWrgPreheater1BinarySensor(coordinator, entry),
-            BicWrgPreheater2BinarySensor(coordinator, entry),
-            BicWrgAlarmBinarySensor(
+            NhrStateBinarySensor(coordinator, entry),
+            Preheater1BinarySensor(coordinator, entry),
+            Preheater2BinarySensor(coordinator, entry),
+            AlarmBinarySensor(
                 coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
             ),
-            BicWrgAlarmBinarySensor(
+            AlarmBinarySensor(
                 coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
             ),
         ]
@@ -90,13 +90,13 @@ async def async_setup_entry(
         rooms = entry.data.get("rooms", [])
         for room in rooms:
             entities.append(
-                BicWrgRoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"], room["name"])
+                RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"], room["name"])
             )
     
     async_add_entities(entities)
 
 
-class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+class FanOverrideBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     """Binary sensor for WRG fan override (Luftstufen Überschreibung)."""
 
     _attr_has_entity_name = True
@@ -104,7 +104,7 @@ class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], Binary
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the binary sensor."""
@@ -127,7 +127,7 @@ class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], Binary
         return None
 
 
-class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+class NhrStateBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     """Binary sensor for WRG NHR state (NHR Zustand)."""
 
     _attr_has_entity_name = True
@@ -136,7 +136,7 @@ class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySen
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the binary sensor."""
@@ -159,7 +159,7 @@ class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySen
         return None
 
 
-class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+class Preheater1BinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     """Binary sensor for WRG preheater 1 state (Vorheizregister 1)."""
 
     _attr_has_entity_name = True
@@ -168,7 +168,7 @@ class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the binary sensor."""
@@ -191,7 +191,7 @@ class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         return None
 
 
-class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+class Preheater2BinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     """Binary sensor for WRG preheater 2 state (Vorheizregister 2)."""
 
     _attr_has_entity_name = True
@@ -200,7 +200,7 @@ class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the binary sensor."""
@@ -223,7 +223,7 @@ class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         return None
 
 
-class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity):
+class AlarmBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     """Binary sensor for WRG alarms."""
 
     _attr_has_entity_name = True
@@ -231,7 +231,7 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
         key: str,
         translation_key: str,
@@ -260,8 +260,8 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
         return None
 
 
-class BicWrgRoomAuxiliaryHeatingActiveBinarySensor(
-    CoordinatorEntity[BicWrgCoordinator], BinarySensorEntity
+class RoomAuxiliaryHeatingActiveBinarySensor(
+    CoordinatorEntity[Coordinator], BinarySensorEntity
 ):
     """Binary sensor for room auxiliary heating active status."""
 
@@ -270,7 +270,7 @@ class BicWrgRoomAuxiliaryHeatingActiveBinarySensor(
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         room_number: int,
         room_name: str,
     ) -> None:

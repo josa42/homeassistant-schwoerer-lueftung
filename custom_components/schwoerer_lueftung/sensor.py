@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from typing import Any
 
 from .const import DOMAIN, MANUFACTURER, CONF_ROOMS, MODEL_WGT, MODEL_WRT
-from .coordinator import BicWrgCoordinator
+from .coordinator import Coordinator
 from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
     HEAT_PUMP_STATUS_HEATING,
@@ -105,43 +105,43 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up WRG sensors from a config entry."""
-    coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
     has_heating = coordinator.has_heating()
     
     entities = [
-        BicWrgCurrentFanLevelSensor(coordinator, entry),
-        BicWrgTimeProgramBaseLevelSensor(coordinator, entry),
-        BicWrgShockVentilationRemainingSensor(coordinator, entry),
-        BicWrgSupplyAirFanStatusSensor(coordinator, entry),
-        BicWrgExhaustAirFanStatusSensor(coordinator, entry),
-        BicWrgBypassStateSensor(coordinator, entry),
-        BicWrgOutdoorDamperStateSensor(coordinator, entry),
-        BicWrgTimeProgramFanLevelSensor(coordinator, entry),
-        BicWrgSensorFanLevelSensor(coordinator, entry),
-        BicWrgCurrentSupplyAirFlowSensor(coordinator, entry),
-        BicWrgCurrentExhaustAirFlowSensor(coordinator, entry),
-        BicWrgCurrentSupplyAirRpmSensor(coordinator, entry),
-        BicWrgCurrentExhaustAirRpmSensor(coordinator, entry),
-        BicWrgTemperatureT1AfterEwtSensor(coordinator, entry),
-        BicWrgTemperatureT5ExhaustAirSensor(coordinator, entry),
-        BicWrgTemperatureT6InWtSensor(coordinator, entry),
-        BicWrgTemperatureT10OutdoorSensor(coordinator, entry),
-        BicWrgDeviceFilterRemainingSensor(coordinator, entry),
-        BicWrgUpstreamFilterRemainingSensor(coordinator, entry),
-        BicWrgErrorMessageSensor(coordinator, entry),
+        CurrentFanLevelSensor(coordinator, entry),
+        TimeProgramBaseLevelSensor(coordinator, entry),
+        ShockVentilationRemainingSensor(coordinator, entry),
+        SupplyAirFanStatusSensor(coordinator, entry),
+        ExhaustAirFanStatusSensor(coordinator, entry),
+        BypassStateSensor(coordinator, entry),
+        OutdoorDamperStateSensor(coordinator, entry),
+        TimeProgramFanLevelSensor(coordinator, entry),
+        SensorFanLevelSensor(coordinator, entry),
+        CurrentSupplyAirFlowSensor(coordinator, entry),
+        CurrentExhaustAirFlowSensor(coordinator, entry),
+        CurrentSupplyAirRpmSensor(coordinator, entry),
+        CurrentExhaustAirRpmSensor(coordinator, entry),
+        TemperatureT1AfterEwtSensor(coordinator, entry),
+        TemperatureT5ExhaustAirSensor(coordinator, entry),
+        TemperatureT6InWtSensor(coordinator, entry),
+        TemperatureT10OutdoorSensor(coordinator, entry),
+        DeviceFilterRemainingSensor(coordinator, entry),
+        UpstreamFilterRemainingSensor(coordinator, entry),
+        ErrorMessageSensor(coordinator, entry),
     ]
     
     # Add heating-related sensors only for WGT devices
     if has_heating:
         entities.extend([
-            BicWrgHeatPumpStatusSensor(coordinator, entry),
-            BicWrgEwtStateSensor(coordinator, entry),
-            BicWrgTemperatureT2AfterVhrSensor(coordinator, entry),
-            BicWrgTemperatureT3BeforeNeSensor(coordinator, entry),
-            BicWrgTemperatureT4AfterNeSensor(coordinator, entry),
-            BicWrgTemperatureT7EvaporatorSensor(coordinator, entry),
-            BicWrgTemperatureT8CondenserSensor(coordinator, entry),
+            HeatPumpStatusSensor(coordinator, entry),
+            EwtStateSensor(coordinator, entry),
+            TemperatureT2AfterVhrSensor(coordinator, entry),
+            TemperatureT3BeforeNeSensor(coordinator, entry),
+            TemperatureT4AfterNeSensor(coordinator, entry),
+            TemperatureT7EvaporatorSensor(coordinator, entry),
+            TemperatureT8CondenserSensor(coordinator, entry),
         ])
     
     # Add room-specific sensors
@@ -149,44 +149,44 @@ async def async_setup_entry(
         # Add room temperature sensor for WRT devices
         if not has_heating:
             entities.append(
-                BicWrgRoomTemperatureSensor(coordinator, room["number"], room["name"])
+                RoomTemperatureSensor(coordinator, room["number"], room["name"])
             )
         # Add auxiliary heating sensor for WGT devices
         else:
             entities.append(
-                BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
+                RoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
             )
     
     # Add operating hours sensors
     entities.extend([
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan", 800, "operating_hours_fan"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "operating_hours_fan_level_1"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "operating_hours_fan_level_2"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "operating_hours_fan_level_3"),
-        BicWrgOperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "operating_hours_fan_level_4"),
+        OperatingHoursSensor(coordinator, entry, "fan", 800, "operating_hours_fan"),
+        OperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "operating_hours_fan_level_1"),
+        OperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "operating_hours_fan_level_2"),
+        OperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "operating_hours_fan_level_3"),
+        OperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "operating_hours_fan_level_4"),
     ])
     
     # Add heating-related operating hours sensors only for WGT
     if has_heating:
         entities.extend([
-            BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
-            BicWrgOperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
-            BicWrgOperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
-            BicWrgOperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
-            BicWrgOperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
+            OperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
+            OperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
+            OperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
+            OperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
+            OperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
         ])
     
     async_add_entities(entities)
 
 
-class BicWrgSensorBase(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class SensorBase(CoordinatorEntity[Coordinator], SensorEntity):
     """Base class for WRG sensors."""
 
     _attr_has_entity_name = True
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
         key: str,
         name: str,
@@ -211,7 +211,7 @@ class BicWrgSensorBase(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         return self.coordinator.data.get(self._key)
 
 
-class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class CurrentFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current fan level (Aktuelle Luftstufe)."""
 
     _attr_has_entity_name = True
@@ -220,7 +220,7 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -241,7 +241,7 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         return self.coordinator.data.get("current_fan_level")
 
 
-class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TimeProgramBaseLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG time program base level (Zeitprogramm Basis Luftstufe)."""
 
     _attr_has_entity_name = True
@@ -251,7 +251,7 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -272,7 +272,7 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return self.coordinator.data.get("time_program_base_level")
 
 
-class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class ShockVentilationRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
 
     _attr_has_entity_name = True
@@ -282,7 +282,7 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -303,7 +303,7 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
         return self.coordinator.data.get("shock_ventilation_remaining")
 
 
-class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class HeatPumpStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG heat pump status (Status Wärmepumpe)."""
 
     _attr_has_entity_name = True
@@ -311,7 +311,7 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -332,7 +332,7 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         return self.coordinator.data.get("heat_pump_status")
 
 
-class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class SupplyAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG supply air fan status (Status Gebläse Zuluft)."""
 
     _attr_has_entity_name = True
@@ -341,7 +341,7 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -362,7 +362,7 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         return self.coordinator.data.get("supply_air_fan_status")
 
 
-class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class ExhaustAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG exhaust air fan status (Status Gebläse Abluft)."""
 
     _attr_has_entity_name = True
@@ -371,7 +371,7 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -392,7 +392,7 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         return self.coordinator.data.get("exhaust_air_fan_status")
 
 
-class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class EwtStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG EWT state (EWT Zustand)."""
 
     _attr_has_entity_name = True
@@ -401,7 +401,7 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -422,7 +422,7 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         return self.coordinator.data.get("ewt_state")
 
 
-class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class BypassStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG bypass state (Bypass Zustand)."""
 
     _attr_has_entity_name = True
@@ -430,7 +430,7 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -451,7 +451,7 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         return self.coordinator.data.get("bypass_state")
 
 
-class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class OutdoorDamperStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG outdoor damper state (Aussenklappe Zustand)."""
 
     _attr_has_entity_name = True
@@ -460,7 +460,7 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -481,7 +481,7 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         return self.coordinator.data.get("outdoor_damper_state")
 
 
-class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TimeProgramFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG time program fan level (Luftstufe Zeitprogramm)."""
 
     _attr_has_entity_name = True
@@ -491,7 +491,7 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -512,7 +512,7 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         return self.coordinator.data.get("time_program_fan_level")
 
 
-class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class SensorFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG sensor fan level (Luftstufe Sensoren)."""
 
     _attr_has_entity_name = True
@@ -522,7 +522,7 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -543,7 +543,7 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         return self.coordinator.data.get("sensor_fan_level")
 
 
-class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class CurrentSupplyAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current supply air flow (Luftleistung aktuell Zuluft)."""
 
     _attr_has_entity_name = True
@@ -554,7 +554,7 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -575,7 +575,7 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return self.coordinator.data.get("current_supply_air_flow")
 
 
-class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class CurrentExhaustAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current exhaust air flow (Luftleistung aktuell Abluft)."""
 
     _attr_has_entity_name = True
@@ -586,7 +586,7 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -607,7 +607,7 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("current_exhaust_air_flow")
 
 
-class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class CurrentSupplyAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current supply air RPM (Aktuelle Drehzahl Zuluft)."""
 
     _attr_has_entity_name = True
@@ -618,7 +618,7 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -639,7 +639,7 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         return self.coordinator.data.get("current_supply_air_rpm")
 
 
-class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class CurrentExhaustAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current exhaust air RPM (Aktuelle Drehzahl Abluft)."""
 
     _attr_has_entity_name = True
@@ -650,7 +650,7 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -671,7 +671,7 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return self.coordinator.data.get("current_exhaust_air_rpm")
 
 
-class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT1AfterEwtSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T1 after EWT (T1 nach EWT)."""
 
     _attr_has_entity_name = True
@@ -683,7 +683,7 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -704,7 +704,7 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("temp_t1_after_ewt")
 
 
-class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT2AfterVhrSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T2 after VHR (T2 nach VHR)."""
 
     _attr_has_entity_name = True
@@ -715,7 +715,7 @@ class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -736,7 +736,7 @@ class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("temp_t2_after_vhr")
 
 
-class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT3BeforeNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T3 before NE (T3 vor NE)."""
 
     _attr_has_entity_name = True
@@ -747,7 +747,7 @@ class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -768,7 +768,7 @@ class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("temp_t3_before_ne")
 
 
-class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT4AfterNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T4 after NE (T4 nach NE)."""
 
     _attr_has_entity_name = True
@@ -779,7 +779,7 @@ class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], Sen
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -800,7 +800,7 @@ class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return self.coordinator.data.get("temp_t4_after_ne")
 
 
-class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT5ExhaustAirSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T5 exhaust air (T5 Abluft)."""
 
     _attr_has_entity_name = True
@@ -811,7 +811,7 @@ class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], 
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -832,7 +832,7 @@ class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], 
         return self.coordinator.data.get("temp_t5_exhaust_air")
 
 
-class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT6InWtSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T6 in WT (T6 im WT)."""
 
     _attr_has_entity_name = True
@@ -843,7 +843,7 @@ class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], Sensor
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -864,7 +864,7 @@ class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], Sensor
         return self.coordinator.data.get("temp_t6_in_wt")
 
 
-class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT7EvaporatorSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T7 evaporator (T7 Verdampfer)."""
 
     _attr_has_entity_name = True
@@ -875,7 +875,7 @@ class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], 
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -896,7 +896,7 @@ class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], 
         return self.coordinator.data.get("temp_t7_evaporator")
 
 
-class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT8CondenserSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T8 condenser (T8 Kondensator)."""
 
     _attr_has_entity_name = True
@@ -907,7 +907,7 @@ class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], S
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -928,7 +928,7 @@ class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], S
         return self.coordinator.data.get("temp_t8_condenser")
 
 
-class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class TemperatureT10OutdoorSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG temperature T10 outdoor (T10 Aussen)."""
 
     _attr_has_entity_name = True
@@ -939,7 +939,7 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -960,7 +960,7 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("temp_t10_outdoor")
 
 
-class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG device filter remaining days (Restlaufzeit Gerätefilter)."""
 
     _attr_has_entity_name = True
@@ -970,7 +970,7 @@ class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], Se
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -991,7 +991,7 @@ class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], Se
         return self.coordinator.data.get("device_filter_remaining")
 
 
-class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG upstream filter remaining days (Restlaufzeit Vorgelagerter Filter)."""
 
     _attr_has_entity_name = True
@@ -1001,7 +1001,7 @@ class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], 
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -1022,7 +1022,7 @@ class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], 
         return self.coordinator.data.get("upstream_filter_remaining")
 
 
-class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG error message (Fehlermeldung)."""
 
     _attr_has_entity_name = True
@@ -1030,7 +1030,7 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
     ) -> None:
         """Initialize the sensor."""
@@ -1051,14 +1051,14 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
         return self.coordinator.data.get("error_message")
 
 
-class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for room auxiliary heating release (Zusatzheizung Freigabe)."""
 
     _attr_entity_registry_enabled_default = False
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         room_number: int,
         room_name: str,
     ) -> None:
@@ -1091,7 +1091,7 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return None
 
 
-class BicWrgRoomTemperatureSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for room temperature (WRT devices only)."""
 
     _attr_device_class = SensorDeviceClass.TEMPERATURE
@@ -1101,7 +1101,7 @@ class BicWrgRoomTemperatureSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         room_number: int,
         room_name: str,
     ) -> None:
@@ -1135,7 +1135,7 @@ class BicWrgRoomTemperatureSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
 
 
 
-class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for operating hours (Betriebsstunden)."""
 
     _attr_device_class = SensorDeviceClass.DURATION
@@ -1146,7 +1146,7 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
 
     def __init__(
         self,
-        coordinator: BicWrgCoordinator,
+        coordinator: Coordinator,
         entry: ConfigEntry,
         key: str,
         register: int,
@@ -1173,7 +1173,7 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         return self.coordinator.data.get(f"register_{self._register}")
 
 
-class BicWrgTemperatureSensor(BicWrgSensorBase):
+class TemperatureSensor(SensorBase):
     """Temperature sensor for WRG."""
 
     _attr_device_class = SensorDeviceClass.TEMPERATURE
