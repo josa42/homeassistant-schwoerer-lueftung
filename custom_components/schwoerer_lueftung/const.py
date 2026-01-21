@@ -21,4 +21,5 @@ DEFAULT_DEVICE_TYPE = DEVICE_TYPE_WGT
 
 # Device information
 MANUFACTURER = "Schwörer"
-MODEL = "Lüftung"
+MODEL_WGT = "Heizung"  # Heating system
+MODEL_WRT = "Lüftung"  # Ventilation only
