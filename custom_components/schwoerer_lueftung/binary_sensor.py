@@ -84,12 +84,14 @@ async def async_setup_entry(
         ]
     )
     
-    # Add room auxiliary heating active binary sensors
-    rooms = entry.data.get("rooms", [])
-    for room in rooms:
-        entities.append(
-            BicWrgRoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"], room["name"])
-        )
+    # Add room auxiliary heating active binary sensors (only for WGT devices)
+    device_type = entry.data.get("device_type", "wgt")
+    if device_type == "wgt":
+        rooms = entry.data.get("rooms", [])
+        for room in rooms:
+            entities.append(
+                BicWrgRoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"], room["name"])
+            )
     
     async_add_entities(entities)
 
