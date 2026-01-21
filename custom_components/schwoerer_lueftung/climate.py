@@ -14,7 +14,7 @@ from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_ROOMS, DOMAIN, MANUFACTURER
+from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import BicWrgCoordinator
 from .entity import BicWrgEntity
 
@@ -64,12 +64,15 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
         self._attr_translation_key = "room_climate"
         self._attr_translation_placeholders = {"room_name": room_name}
         
+        # Determine model based on device type
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
+        
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
             "name": room_name,
             "manufacturer": MANUFACTURER,
-            "model": "Room Climate Control",
+            "model": model,
             "via_device": (DOMAIN, coordinator.config_entry.entry_id),
         }
 
