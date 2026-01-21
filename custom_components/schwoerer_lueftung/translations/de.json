@@ -60,7 +60,7 @@
         }
       },
       "fan_speed": {
-        "name": "Manuelle Luftstufe",
+        "name": "Luftstufe",
         "state": {
           "0": "Aus",
           "1": "1",
