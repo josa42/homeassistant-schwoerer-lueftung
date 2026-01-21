@@ -1,8 +1,8 @@
 """DataUpdateCoordinator for BIC WRG."""
 from __future__ import annotations
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -13,7 +13,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_DEVICE_TYPE,
     CONF_SLAVE_ID,
-    CONF_ROOMS,
     DEFAULT_SCAN_INTERVAL,
     DEVICE_TYPE_WGT,
     DOMAIN,

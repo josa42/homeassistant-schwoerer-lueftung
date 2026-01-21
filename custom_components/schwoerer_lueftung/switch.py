@@ -13,14 +13,14 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
 from .modbus_client import (
-    SHOCK_VENTILATION_INACTIVE,
-    SHOCK_VENTILATION_ACTIVE,
-    HEAT_PUMP_HEATING_OFF,
-    HEAT_PUMP_HEATING_ENABLED,
-    HEAT_PUMP_COOLING_OFF,
-    HEAT_PUMP_COOLING_ENABLED,
-    AUXILIARY_HEATING_OFF,
     AUXILIARY_HEATING_ENABLED,
+    AUXILIARY_HEATING_OFF,
+    HEAT_PUMP_COOLING_ENABLED,
+    HEAT_PUMP_COOLING_OFF,
+    HEAT_PUMP_HEATING_ENABLED,
+    HEAT_PUMP_HEATING_OFF,
+    SHOCK_VENTILATION_ACTIVE,
+    SHOCK_VENTILATION_INACTIVE,
 )
 
 
@@ -50,10 +50,14 @@ async def async_setup_entry(
         rooms = entry.data.get("rooms", [])
         for room in rooms:
             entities.append(
-                RoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"], room["name"])
+                RoomAuxiliaryHeatingEnableSwitch(
+                    coordinator, room["number"], room["name"]
+                )
             )
             entities.append(
-                RoomTimeProgramHeatingEnableSwitch(coordinator, room["number"], room["name"])
+                RoomTimeProgramHeatingEnableSwitch(
+                    coordinator, room["number"], room["name"]
+                )
             )
     
     async_add_entities(entities)
@@ -124,12 +128,15 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating_enable"
+        entry_id = coordinator.config_entry.entry_id
+        self._attr_unique_id = (
+            f"{entry_id}_room_{room_number}_auxiliary_heating_enable"
+        )
         self._attr_translation_key = "auxiliary_heating_enable"
         
         # Room-specific device
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
             "name": room_name,
             "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
@@ -168,7 +175,10 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
 
 
 class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
-    """Switch entity for room time program heating enable (Freigabe Zeitprogramm Heizen)."""
+    """Switch entity for room time program heating enable.
+    
+    Freigabe Zeitprogramm Heizen.
+    """
 
     _attr_has_entity_name = True
     _attr_entity_registry_enabled_default = False
@@ -183,12 +193,15 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_time_program_heating_enable"
+        entry_id = coordinator.config_entry.entry_id
+        self._attr_unique_id = (
+            f"{entry_id}_room_{room_number}_time_program_heating_enable"
+        )
         self._attr_translation_key = "time_program_heating_enable"
         
         # Room-specific device
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
             "name": room_name,
             "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
@@ -259,7 +272,8 @@ class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Enable heat pump heating."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_heat_pump_heating_enable, HEAT_PUMP_HEATING_ENABLED
+            self.coordinator.client.write_heat_pump_heating_enable,
+            HEAT_PUMP_HEATING_ENABLED,
         )
         
         if success:
@@ -268,7 +282,8 @@ class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Disable heat pump heating."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_heat_pump_heating_enable, HEAT_PUMP_HEATING_OFF
+            self.coordinator.client.write_heat_pump_heating_enable,
+            HEAT_PUMP_HEATING_OFF,
         )
         
         if success:
@@ -308,7 +323,8 @@ class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Enable heat pump cooling."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_heat_pump_cooling_enable, HEAT_PUMP_COOLING_ENABLED
+            self.coordinator.client.write_heat_pump_cooling_enable,
+            HEAT_PUMP_COOLING_ENABLED,
         )
         
         if success:
@@ -317,7 +333,8 @@ class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Disable heat pump cooling."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_heat_pump_cooling_enable, HEAT_PUMP_COOLING_OFF
+            self.coordinator.client.write_heat_pump_cooling_enable,
+            HEAT_PUMP_COOLING_OFF,
         )
         
         if success:
@@ -357,7 +374,8 @@ class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Enable auxiliary house heating."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_auxiliary_heating_enable, AUXILIARY_HEATING_ENABLED
+            self.coordinator.client.write_auxiliary_heating_enable,
+            AUXILIARY_HEATING_ENABLED,
         )
         
         if success:
@@ -366,7 +384,8 @@ class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Disable auxiliary house heating."""
         success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_auxiliary_heating_enable, AUXILIARY_HEATING_OFF
+            self.coordinator.client.write_auxiliary_heating_enable,
+            AUXILIARY_HEATING_OFF,
         )
         
         if success:

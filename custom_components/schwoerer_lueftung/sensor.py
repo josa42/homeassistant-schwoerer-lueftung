@@ -1,6 +1,8 @@
 """Sensor platform for BIC WRG."""
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -8,38 +10,35 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature, UnitOfTime
-from homeassistant.components.sensor import SensorDeviceClass as SDC
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from typing import Any
 
-from .const import DOMAIN, MANUFACTURER, CONF_ROOMS, MODEL_WGT, MODEL_WRT
+from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
 from .modbus_client import (
-    HEAT_PUMP_STATUS_OFF,
-    HEAT_PUMP_STATUS_HEATING,
-    HEAT_PUMP_STATUS_COOLING,
-    SUPPLY_AIR_FAN_STATUS_DISABLED,
-    SUPPLY_AIR_FAN_STATUS_STARTUP,
-    SUPPLY_AIR_FAN_STATUS_ACTIVE,
-    SUPPLY_AIR_FAN_STATUS_STANDBY,
-    SUPPLY_AIR_FAN_STATUS_ERROR,
-    EXHAUST_AIR_FAN_STATUS_DISABLED,
-    EXHAUST_AIR_FAN_STATUS_STARTUP,
-    EXHAUST_AIR_FAN_STATUS_ACTIVE,
-    EXHAUST_AIR_FAN_STATUS_STANDBY,
-    EXHAUST_AIR_FAN_STATUS_ERROR,
-    EWT_STATE_OFF,
-    EWT_STATE_HEATING,
-    EWT_STATE_COOLING,
     BYPASS_STATE_CLOSED,
     BYPASS_STATE_OPEN_COOLING,
     BYPASS_STATE_OPEN_HEATING,
+    EWT_STATE_COOLING,
+    EWT_STATE_HEATING,
+    EWT_STATE_OFF,
+    EXHAUST_AIR_FAN_STATUS_ACTIVE,
+    EXHAUST_AIR_FAN_STATUS_DISABLED,
+    EXHAUST_AIR_FAN_STATUS_ERROR,
+    EXHAUST_AIR_FAN_STATUS_STANDBY,
+    EXHAUST_AIR_FAN_STATUS_STARTUP,
+    HEAT_PUMP_STATUS_COOLING,
+    HEAT_PUMP_STATUS_HEATING,
+    HEAT_PUMP_STATUS_OFF,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
-    ERROR_CODES,
+    SUPPLY_AIR_FAN_STATUS_ACTIVE,
+    SUPPLY_AIR_FAN_STATUS_DISABLED,
+    SUPPLY_AIR_FAN_STATUS_ERROR,
+    SUPPLY_AIR_FAN_STATUS_STANDBY,
+    SUPPLY_AIR_FAN_STATUS_STARTUP,
 )
 
 # Current fan level is now numeric (0-4)
@@ -169,11 +168,29 @@ async def async_setup_entry(
     # Add heating-related operating hours sensors only for WGT
     if has_heating:
         entities.extend([
-            OperatingHoursSensor(coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"),
-            OperatingHoursSensor(coordinator, entry, "heat_pump_cooling", 806, "operating_hours_heat_pump_cooling"),
-            OperatingHoursSensor(coordinator, entry, "vhr", 809, "operating_hours_vhr"),
-            OperatingHoursSensor(coordinator, entry, "auxiliary_heating_house", 810, "operating_hours_auxiliary_heating_house"),
-            OperatingHoursSensor(coordinator, entry, "ewt", 813, "operating_hours_ewt"),
+            OperatingHoursSensor(
+                coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"
+            ),
+            OperatingHoursSensor(
+                coordinator,
+                entry,
+                "heat_pump_cooling",
+                806,
+                "operating_hours_heat_pump_cooling",
+            ),
+            OperatingHoursSensor(
+                coordinator, entry, "vhr", 809, "operating_hours_vhr"
+            ),
+            OperatingHoursSensor(
+                coordinator,
+                entry,
+                "auxiliary_heating_house",
+                810,
+                "operating_hours_auxiliary_heating_house",
+            ),
+            OperatingHoursSensor(
+                coordinator, entry, "ewt", 813, "operating_hours_ewt"
+            ),
         ])
     
     async_add_entities(entities)
@@ -992,7 +1009,10 @@ class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 
 class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG upstream filter remaining days (Restlaufzeit Vorgelagerter Filter)."""
+    """Sensor for WRG upstream filter remaining days.
+    
+    Restlaufzeit Vorgelagerter Filter.
+    """
 
     _attr_has_entity_name = True
     _attr_translation_key = "upstream_filter_remaining"
@@ -1066,12 +1086,17 @@ class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_auxiliary_heating"
+        entry_id = coordinator.config_entry.entry_id
+        self._attr_unique_id = (
+            f"{entry_id}_room_{room_number}_auxiliary_heating"
+        )
         self._attr_translation_key = "auxiliary_heating_release"
         
         # Room-specific device
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "identifiers": {
+                (DOMAIN, f"{entry_id}_room_{room_number}")
+            },
             "name": room_name,
             "manufacturer": MANUFACTURER,
             "model": "Room Climate Control",
@@ -1109,12 +1134,13 @@ class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
         super().__init__(coordinator)
         self._room_number = room_number
         self._room_name = room_name
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_temperature"
+        entry_id = coordinator.config_entry.entry_id
+        self._attr_unique_id = f"{entry_id}_room_{room_number}_temperature"
         self._attr_translation_key = "room_temperature"
         
         # Room-specific device
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
             "name": room_name,
             "manufacturer": MANUFACTURER,
             "model": "Room Temperature",
