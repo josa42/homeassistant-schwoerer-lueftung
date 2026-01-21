@@ -955,15 +955,17 @@ class BicWrgModbusClient:
         if shock_ventilation_remaining is not None:
             data["shock_ventilation_remaining"] = shock_ventilation_remaining
         
-        # Read heat pump status (Status Wärmepumpe)
-        heat_pump_status = self.read_heat_pump_status()
-        if heat_pump_status is not None:
-            data["heat_pump_status"] = heat_pump_status
-        
-        # Read NHR state (NHR Zustand)
-        nhr_state = self.read_nhr_state()
-        if nhr_state is not None:
-            data["nhr_state"] = nhr_state
+        # WGT-only: heat pump status and NHR state
+        if self.device_type == "wgt":
+            # Read heat pump status (Status Wärmepumpe)
+            heat_pump_status = self.read_heat_pump_status()
+            if heat_pump_status is not None:
+                data["heat_pump_status"] = heat_pump_status
+            
+            # Read NHR state (NHR Zustand)
+            nhr_state = self.read_nhr_state()
+            if nhr_state is not None:
+                data["nhr_state"] = nhr_state
         
         # Read supply air fan status (Status Gebläse Zuluft)
         supply_air_fan_status = self.read_supply_air_fan_status()
@@ -1070,25 +1072,27 @@ class BicWrgModbusClient:
         if temp_t10_outdoor is not None:
             data["temp_t10_outdoor"] = temp_t10_outdoor
         
-        # Read heating/cooling function (Heiz-Kühlfunktion)
-        heating_cooling_function = self.read_heating_cooling_function()
-        if heating_cooling_function is not None:
-            data["heating_cooling_function"] = heating_cooling_function
-        
-        # Read heat pump heating enable (Wärmepumpe Heizen)
-        heat_pump_heating_enable = self.read_heat_pump_heating_enable()
-        if heat_pump_heating_enable is not None:
-            data["heat_pump_heating_enable"] = heat_pump_heating_enable
-        
-        # Read heat pump cooling enable (Wärmepumpe Kühlen)
-        heat_pump_cooling_enable = self.read_heat_pump_cooling_enable()
-        if heat_pump_cooling_enable is not None:
-            data["heat_pump_cooling_enable"] = heat_pump_cooling_enable
-        
-        # Read auxiliary heating enable (Zusatzheizung Haus)
-        auxiliary_heating_enable = self.read_auxiliary_heating_enable()
-        if auxiliary_heating_enable is not None:
-            data["auxiliary_heating_enable"] = auxiliary_heating_enable
+        # WGT-specific registers (heating/cooling)
+        if self.device_type == "wgt":
+            # Read heating/cooling function (Heiz-Kühlfunktion)
+            heating_cooling_function = self.read_heating_cooling_function()
+            if heating_cooling_function is not None:
+                data["heating_cooling_function"] = heating_cooling_function
+            
+            # Read heat pump heating enable (Wärmepumpe Heizen)
+            heat_pump_heating_enable = self.read_heat_pump_heating_enable()
+            if heat_pump_heating_enable is not None:
+                data["heat_pump_heating_enable"] = heat_pump_heating_enable
+            
+            # Read heat pump cooling enable (Wärmepumpe Kühlen)
+            heat_pump_cooling_enable = self.read_heat_pump_cooling_enable()
+            if heat_pump_cooling_enable is not None:
+                data["heat_pump_cooling_enable"] = heat_pump_cooling_enable
+            
+            # Read auxiliary heating enable (Zusatzheizung Haus)
+            auxiliary_heating_enable = self.read_auxiliary_heating_enable()
+            if auxiliary_heating_enable is not None:
+                data["auxiliary_heating_enable"] = auxiliary_heating_enable
         
         # Read alarms
         alarm_pressure_switch = self.read_alarm_pressure_switch()
@@ -1161,30 +1165,32 @@ class BicWrgModbusClient:
             if current_temp is not None:
                 data[f"register_{360 + room_number - 1}"] = int(current_temp * 10)
             
-            # Target temperature
-            target_temp = self.read_room_target_temperature(room_number)
-            if target_temp is not None:
-                data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
-            
-            # Base temperature
-            base_temp = self.read_room_base_temperature(room_number)
-            if base_temp is not None:
-                data[f"room_{room_number}_base_temp"] = base_temp
-            
-            # Heating enable (registers 440-456 for rooms 1-17)
-            heating_enable = self.read_room_heating_enable(room_number)
-            if heating_enable is not None:
-                data[f"register_{440 + room_number - 1}"] = heating_enable
-            
-            # Heating active (registers 460-476 for rooms 1-17)
-            heating_active = self.read_room_heating_active(room_number)
-            if heating_active is not None:
-                data[f"register_{460 + room_number - 1}"] = heating_active
-            
-            # Time program heating enable (registers 500-516 for rooms 1-17)
-            time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
-            if time_program_heating:
-                data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
+            # WGT-only: target and base temperatures, heating controls
+            if self.device_type == "wgt":
+                # Target temperature
+                target_temp = self.read_room_target_temperature(room_number)
+                if target_temp is not None:
+                    data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
+                
+                # Base temperature
+                base_temp = self.read_room_base_temperature(room_number)
+                if base_temp is not None:
+                    data[f"room_{room_number}_base_temp"] = base_temp
+                
+                # Heating enable (registers 440-456 for rooms 1-17)
+                heating_enable = self.read_room_heating_enable(room_number)
+                if heating_enable is not None:
+                    data[f"register_{440 + room_number - 1}"] = heating_enable
+                
+                # Heating active (registers 460-476 for rooms 1-17)
+                heating_active = self.read_room_heating_active(room_number)
+                if heating_active is not None:
+                    data[f"register_{460 + room_number - 1}"] = heating_active
+                
+                # Time program heating enable (registers 500-516 for rooms 1-17)
+                time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
+                if time_program_heating:
+                    data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
         
         # Read operating hours (Betriebsstunden)
         operating_hours_registers = [
