@@ -271,7 +271,7 @@
 | 810 | ✅ | ❌ | Betriebsstunden ZH Raum (Room Aux Heating Hours) | Hours | Read-only |
 | 813 | ✅ | ❌ | Betriebsstunden EWT (Ground Heat Exchanger Hours) | Hours | Read-only |
 
----
+<br><br>
 
 ## Error Codes (Register 240)
 
@@ -306,7 +306,7 @@
 | 1283 | Maximale Abtauzeit überschritten (Max Defrost Time Exceeded) |
 | 1284 | Wärmepumpe Niederdruck im Kühlbetrieb (Heat Pump Low Pressure in Cooling) |
 
----
+<br><br>
 
 ## Important Notes
 
@@ -340,8 +340,32 @@ Examples:
 
 Some registers are marked as "Optional" and may not be available on all devices or firmware versions. Check device capabilities before implementation.
 
+<br><br>
+
+## Undocumented Registers
+
+| Register | Observed Value | Notes                               |
+|---------:|---------------:|-------------------------------------|
+|      208 |            198 | Could be T9 (19.8°C)                |
+|      320 |              9 |                                     |
+|      321 |             14 | Matches register 209 (outdoor temp) |
+|      322 |              7 |                                     |
+|      323 |              1 |                                     |
+|      324 |              5 |                                     | 
+|      325 |              4 |                                     | 
+|      343 |              1 |                                     | 
+|      344 |              1 |                                     | 
+|      345 |              1 |                                     | 
+|      480 |              7 |                                     | 
+|      481 |              3 |                                     | 
+|      482 |              8 |                                     | 
+|      483 |              8 |                                     | 
+|      484 |              3 |                                     | 
+|      485 |             11 |                                     | 
+
 ---
 
 **Document Version:** 31.03.2020  
 **Source:** SchwörerHaus KG Official Documentation  
+**Community Research Added:** 2026-01-21  
 **Integration:** homeassistant-schwoerer-lueftung
