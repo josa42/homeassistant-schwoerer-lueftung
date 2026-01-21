@@ -1,19 +1,20 @@
-"""Test the BIC WRG integration initialization."""
+"""Test the Schwörer Lüftung integration initialisation."""
 from unittest.mock import MagicMock, patch
 
 import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.bic_wrg.const import CONF_SLAVE_ID, DOMAIN
+from custom_components.schwoerer_lueftung.const import CONF_SLAVE_ID, DOMAIN
 
 
 @pytest.fixture
 def mock_modbus_client():
     """Mock the Modbus client."""
     with patch(
-        "custom_components.bic_wrg.coordinator.BicWrgModbusClient"
+        "custom_components.schwoerer_lueftung.coordinator.ModbusClient"
     ) as mock_client:
         client_instance = MagicMock()
         client_instance.connect.return_value = True
@@ -62,18 +63,3 @@ async def test_unload_entry(hass: HomeAssistant, mock_modbus_client) -> None:
 
     assert entry.state == ConfigEntryState.NOT_LOADED
     assert entry.entry_id not in hass.data[DOMAIN]
-
-
-class MockConfigEntry:
-    """Mock config entry."""
-
-    def __init__(self, domain, data):
-        """Initialize mock config entry."""
-        self.domain = domain
-        self.data = data
-        self.entry_id = "test_entry_id"
-        self.state = ConfigEntryState.NOT_LOADED
-
-    def add_to_hass(self, hass):
-        """Add to hass."""
-        hass.config_entries._entries[self.entry_id] = self
