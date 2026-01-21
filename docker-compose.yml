@@ -1,7 +1,7 @@
 version: '3'
 services:
   homeassistant:
-    container_name: bic-wrg-ha-test
+    container_name: schwoerer-lueftung-ha-test
     image: ghcr.io/home-assistant/home-assistant:stable
     volumes:
       - ./config:/config

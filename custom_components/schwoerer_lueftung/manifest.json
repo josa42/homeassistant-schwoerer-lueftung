@@ -3,7 +3,7 @@
   "name": "Schwörer Lüftung",
   "codeowners": ["@josa42"],
   "config_flow": true,
-  "documentation": "https://github.com/josa42/homeassistant-bic-wrg",
+  "documentation": "https://github.com/josa42/homeassistant-schwoerer-lueftung",
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": ["pymodbus>=3.6.0"],

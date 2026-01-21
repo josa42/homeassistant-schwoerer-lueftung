@@ -18,12 +18,12 @@ jobs:
       - name: Create release archive
         run: |
           cd custom_components
-          zip -r ../bic_wrg.zip bic_wrg/
+          zip -r ../schwoerer_lueftung.zip schwoerer_lueftung/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: bic_wrg.zip
+          files: schwoerer_lueftung.zip
           generate_release_notes: true
           draft: false
           prerelease: false
