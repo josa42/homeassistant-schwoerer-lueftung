@@ -1,5 +1,10 @@
 # Home Assistant Integration for Schwörer Lüftung
 
+> [!WARNING] 
+> Work in progress
+
+<!--
+
 This is a custom Home Assistant integration for the Schwörer ventilation system (BIC WRG 134-BP-HK) with heat recovery.
 
 ## Features
@@ -106,6 +111,8 @@ You'll need to consult the WRG 134-BP-HK Modbus documentation to map:
 ## Support
 
 For issues and feature requests, please use the GitHub issue tracker.
+
+-->
 
 ## License
 
