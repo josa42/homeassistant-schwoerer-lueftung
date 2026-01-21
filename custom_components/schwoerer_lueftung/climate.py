@@ -58,6 +58,11 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     ) -> None:
         """Initialize the climate entity."""
         super().__init__(coordinator)
+        
+        # Validate room number (1-17 as per Modbus documentation)
+        if not 1 <= room_number <= 17:
+            raise ValueError(f"Room number must be between 1 and 17, got {room_number}")
+        
         self._room_number = room_number
         self._room_name = room_name
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{room_name.lower().replace(' ', '_')}_climate"
