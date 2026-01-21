@@ -405,11 +405,16 @@ class BicWrgModbusClient:
         Returns the detected room count or None if detection fails.
         """
         try:
+            # Ensure connection is established
+            if not self.connect():
+                _LOGGER.warning("Cannot detect room count: connection failed")
+                return None
+            
             # Read room actual temperature registers 360-376 (17 rooms max)
             # Register 360 = Room 1, 361 = Room 2, ... 376 = Room 17
             registers = self.read_holding_registers(360, 17)
             if not registers:
-                _LOGGER.warning("Failed to read room temperature registers")
+                _LOGGER.warning("Failed to read room temperature registers for detection")
                 return None
             
             # Find the last room with a unique temperature reading
@@ -448,7 +453,7 @@ class BicWrgModbusClient:
             return None
             
         except Exception as err:
-            _LOGGER.error("Error detecting room count: %s", err)
+            _LOGGER.warning("Error detecting room count: %s", err)
             return None
 
     def read_operation_mode(self) -> int | None:

@@ -49,8 +49,12 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         if not client.is_connected():
             raise CannotConnect
         
-        # Try to detect room count
-        room_count = await hass.async_add_executor_job(client.detect_room_count)
+        # Try to detect room count (non-blocking, can fail gracefully)
+        room_count = None
+        try:
+            room_count = await hass.async_add_executor_job(client.detect_room_count)
+        except Exception as detect_err:
+            _LOGGER.warning("Room count detection failed: %s", detect_err)
         
         await hass.async_add_executor_job(client.disconnect)
         
@@ -59,6 +63,8 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             result["detected_rooms"] = room_count
         
         return result
+    except CannotConnect:
+        raise
     except Exception as err:
         _LOGGER.error("Failed to connect: %s", err)
         raise CannotConnect from err
