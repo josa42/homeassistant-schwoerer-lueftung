@@ -418,13 +418,6 @@ class ModbusClient:
             return False
 
 
-    def read_fan_speed(self) -> int | None:
-        """Read manual fan speed (Manuelle Luftstufe)."""
-        registers = self.read_holding_registers(REG_FAN_SPEED, 1)
-        if registers:
-            return registers[0]
-        return None
-
     def write_fan_speed(self, speed: int) -> bool:
         """Write manual fan speed (Manuelle Luftstufe)."""
         return self.write_register(REG_FAN_SPEED, speed)
@@ -442,347 +435,25 @@ class ModbusClient:
             return False
         return self.write_register(REG_LINEAR_FAN_POWER, power)
 
-    def read_fan_override(self) -> int | None:
-        """Read fan level override (Luftstufen Überschreibung)."""
-        registers = self.read_holding_registers(REG_FAN_OVERRIDE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_time_program_base_level(self) -> int | None:
-        """Read time program base fan level (Zeitprogramm Basis Luftstufe)."""
-        registers = self.read_holding_registers(REG_TIME_PROGRAM_BASE_LEVEL, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_shock_ventilation(self) -> int | None:
-        """Read shock ventilation (Stoßlüftung)."""
-        registers = self.read_holding_registers(REG_SHOCK_VENTILATION, 1)
-        if registers:
-            return registers[0]
-        return None
-
     def write_shock_ventilation(self, active: int) -> bool:
         """Write shock ventilation (Stoßlüftung)."""
         return self.write_register(REG_SHOCK_VENTILATION, active)
-
-    def read_shock_ventilation_remaining(self) -> int | None:
-        """Read shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
-        registers = self.read_holding_registers(REG_SHOCK_VENTILATION_REMAINING, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_heat_pump_status(self) -> int | None:
-        """Read heat pump status (Status Wärmepumpe)."""
-        registers = self.read_holding_registers(REG_HEAT_PUMP_STATUS, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_nhr_state(self) -> int | None:
-        """Read NHR state (NHR Zustand)."""
-        registers = self.read_holding_registers(REG_NHR_STATE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_supply_air_fan_status(self) -> int | None:
-        """Read supply air fan status (Status Gebläse Zuluft)."""
-        registers = self.read_holding_registers(REG_SUPPLY_AIR_FAN_STATUS, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_exhaust_air_fan_status(self) -> int | None:
-        """Read exhaust air fan status (Status Gebläse Abluft)."""
-        registers = self.read_holding_registers(REG_EXHAUST_AIR_FAN_STATUS, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_ewt_state(self) -> int | None:
-        """Read EWT state (EWT Zustand)."""
-        registers = self.read_holding_registers(REG_EWT_STATE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_bypass_state(self) -> int | None:
-        """Read bypass state (Bypass Zustand)."""
-        registers = self.read_holding_registers(REG_BYPASS_STATE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_outdoor_damper_state(self) -> int | None:
-        """Read outdoor damper state (Aussenklappe Zustand)."""
-        registers = self.read_holding_registers(REG_OUTDOOR_DAMPER_STATE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_preheater_state(self) -> int | None:
-        """Read preheater state (Vorheizregister Zustand)."""
-        registers = self.read_holding_registers(REG_PREHEATER_STATE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_time_program_fan_level(self) -> int | None:
-        """Read time program fan level (Luftstufe Zeitprogramm)."""
-        registers = self.read_holding_registers(REG_TIME_PROGRAM_FAN_LEVEL, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_sensor_fan_level(self) -> int | None:
-        """Read sensor fan level (Luftstufe Sensoren)."""
-        registers = self.read_holding_registers(REG_SENSOR_FAN_LEVEL, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_current_supply_air_flow(self) -> int | None:
-        """Read current supply air flow (Luftleistung aktuell Zuluft)."""
-        registers = self.read_holding_registers(REG_CURRENT_SUPPLY_AIR_FLOW, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_current_exhaust_air_flow(self) -> int | None:
-        """Read current exhaust air flow (Luftleistung aktuell Abluft)."""
-        registers = self.read_holding_registers(REG_CURRENT_EXHAUST_AIR_FLOW, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_current_supply_air_rpm(self) -> int | None:
-        """Read current supply air RPM (Aktuelle Drehzahl Zuluft)."""
-        registers = self.read_holding_registers(REG_CURRENT_SUPPLY_AIR_RPM, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_current_exhaust_air_rpm(self) -> int | None:
-        """Read current exhaust air RPM (Aktuelle Drehzahl Abluft)."""
-        registers = self.read_holding_registers(REG_CURRENT_EXHAUST_AIR_RPM, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_temperature_t1_after_ewt(self) -> float | None:
-        """Read temperature T1 after EWT (T1 nach EWT)."""
-        registers = self.read_holding_registers(REG_TEMP_T1_AFTER_EWT, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t2_after_vhr(self) -> float | None:
-        """Read temperature T2 after VHR (T2 nach VHR)."""
-        registers = self.read_holding_registers(REG_TEMP_T2_AFTER_VHR, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t3_before_ne(self) -> float | None:
-        """Read temperature T3 before NE (T3 vor NE)."""
-        registers = self.read_holding_registers(REG_TEMP_T3_BEFORE_NE, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t4_after_ne(self) -> float | None:
-        """Read temperature T4 after NE (T4 nach NE)."""
-        registers = self.read_holding_registers(REG_TEMP_T4_AFTER_NE, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t5_exhaust_air(self) -> float | None:
-        """Read temperature T5 exhaust air (T5 Abluft)."""
-        registers = self.read_holding_registers(REG_TEMP_T5_EXHAUST_AIR, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t6_in_wt(self) -> float | None:
-        """Read temperature T6 in WT (T6 im WT)."""
-        registers = self.read_holding_registers(REG_TEMP_T6_IN_WT, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t7_evaporator(self) -> float | None:
-        """Read temperature T7 evaporator (T7 Verdampfer)."""
-        registers = self.read_holding_registers(REG_TEMP_T7_EVAPORATOR, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t8_condenser(self) -> float | None:
-        """Read temperature T8 condenser (T8 Kondensator)."""
-        registers = self.read_holding_registers(REG_TEMP_T8_CONDENSER, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_temperature_t10_outdoor(self) -> float | None:
-        """Read temperature T10 outdoor (T10 Aussen)."""
-        registers = self.read_holding_registers(REG_TEMP_T10_OUTDOOR, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_heating_cooling_function(self) -> int | None:
-        """Read heating/cooling function (Heiz-Kühlfunktion)."""
-        registers = self.read_holding_registers(REG_HEATING_COOLING_FUNCTION, 1)
-        if registers:
-            return registers[0]
-        return None
 
     def write_heating_cooling_function(self, mode: int) -> bool:
         """Write heating/cooling function (Heiz-Kühlfunktion)."""
         return self.write_register(REG_HEATING_COOLING_FUNCTION, mode)
 
-    def read_heat_pump_heating_enable(self) -> int | None:
-        """Read heat pump heating enable (Wärmepumpe Heizen)."""
-        registers = self.read_holding_registers(REG_HEAT_PUMP_HEATING_ENABLE, 1)
-        if registers:
-            return registers[0]
-        return None
-
     def write_heat_pump_heating_enable(self, enabled: int) -> bool:
         """Write heat pump heating enable (Wärmepumpe Heizen)."""
         return self.write_register(REG_HEAT_PUMP_HEATING_ENABLE, enabled)
-
-    def read_heat_pump_cooling_enable(self) -> int | None:
-        """Read heat pump cooling enable (Wärmepumpe Kühlen)."""
-        registers = self.read_holding_registers(REG_HEAT_PUMP_COOLING_ENABLE, 1)
-        if registers:
-            return registers[0]
-        return None
 
     def write_heat_pump_cooling_enable(self, enabled: int) -> bool:
         """Write heat pump cooling enable (Wärmepumpe Kühlen)."""
         return self.write_register(REG_HEAT_PUMP_COOLING_ENABLE, enabled)
 
-    def read_auxiliary_heating_enable(self) -> int | None:
-        """Read auxiliary heating enable (Zusatzheizung Haus)."""
-        registers = self.read_holding_registers(REG_AUXILIARY_HEATING_ENABLE, 1)
-        if registers:
-            return registers[0]
-        return None
-
     def write_auxiliary_heating_enable(self, enabled: int) -> bool:
         """Write auxiliary heating enable (Zusatzheizung Haus)."""
         return self.write_register(REG_AUXILIARY_HEATING_ENABLE, enabled)
-
-    def read_alarm_pressure_switch(self) -> int | None:
-        """Read pressure switch alarm (Meldung Druckwächter Aktiv)."""
-        registers = self.read_holding_registers(REG_ALARM_PRESSURE_SWITCH, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_utility_lock(self) -> int | None:
-        """Read utility lock alarm (EVU Sperre Aktiv)."""
-        registers = self.read_holding_registers(REG_ALARM_UTILITY_LOCK, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_door_open(self) -> int | None:
-        """Read door open alarm (Tür offen)."""
-        registers = self.read_holding_registers(REG_ALARM_DOOR_OPEN, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_device_filter_dirty(self) -> int | None:
-        """Read device filter dirty alarm (Gerätefilter verschmutzt)."""
-        registers = self.read_holding_registers(REG_ALARM_DEVICE_FILTER_DIRTY, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_upstream_filter_dirty(self) -> int | None:
-        """Read upstream filter dirty alarm (Vorgelagerter Filter verschmutzt)."""
-        registers = self.read_holding_registers(REG_ALARM_UPSTREAM_FILTER_DIRTY, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_off_peak_disabled(self) -> int | None:
-        """Read off-peak disabled alarm (Niedertarif abgeschaltet)."""
-        registers = self.read_holding_registers(REG_ALARM_OFF_PEAK_DISABLED, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_supply_voltage_off(self) -> int | None:
-        """Read supply voltage off alarm (Versorgungsspannung abgeschaltet)."""
-        registers = self.read_holding_registers(REG_ALARM_SUPPLY_VOLTAGE_OFF, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_pressostat_triggered(self) -> int | None:
-        """Read pressostat triggered alarm (Pressostat ausgelöst)."""
-        registers = self.read_holding_registers(REG_ALARM_PRESSOSTAT_TRIGGERED, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_external_utility_lock(self) -> int | None:
-        """Read external utility lock alarm (EVU Sperre extern Aktiv)."""
-        registers = self.read_holding_registers(REG_ALARM_EXTERNAL_UTILITY_LOCK, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_heating_module_test(self) -> int | None:
-        """Read heating module test alarm (Heizmodul Testbetrieb aktiv)."""
-        registers = self.read_holding_registers(REG_ALARM_HEATING_MODULE_TEST, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_emergency_mode(self) -> int | None:
-        """Read emergency mode alarm (Notbetrieb aktiv)."""
-        registers = self.read_holding_registers(REG_ALARM_EMERGENCY_MODE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_alarm_supply_air_cold(self) -> int | None:
-        """Read supply air too cold alarm (Zuluft zu kalt)."""
-        registers = self.read_holding_registers(REG_ALARM_SUPPLY_AIR_COLD, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_device_filter_remaining(self) -> int | None:
-        """Read device filter remaining days (Restlaufzeit Gerätefilter)."""
-        registers = self.read_holding_registers(REG_DEVICE_FILTER_REMAINING, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_upstream_filter_remaining(self) -> int | None:
-        """Read upstream filter remaining days (Restlaufzeit Vorgelagerter Filter)."""
-        registers = self.read_holding_registers(REG_UPSTREAM_FILTER_REMAINING, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_error_message(self) -> int | None:
-        """Read error message code (Fehlermeldung)."""
-        registers = self.read_holding_registers(REG_ERROR_MESSAGE, 1)
-        if registers:
-            return registers[0]
-        return None
 
 
     def read_room_temperature(self, room_number: int) -> float | None:
@@ -867,226 +538,154 @@ class ModbusClient:
         data["current_fan_level"] = self.read_register(REG_CURRENT_FAN_LEVEL, 1)
         data["linear_fan_power"] = self.read_register(REG_LINEAR_FAN_POWER, 1)
 
-        # Read fan override (Luftstufen Überschreibung)
-        fan_override = self.read_fan_override()
-        if fan_override is not None:
-            data["fan_override"] = fan_override
+        if (val := self.read_register(REG_FAN_OVERRIDE, 1)) is not None:
+            data["fan_override"] = val
 
-        # Read time program base level (Zeitprogramm Basis Luftstufe)
-        time_program_base_level = self.read_time_program_base_level()
-        if time_program_base_level is not None:
-            data["time_program_base_level"] = time_program_base_level
+        if (val := self.read_register(REG_TIME_PROGRAM_BASE_LEVEL, 1)) is not None:
+            data["time_program_base_level"] = val
 
-        # Read shock ventilation (Stoßlüftung)
-        shock_ventilation = self.read_shock_ventilation()
-        if shock_ventilation is not None:
-            data["shock_ventilation"] = shock_ventilation
+        if (val := self.read_register(REG_SHOCK_VENTILATION, 1)) is not None:
+            data["shock_ventilation"] = val
 
-        # Read shock ventilation remaining time (Restlaufzeit Stoßlüftung)
-        shock_ventilation_remaining = self.read_shock_ventilation_remaining()
-        if shock_ventilation_remaining is not None:
-            data["shock_ventilation_remaining"] = shock_ventilation_remaining
+        if (val := self.read_register(REG_SHOCK_VENTILATION_REMAINING, 1)) is not None:
+            data["shock_ventilation_remaining"] = val
 
         # WGT-only: heat pump status and NHR state
         if self.device_type == "wgt":
-            # Read heat pump status (Status Wärmepumpe)
-            heat_pump_status = self.read_heat_pump_status()
-            if heat_pump_status is not None:
-                data["heat_pump_status"] = heat_pump_status
+            if (val := self.read_register(REG_HEAT_PUMP_STATUS, 1)) is not None:
+                data["heat_pump_status"] = val
 
-            # Read NHR state (NHR Zustand)
-            nhr_state = self.read_nhr_state()
-            if nhr_state is not None:
-                data["nhr_state"] = nhr_state
+            if (val := self.read_register(REG_NHR_STATE, 1)) is not None:
+                data["nhr_state"] = val
 
-        # Read supply air fan status (Status Gebläse Zuluft)
-        supply_air_fan_status = self.read_supply_air_fan_status()
-        if supply_air_fan_status is not None:
-            data["supply_air_fan_status"] = supply_air_fan_status
+        if (val := self.read_register(REG_SUPPLY_AIR_FAN_STATUS, 1)) is not None:
+            data["supply_air_fan_status"] = val
 
-        # Read exhaust air fan status (Status Gebläse Abluft)
-        exhaust_air_fan_status = self.read_exhaust_air_fan_status()
-        if exhaust_air_fan_status is not None:
-            data["exhaust_air_fan_status"] = exhaust_air_fan_status
+        if (val := self.read_register(REG_EXHAUST_AIR_FAN_STATUS, 1)) is not None:
+            data["exhaust_air_fan_status"] = val
 
-        # Read EWT state (EWT Zustand)
-        ewt_state = self.read_ewt_state()
-        if ewt_state is not None:
-            data["ewt_state"] = ewt_state
+        if (val := self.read_register(REG_EWT_STATE, 1)) is not None:
+            data["ewt_state"] = val
 
-        # Read bypass state (Bypass Zustand)
-        bypass_state = self.read_bypass_state()
-        if bypass_state is not None:
-            data["bypass_state"] = bypass_state
+        if (val := self.read_register(REG_BYPASS_STATE, 1)) is not None:
+            data["bypass_state"] = val
 
-        # Read outdoor damper state (Aussenklappe Zustand)
-        outdoor_damper_state = self.read_outdoor_damper_state()
-        if outdoor_damper_state is not None:
-            data["outdoor_damper_state"] = outdoor_damper_state
+        if (val := self.read_register(REG_OUTDOOR_DAMPER_STATE, 1)) is not None:
+            data["outdoor_damper_state"] = val
 
-        # Read preheater state (Vorheizregister Zustand)
-        preheater_state = self.read_preheater_state()
-        if preheater_state is not None:
-            data["preheater_state"] = preheater_state
+        if (val := self.read_register(REG_PREHEATER_STATE, 1)) is not None:
+            data["preheater_state"] = val
 
-        # Read time program fan level (Luftstufe Zeitprogramm)
-        time_program_fan_level = self.read_time_program_fan_level()
-        if time_program_fan_level is not None:
-            data["time_program_fan_level"] = time_program_fan_level
+        if (val := self.read_register(REG_TIME_PROGRAM_FAN_LEVEL, 1)) is not None:
+            data["time_program_fan_level"] = val
 
-        # Read sensor fan level (Luftstufe Sensoren)
-        sensor_fan_level = self.read_sensor_fan_level()
-        if sensor_fan_level is not None:
-            data["sensor_fan_level"] = sensor_fan_level
+        if (val := self.read_register(REG_SENSOR_FAN_LEVEL, 1)) is not None:
+            data["sensor_fan_level"] = val
 
-        # Read current supply air flow (Luftleistung aktuell Zuluft)
-        current_supply_air_flow = self.read_current_supply_air_flow()
-        if current_supply_air_flow is not None:
-            data["current_supply_air_flow"] = current_supply_air_flow
+        if (val := self.read_register(REG_CURRENT_SUPPLY_AIR_FLOW, 1)) is not None:
+            data["current_supply_air_flow"] = val
 
-        # Read current exhaust air flow (Luftleistung aktuell Abluft)
-        current_exhaust_air_flow = self.read_current_exhaust_air_flow()
-        if current_exhaust_air_flow is not None:
-            data["current_exhaust_air_flow"] = current_exhaust_air_flow
+        if (val := self.read_register(REG_CURRENT_EXHAUST_AIR_FLOW, 1)) is not None:
+            data["current_exhaust_air_flow"] = val
 
-        # Read current supply air RPM (Aktuelle Drehzahl Zuluft)
-        current_supply_air_rpm = self.read_current_supply_air_rpm()
-        if current_supply_air_rpm is not None:
-            data["current_supply_air_rpm"] = current_supply_air_rpm
+        if (val := self.read_register(REG_CURRENT_SUPPLY_AIR_RPM, 1)) is not None:
+            data["current_supply_air_rpm"] = val
 
-        # Read current exhaust air RPM (Aktuelle Drehzahl Abluft)
-        current_exhaust_air_rpm = self.read_current_exhaust_air_rpm()
-        if current_exhaust_air_rpm is not None:
-            data["current_exhaust_air_rpm"] = current_exhaust_air_rpm
+        if (val := self.read_register(REG_CURRENT_EXHAUST_AIR_RPM, 1)) is not None:
+            data["current_exhaust_air_rpm"] = val
 
-        # Read temperature T1 after EWT (T1 nach EWT)
-        temp_t1_after_ewt = self.read_temperature_t1_after_ewt()
-        if temp_t1_after_ewt is not None:
-            data["temp_t1_after_ewt"] = temp_t1_after_ewt
+        # Helper for temperature conversion
+        def read_temp(reg):
+            if (regs := self.read_holding_registers(reg, 1)):
+                return int.from_bytes(regs[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
+            return None
 
-        # Read temperature T2 after VHR (T2 nach VHR)
-        temp_t2_after_vhr = self.read_temperature_t2_after_vhr()
-        if temp_t2_after_vhr is not None:
-            data["temp_t2_after_vhr"] = temp_t2_after_vhr
+        if (val := read_temp(REG_TEMP_T1_AFTER_EWT)) is not None:
+            data["temp_t1_after_ewt"] = val
 
-        # Read temperature T3 before NE (T3 vor NE)
-        temp_t3_before_ne = self.read_temperature_t3_before_ne()
-        if temp_t3_before_ne is not None:
-            data["temp_t3_before_ne"] = temp_t3_before_ne
+        if (val := read_temp(REG_TEMP_T2_AFTER_VHR)) is not None:
+            data["temp_t2_after_vhr"] = val
 
-        # Read temperature T4 after NE (T4 nach NE)
-        temp_t4_after_ne = self.read_temperature_t4_after_ne()
-        if temp_t4_after_ne is not None:
-            data["temp_t4_after_ne"] = temp_t4_after_ne
+        if (val := read_temp(REG_TEMP_T3_BEFORE_NE)) is not None:
+            data["temp_t3_before_ne"] = val
 
-        # Read temperature T5 exhaust air (T5 Abluft)
-        temp_t5_exhaust_air = self.read_temperature_t5_exhaust_air()
-        if temp_t5_exhaust_air is not None:
-            data["temp_t5_exhaust_air"] = temp_t5_exhaust_air
+        if (val := read_temp(REG_TEMP_T4_AFTER_NE)) is not None:
+            data["temp_t4_after_ne"] = val
 
-        # Read temperature T6 in WT (T6 im WT)
-        temp_t6_in_wt = self.read_temperature_t6_in_wt()
-        if temp_t6_in_wt is not None:
-            data["temp_t6_in_wt"] = temp_t6_in_wt
+        if (val := read_temp(REG_TEMP_T5_EXHAUST_AIR)) is not None:
+            data["temp_t5_exhaust_air"] = val
 
-        # Read temperature T7 evaporator (T7 Verdampfer)
-        temp_t7_evaporator = self.read_temperature_t7_evaporator()
-        if temp_t7_evaporator is not None:
-            data["temp_t7_evaporator"] = temp_t7_evaporator
+        if (val := read_temp(REG_TEMP_T6_IN_WT)) is not None:
+            data["temp_t6_in_wt"] = val
 
-        # Read temperature T8 condenser (T8 Kondensator)
-        temp_t8_condenser = self.read_temperature_t8_condenser()
-        if temp_t8_condenser is not None:
-            data["temp_t8_condenser"] = temp_t8_condenser
+        if (val := read_temp(REG_TEMP_T7_EVAPORATOR)) is not None:
+            data["temp_t7_evaporator"] = val
 
-        # Read temperature T10 outdoor (T10 Aussen)
-        temp_t10_outdoor = self.read_temperature_t10_outdoor()
-        if temp_t10_outdoor is not None:
-            data["temp_t10_outdoor"] = temp_t10_outdoor
+        if (val := read_temp(REG_TEMP_T8_CONDENSER)) is not None:
+            data["temp_t8_condenser"] = val
+
+        if (val := read_temp(REG_TEMP_T10_OUTDOOR)) is not None:
+            data["temp_t10_outdoor"] = val
 
         # WGT-specific registers (heating/cooling)
         if self.device_type == "wgt":
-            # Read heating/cooling function (Heiz-Kühlfunktion)
-            heating_cooling_function = self.read_heating_cooling_function()
-            if heating_cooling_function is not None:
-                data["heating_cooling_function"] = heating_cooling_function
+            if (val := self.read_register(REG_HEATING_COOLING_FUNCTION, 1)) is not None:
+                data["heating_cooling_function"] = val
 
-            # Read heat pump heating enable (Wärmepumpe Heizen)
-            heat_pump_heating_enable = self.read_heat_pump_heating_enable()
-            if heat_pump_heating_enable is not None:
-                data["heat_pump_heating_enable"] = heat_pump_heating_enable
+            if (val := self.read_register(REG_HEAT_PUMP_HEATING_ENABLE, 1)) is not None:
+                data["heat_pump_heating_enable"] = val
 
-            # Read heat pump cooling enable (Wärmepumpe Kühlen)
-            heat_pump_cooling_enable = self.read_heat_pump_cooling_enable()
-            if heat_pump_cooling_enable is not None:
-                data["heat_pump_cooling_enable"] = heat_pump_cooling_enable
+            if (val := self.read_register(REG_HEAT_PUMP_COOLING_ENABLE, 1)) is not None:
+                data["heat_pump_cooling_enable"] = val
 
-            # Read auxiliary heating enable (Zusatzheizung Haus)
-            auxiliary_heating_enable = self.read_auxiliary_heating_enable()
-            if auxiliary_heating_enable is not None:
-                data["auxiliary_heating_enable"] = auxiliary_heating_enable
+            if (val := self.read_register(REG_AUXILIARY_HEATING_ENABLE, 1)) is not None:
+                data["auxiliary_heating_enable"] = val
 
         # Read alarms
-        alarm_pressure_switch = self.read_alarm_pressure_switch()
-        if alarm_pressure_switch is not None:
-            data["alarm_pressure_switch"] = alarm_pressure_switch
+        if (val := self.read_register(REG_ALARM_PRESSURE_SWITCH, 1)) is not None:
+            data["alarm_pressure_switch"] = val
 
-        alarm_utility_lock = self.read_alarm_utility_lock()
-        if alarm_utility_lock is not None:
-            data["alarm_utility_lock"] = alarm_utility_lock
+        if (val := self.read_register(REG_ALARM_UTILITY_LOCK, 1)) is not None:
+            data["alarm_utility_lock"] = val
 
-        alarm_door_open = self.read_alarm_door_open()
-        if alarm_door_open is not None:
-            data["alarm_door_open"] = alarm_door_open
+        if (val := self.read_register(REG_ALARM_DOOR_OPEN, 1)) is not None:
+            data["alarm_door_open"] = val
 
-        alarm_device_filter_dirty = self.read_alarm_device_filter_dirty()
-        if alarm_device_filter_dirty is not None:
-            data["alarm_device_filter_dirty"] = alarm_device_filter_dirty
+        if (val := self.read_register(REG_ALARM_DEVICE_FILTER_DIRTY, 1)) is not None:
+            data["alarm_device_filter_dirty"] = val
 
-        alarm_upstream_filter_dirty = self.read_alarm_upstream_filter_dirty()
-        if alarm_upstream_filter_dirty is not None:
-            data["alarm_upstream_filter_dirty"] = alarm_upstream_filter_dirty
+        if (val := self.read_register(REG_ALARM_UPSTREAM_FILTER_DIRTY, 1)) is not None:
+            data["alarm_upstream_filter_dirty"] = val
 
-        alarm_off_peak_disabled = self.read_alarm_off_peak_disabled()
-        if alarm_off_peak_disabled is not None:
-            data["alarm_off_peak_disabled"] = alarm_off_peak_disabled
+        if (val := self.read_register(REG_ALARM_OFF_PEAK_DISABLED, 1)) is not None:
+            data["alarm_off_peak_disabled"] = val
 
-        alarm_supply_voltage_off = self.read_alarm_supply_voltage_off()
-        if alarm_supply_voltage_off is not None:
-            data["alarm_supply_voltage_off"] = alarm_supply_voltage_off
+        if (val := self.read_register(REG_ALARM_SUPPLY_VOLTAGE_OFF, 1)) is not None:
+            data["alarm_supply_voltage_off"] = val
 
-        alarm_pressostat_triggered = self.read_alarm_pressostat_triggered()
-        if alarm_pressostat_triggered is not None:
-            data["alarm_pressostat_triggered"] = alarm_pressostat_triggered
+        if (val := self.read_register(REG_ALARM_PRESSOSTAT_TRIGGERED, 1)) is not None:
+            data["alarm_pressostat_triggered"] = val
 
-        alarm_external_utility_lock = self.read_alarm_external_utility_lock()
-        if alarm_external_utility_lock is not None:
-            data["alarm_external_utility_lock"] = alarm_external_utility_lock
+        if (val := self.read_register(REG_ALARM_EXTERNAL_UTILITY_LOCK, 1)) is not None:
+            data["alarm_external_utility_lock"] = val
 
-        alarm_heating_module_test = self.read_alarm_heating_module_test()
-        if alarm_heating_module_test is not None:
-            data["alarm_heating_module_test"] = alarm_heating_module_test
+        if (val := self.read_register(REG_ALARM_HEATING_MODULE_TEST, 1)) is not None:
+            data["alarm_heating_module_test"] = val
 
-        alarm_emergency_mode = self.read_alarm_emergency_mode()
-        if alarm_emergency_mode is not None:
-            data["alarm_emergency_mode"] = alarm_emergency_mode
+        if (val := self.read_register(REG_ALARM_EMERGENCY_MODE, 1)) is not None:
+            data["alarm_emergency_mode"] = val
 
-        alarm_supply_air_cold = self.read_alarm_supply_air_cold()
-        if alarm_supply_air_cold is not None:
-            data["alarm_supply_air_cold"] = alarm_supply_air_cold
+        if (val := self.read_register(REG_ALARM_SUPPLY_AIR_COLD, 1)) is not None:
+            data["alarm_supply_air_cold"] = val
 
-        device_filter_remaining = self.read_device_filter_remaining()
-        if device_filter_remaining is not None:
-            data["device_filter_remaining"] = device_filter_remaining
+        if (val := self.read_register(REG_DEVICE_FILTER_REMAINING, 1)) is not None:
+            data["device_filter_remaining"] = val
 
-        upstream_filter_remaining = self.read_upstream_filter_remaining()
-        if upstream_filter_remaining is not None:
-            data["upstream_filter_remaining"] = upstream_filter_remaining
+        if (val := self.read_register(REG_UPSTREAM_FILTER_REMAINING, 1)) is not None:
+            data["upstream_filter_remaining"] = val
 
-        # Read error message (Fehlermeldung)
-        error_message = self.read_error_message()
-        if error_message is not None:
-            data["error_message"] = error_message
+        if (val := self.read_register(REG_ERROR_MESSAGE, 1)) is not None:
+            data["error_message"] = val
 
         # Read room temperatures (registers 360-376 for current, 400-416 for target)
         # and heating enable (registers 440-456 for rooms 1-17)
