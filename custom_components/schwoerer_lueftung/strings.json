@@ -11,7 +11,7 @@
       },
       "rooms": {
         "title": "Configure Rooms",
-        "description": "How many rooms do you want to configure? (1-17)",
+        "description": "How many rooms do you want to configure? (1-17){detected_rooms, select, other {\n\nAuto-detected: {detected_rooms} rooms}}",
         "data": {
           "num_rooms": "Number of Rooms"
         }

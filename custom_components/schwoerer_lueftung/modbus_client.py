@@ -397,6 +397,35 @@ class BicWrgModbusClient:
             _LOGGER.error("Unexpected error writing register at %s: %s", address, err)
             return False
 
+    def detect_room_count(self) -> int | None:
+        """Detect the number of configured rooms by reading registers 343-345.
+        
+        These registers appear to indicate room count configuration.
+        Returns the detected room count or None if detection fails.
+        """
+        try:
+            # Read registers 343-345 (room count indicators)
+            registers = self.read_holding_registers(343, 3)
+            if not registers:
+                _LOGGER.warning("Failed to read room count registers")
+                return None
+            
+            # The registers typically contain the same value indicating room count
+            # Use the first non-zero value
+            room_count = registers[0]
+            
+            # Validate room count is reasonable (1-17 according to documentation)
+            if 1 <= room_count <= 17:
+                _LOGGER.info("Detected %d rooms from registers 343-345: %s", room_count, registers)
+                return room_count
+            
+            _LOGGER.warning("Room count detection returned invalid value: %d (registers: %s)", room_count, registers)
+            return None
+            
+        except Exception as err:
+            _LOGGER.error("Error detecting room count: %s", err)
+            return None
+
     def read_operation_mode(self) -> int | None:
         """Read operation mode (Betriebsart)."""
         registers = self.read_holding_registers(REG_OPERATION_MODE, 1)

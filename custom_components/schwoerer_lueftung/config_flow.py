@@ -49,13 +49,19 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         if not client.is_connected():
             raise CannotConnect
         
-        # Test read to verify communication
+        # Try to detect room count
+        room_count = await hass.async_add_executor_job(client.detect_room_count)
+        
         await hass.async_add_executor_job(client.disconnect)
+        
+        result = {"title": f"WRG {data[CONF_HOST]}"}
+        if room_count is not None:
+            result["detected_rooms"] = room_count
+        
+        return result
     except Exception as err:
         _LOGGER.error("Failed to connect: %s", err)
         raise CannotConnect from err
-    
-    return {"title": f"WRG {data[CONF_HOST]}"}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -66,6 +72,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize config flow."""
         self._host_data: dict[str, Any] = {}
+        self._detected_rooms: int | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -85,6 +92,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(user_input[CONF_HOST])
                 self._abort_if_unique_id_configured()
                 self._host_data = user_input
+                self._detected_rooms = info.get("detected_rooms")
+                
+                # If room count was auto-detected, skip the room config step
+                if self._detected_rooms is not None:
+                    return await self.async_step_rooms(user_input={"num_rooms": self._detected_rooms})
+                
                 return await self.async_step_rooms()
         
         return self.async_show_form(
@@ -114,16 +127,25 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             info = {"title": f"WRG {self._host_data[CONF_HOST]}"}
             return self.async_create_entry(title=info["title"], data=data)
         
-        # Build schema for number of rooms
+        # Use detected room count as default, or 1 if not detected
+        default_rooms = self._detected_rooms if self._detected_rooms is not None else 1
+        
+        # Build schema for number of rooms with auto-detected value
         schema_dict = {
-            vol.Required("num_rooms", default=1, description={"suggested_value": 1}): vol.All(
+            vol.Required("num_rooms", default=default_rooms): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=17)
             )
         }
         
+        # Add description if rooms were auto-detected
+        description_placeholders = {}
+        if self._detected_rooms is not None:
+            description_placeholders["detected_rooms"] = str(self._detected_rooms)
+        
         return self.async_show_form(
             step_id="rooms",
             data_schema=vol.Schema(schema_dict),
+            description_placeholders=description_placeholders,
         )
 
 
