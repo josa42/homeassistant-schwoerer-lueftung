@@ -105,11 +105,15 @@ class BicWrgRoomBaseTemperatureNumber(CoordinatorEntity[BicWrgCoordinator], Numb
         self._room_name = room_name
         self._attr_translation_key = "base_temperature"
         self._attr_unique_id = f"{entry.entry_id}_room_{room_number}_base_temp"
+        
+        # Use same model as climate entity for consistency
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
+        
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{entry.entry_id}_room_{room_number}")},
             name=room_name,
             manufacturer=MANUFACTURER,
-            model="Room Control",
+            model=model,
             via_device=(DOMAIN, entry.entry_id),
         )
 
