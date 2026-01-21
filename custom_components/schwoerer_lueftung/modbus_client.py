@@ -537,62 +537,28 @@ class ModbusClient:
         data["fan_speed"] =  self.read_register(REG_FAN_SPEED, 1)
         data["current_fan_level"] = self.read_register(REG_CURRENT_FAN_LEVEL, 1)
         data["linear_fan_power"] = self.read_register(REG_LINEAR_FAN_POWER, 1)
-
-        if (val := self.read_register(REG_FAN_OVERRIDE, 1)) is not None:
-            data["fan_override"] = val
-
-        if (val := self.read_register(REG_TIME_PROGRAM_BASE_LEVEL, 1)) is not None:
-            data["time_program_base_level"] = val
-
-        if (val := self.read_register(REG_SHOCK_VENTILATION, 1)) is not None:
-            data["shock_ventilation"] = val
-
-        if (val := self.read_register(REG_SHOCK_VENTILATION_REMAINING, 1)) is not None:
-            data["shock_ventilation_remaining"] = val
+        data["fan_override"] = self.read_register(REG_FAN_OVERRIDE, 1)
+        data["time_program_base_level"] = self.read_register(REG_TIME_PROGRAM_BASE_LEVEL, 1)
+        data["shock_ventilation"] = self.read_register(REG_SHOCK_VENTILATION, 1)
+        data["shock_ventilation_remaining"] = self.read_register(REG_SHOCK_VENTILATION_REMAINING, 1)
 
         # WGT-only: heat pump status and NHR state
         if self.device_type == "wgt":
-            if (val := self.read_register(REG_HEAT_PUMP_STATUS, 1)) is not None:
-                data["heat_pump_status"] = val
+            data["heat_pump_status"] = self.read_register(REG_HEAT_PUMP_STATUS, 1)
+            data["nhr_state"] = self.read_register(REG_NHR_STATE, 1)
 
-            if (val := self.read_register(REG_NHR_STATE, 1)) is not None:
-                data["nhr_state"] = val
-
-        if (val := self.read_register(REG_SUPPLY_AIR_FAN_STATUS, 1)) is not None:
-            data["supply_air_fan_status"] = val
-
-        if (val := self.read_register(REG_EXHAUST_AIR_FAN_STATUS, 1)) is not None:
-            data["exhaust_air_fan_status"] = val
-
-        if (val := self.read_register(REG_EWT_STATE, 1)) is not None:
-            data["ewt_state"] = val
-
-        if (val := self.read_register(REG_BYPASS_STATE, 1)) is not None:
-            data["bypass_state"] = val
-
-        if (val := self.read_register(REG_OUTDOOR_DAMPER_STATE, 1)) is not None:
-            data["outdoor_damper_state"] = val
-
-        if (val := self.read_register(REG_PREHEATER_STATE, 1)) is not None:
-            data["preheater_state"] = val
-
-        if (val := self.read_register(REG_TIME_PROGRAM_FAN_LEVEL, 1)) is not None:
-            data["time_program_fan_level"] = val
-
-        if (val := self.read_register(REG_SENSOR_FAN_LEVEL, 1)) is not None:
-            data["sensor_fan_level"] = val
-
-        if (val := self.read_register(REG_CURRENT_SUPPLY_AIR_FLOW, 1)) is not None:
-            data["current_supply_air_flow"] = val
-
-        if (val := self.read_register(REG_CURRENT_EXHAUST_AIR_FLOW, 1)) is not None:
-            data["current_exhaust_air_flow"] = val
-
-        if (val := self.read_register(REG_CURRENT_SUPPLY_AIR_RPM, 1)) is not None:
-            data["current_supply_air_rpm"] = val
-
-        if (val := self.read_register(REG_CURRENT_EXHAUST_AIR_RPM, 1)) is not None:
-            data["current_exhaust_air_rpm"] = val
+        data["supply_air_fan_status"] = self.read_register(REG_SUPPLY_AIR_FAN_STATUS, 1)
+        data["exhaust_air_fan_status"] = self.read_register(REG_EXHAUST_AIR_FAN_STATUS, 1)
+        data["ewt_state"] = self.read_register(REG_EWT_STATE, 1)
+        data["bypass_state"] = self.read_register(REG_BYPASS_STATE, 1)
+        data["outdoor_damper_state"] = self.read_register(REG_OUTDOOR_DAMPER_STATE, 1)
+        data["preheater_state"] = self.read_register(REG_PREHEATER_STATE, 1)
+        data["time_program_fan_level"] = self.read_register(REG_TIME_PROGRAM_FAN_LEVEL, 1)
+        data["sensor_fan_level"] = self.read_register(REG_SENSOR_FAN_LEVEL, 1)
+        data["current_supply_air_flow"] = self.read_register(REG_CURRENT_SUPPLY_AIR_FLOW, 1)
+        data["current_exhaust_air_flow"] = self.read_register(REG_CURRENT_EXHAUST_AIR_FLOW, 1)
+        data["current_supply_air_rpm"] = self.read_register(REG_CURRENT_SUPPLY_AIR_RPM, 1)
+        data["current_exhaust_air_rpm"] = self.read_register(REG_CURRENT_EXHAUST_AIR_RPM, 1)
 
         # Helper for temperature conversion
         def read_temp(reg):
@@ -600,92 +566,39 @@ class ModbusClient:
                 return int.from_bytes(regs[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
             return None
 
-        if (val := read_temp(REG_TEMP_T1_AFTER_EWT)) is not None:
-            data["temp_t1_after_ewt"] = val
-
-        if (val := read_temp(REG_TEMP_T2_AFTER_VHR)) is not None:
-            data["temp_t2_after_vhr"] = val
-
-        if (val := read_temp(REG_TEMP_T3_BEFORE_NE)) is not None:
-            data["temp_t3_before_ne"] = val
-
-        if (val := read_temp(REG_TEMP_T4_AFTER_NE)) is not None:
-            data["temp_t4_after_ne"] = val
-
-        if (val := read_temp(REG_TEMP_T5_EXHAUST_AIR)) is not None:
-            data["temp_t5_exhaust_air"] = val
-
-        if (val := read_temp(REG_TEMP_T6_IN_WT)) is not None:
-            data["temp_t6_in_wt"] = val
-
-        if (val := read_temp(REG_TEMP_T7_EVAPORATOR)) is not None:
-            data["temp_t7_evaporator"] = val
-
-        if (val := read_temp(REG_TEMP_T8_CONDENSER)) is not None:
-            data["temp_t8_condenser"] = val
-
-        if (val := read_temp(REG_TEMP_T10_OUTDOOR)) is not None:
-            data["temp_t10_outdoor"] = val
+        data["temp_t1_after_ewt"] = read_temp(REG_TEMP_T1_AFTER_EWT)
+        data["temp_t2_after_vhr"] = read_temp(REG_TEMP_T2_AFTER_VHR)
+        data["temp_t3_before_ne"] = read_temp(REG_TEMP_T3_BEFORE_NE)
+        data["temp_t4_after_ne"] = read_temp(REG_TEMP_T4_AFTER_NE)
+        data["temp_t5_exhaust_air"] = read_temp(REG_TEMP_T5_EXHAUST_AIR)
+        data["temp_t6_in_wt"] = read_temp(REG_TEMP_T6_IN_WT)
+        data["temp_t7_evaporator"] = read_temp(REG_TEMP_T7_EVAPORATOR)
+        data["temp_t8_condenser"] = read_temp(REG_TEMP_T8_CONDENSER)
+        data["temp_t10_outdoor"] = read_temp(REG_TEMP_T10_OUTDOOR)
 
         # WGT-specific registers (heating/cooling)
         if self.device_type == "wgt":
-            if (val := self.read_register(REG_HEATING_COOLING_FUNCTION, 1)) is not None:
-                data["heating_cooling_function"] = val
-
-            if (val := self.read_register(REG_HEAT_PUMP_HEATING_ENABLE, 1)) is not None:
-                data["heat_pump_heating_enable"] = val
-
-            if (val := self.read_register(REG_HEAT_PUMP_COOLING_ENABLE, 1)) is not None:
-                data["heat_pump_cooling_enable"] = val
-
-            if (val := self.read_register(REG_AUXILIARY_HEATING_ENABLE, 1)) is not None:
-                data["auxiliary_heating_enable"] = val
+            data["heating_cooling_function"] = self.read_register(REG_HEATING_COOLING_FUNCTION, 1)
+            data["heat_pump_heating_enable"] = self.read_register(REG_HEAT_PUMP_HEATING_ENABLE, 1)
+            data["heat_pump_cooling_enable"] = self.read_register(REG_HEAT_PUMP_COOLING_ENABLE, 1)
+            data["auxiliary_heating_enable"] = self.read_register(REG_AUXILIARY_HEATING_ENABLE, 1)
 
         # Read alarms
-        if (val := self.read_register(REG_ALARM_PRESSURE_SWITCH, 1)) is not None:
-            data["alarm_pressure_switch"] = val
-
-        if (val := self.read_register(REG_ALARM_UTILITY_LOCK, 1)) is not None:
-            data["alarm_utility_lock"] = val
-
-        if (val := self.read_register(REG_ALARM_DOOR_OPEN, 1)) is not None:
-            data["alarm_door_open"] = val
-
-        if (val := self.read_register(REG_ALARM_DEVICE_FILTER_DIRTY, 1)) is not None:
-            data["alarm_device_filter_dirty"] = val
-
-        if (val := self.read_register(REG_ALARM_UPSTREAM_FILTER_DIRTY, 1)) is not None:
-            data["alarm_upstream_filter_dirty"] = val
-
-        if (val := self.read_register(REG_ALARM_OFF_PEAK_DISABLED, 1)) is not None:
-            data["alarm_off_peak_disabled"] = val
-
-        if (val := self.read_register(REG_ALARM_SUPPLY_VOLTAGE_OFF, 1)) is not None:
-            data["alarm_supply_voltage_off"] = val
-
-        if (val := self.read_register(REG_ALARM_PRESSOSTAT_TRIGGERED, 1)) is not None:
-            data["alarm_pressostat_triggered"] = val
-
-        if (val := self.read_register(REG_ALARM_EXTERNAL_UTILITY_LOCK, 1)) is not None:
-            data["alarm_external_utility_lock"] = val
-
-        if (val := self.read_register(REG_ALARM_HEATING_MODULE_TEST, 1)) is not None:
-            data["alarm_heating_module_test"] = val
-
-        if (val := self.read_register(REG_ALARM_EMERGENCY_MODE, 1)) is not None:
-            data["alarm_emergency_mode"] = val
-
-        if (val := self.read_register(REG_ALARM_SUPPLY_AIR_COLD, 1)) is not None:
-            data["alarm_supply_air_cold"] = val
-
-        if (val := self.read_register(REG_DEVICE_FILTER_REMAINING, 1)) is not None:
-            data["device_filter_remaining"] = val
-
-        if (val := self.read_register(REG_UPSTREAM_FILTER_REMAINING, 1)) is not None:
-            data["upstream_filter_remaining"] = val
-
-        if (val := self.read_register(REG_ERROR_MESSAGE, 1)) is not None:
-            data["error_message"] = val
+        data["alarm_pressure_switch"] = self.read_register(REG_ALARM_PRESSURE_SWITCH, 1)
+        data["alarm_utility_lock"] = self.read_register(REG_ALARM_UTILITY_LOCK, 1)
+        data["alarm_door_open"] = self.read_register(REG_ALARM_DOOR_OPEN, 1)
+        data["alarm_device_filter_dirty"] = self.read_register(REG_ALARM_DEVICE_FILTER_DIRTY, 1)
+        data["alarm_upstream_filter_dirty"] = self.read_register(REG_ALARM_UPSTREAM_FILTER_DIRTY, 1)
+        data["alarm_off_peak_disabled"] = self.read_register(REG_ALARM_OFF_PEAK_DISABLED, 1)
+        data["alarm_supply_voltage_off"] = self.read_register(REG_ALARM_SUPPLY_VOLTAGE_OFF, 1)
+        data["alarm_pressostat_triggered"] = self.read_register(REG_ALARM_PRESSOSTAT_TRIGGERED, 1)
+        data["alarm_external_utility_lock"] = self.read_register(REG_ALARM_EXTERNAL_UTILITY_LOCK, 1)
+        data["alarm_heating_module_test"] = self.read_register(REG_ALARM_HEATING_MODULE_TEST, 1)
+        data["alarm_emergency_mode"] = self.read_register(REG_ALARM_EMERGENCY_MODE, 1)
+        data["alarm_supply_air_cold"] = self.read_register(REG_ALARM_SUPPLY_AIR_COLD, 1)
+        data["device_filter_remaining"] = self.read_register(REG_DEVICE_FILTER_REMAINING, 1)
+        data["upstream_filter_remaining"] = self.read_register(REG_UPSTREAM_FILTER_REMAINING, 1)
+        data["error_message"] = self.read_register(REG_ERROR_MESSAGE, 1)
 
         # Read room temperatures (registers 360-376 for current, 400-416 for target)
         # and heating enable (registers 440-456 for rooms 1-17)
