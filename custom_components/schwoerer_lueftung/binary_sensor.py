@@ -11,7 +11,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, MANUFACTURER, MODEL
+from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import BicWrgCoordinator
 from .modbus_client import (
     ALARM_ACTIVE,
@@ -110,11 +110,12 @@ class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], Binary
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_fan_override"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -141,11 +142,12 @@ class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySen
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_nhr_state"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -172,11 +174,12 @@ class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_preheater_1"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -203,11 +206,12 @@ class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_preheater_2"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -239,11 +243,12 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
         self._attr_translation_key = translation_key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_entity_registry_enabled_default = enabled_by_default
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property

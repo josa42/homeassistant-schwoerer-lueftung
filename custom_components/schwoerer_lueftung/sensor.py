@@ -15,7 +15,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from typing import Any
 
-from .const import DOMAIN, MANUFACTURER, MODEL, CONF_ROOMS
+from .const import DOMAIN, MANUFACTURER, CONF_ROOMS, MODEL_WGT, MODEL_WRT
 from .coordinator import BicWrgCoordinator
 from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
@@ -196,11 +196,13 @@ class BicWrgSensorBase(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         self._key = key
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{key}"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -224,11 +226,13 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_fan_level"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -253,11 +257,13 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_time_program_base_level"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -282,11 +288,13 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_shock_ventilation_remaining"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -309,11 +317,13 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_status"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -337,11 +347,13 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_supply_air_fan_status"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -365,11 +377,13 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_exhaust_air_fan_status"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -393,11 +407,13 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_ewt_state"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -420,11 +436,13 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_bypass_state"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -448,11 +466,13 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_outdoor_damper_state"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -477,11 +497,13 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_time_program_fan_level"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -506,11 +528,13 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_sensor_fan_level"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -536,11 +560,13 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_flow"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -566,11 +592,13 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_flow"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -596,11 +624,13 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_rpm"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -626,11 +656,13 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_rpm"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -657,11 +689,13 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t1_after_ewt"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -687,11 +721,13 @@ class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t2_after_vhr"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -717,11 +753,13 @@ class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t3_before_ne"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -747,11 +785,13 @@ class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t4_after_ne"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -777,11 +817,13 @@ class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], 
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t5_exhaust_air"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -807,11 +849,13 @@ class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], Sensor
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t6_in_wt"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -837,11 +881,13 @@ class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], 
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t7_evaporator"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -867,11 +913,13 @@ class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], S
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t8_condenser"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -897,11 +945,13 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t10_outdoor"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -926,11 +976,13 @@ class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], Se
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_device_filter_remaining"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -955,11 +1007,13 @@ class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], 
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_upstream_filter_remaining"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -982,11 +1036,13 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_error_message"
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -1102,11 +1158,13 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         self._register = register
         self._attr_unique_id = f"{entry.entry_id}_operating_hours_{key}"
         self._attr_translation_key = translation_key
+        
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property

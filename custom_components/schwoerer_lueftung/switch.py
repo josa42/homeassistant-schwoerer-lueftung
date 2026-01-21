@@ -10,7 +10,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, MANUFACTURER, MODEL
+from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import BicWrgCoordinator
 from .modbus_client import (
     SHOCK_VENTILATION_INACTIVE,
@@ -73,11 +73,12 @@ class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
         """Initialize the switch entity."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_shock_ventilation"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -239,11 +240,12 @@ class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
         """Initialize the switch entity."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_heating_enable"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -287,11 +289,12 @@ class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
         """Initialize the switch entity."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_cooling_enable"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
@@ -335,11 +338,12 @@ class BicWrgAuxiliaryHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
         """Initialize the switch entity."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_auxiliary_heating_enable"
+        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name="Lüftung",
             manufacturer=MANUFACTURER,
-            model=MODEL,
+            model=model,
         )
 
     @property
