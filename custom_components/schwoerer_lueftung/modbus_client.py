@@ -455,24 +455,17 @@ class ModbusClient:
         """Write auxiliary heating enable (Zusatzheizung Haus)."""
         return self.write_register(REG_AUXILIARY_HEATING_ENABLE, enabled)
 
-
     def read_room_temperature(self, room_number: int) -> float | None:
         """Read room current temperature (Ist Temp Raum)."""
         # Rooms 1-17 use registers 360-376
         register = 360 + room_number - 1
-        registers = self.read_holding_registers(register, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
+        return self.read_temperature_register(register)
 
     def read_room_target_temperature(self, room_number: int) -> float | None:
         """Read room target temperature (Soll Temp Raum)."""
         # Rooms 1-17 use registers 400-416
         register = 400 + room_number - 1
-        registers = self.read_holding_registers(register, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
+        return self.read_temperature_register(register)
 
     def write_room_target_temperature(self, room_number: int, temperature: float) -> bool:
         """Write room target temperature (Soll Temp Raum)."""
@@ -516,10 +509,7 @@ class ModbusClient:
         """Read room base temperature (Grundtemperatur Raum)."""
         # Rooms 1-17 use registers 420-436
         register = 420 + room_number - 1
-        registers = self.read_holding_registers(register, 1)
-        if registers:
-            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
+        return self.read_temperature_register(register)
 
     def write_room_base_temperature(self, room_number: int, temperature: float) -> bool:
         """Write room base temperature (Grundtemperatur Raum)."""
