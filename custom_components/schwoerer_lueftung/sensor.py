@@ -1,4 +1,5 @@
-"""Sensor platform for BIC WRG."""
+"""Sensor platform"""
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,7 +12,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -34,17 +35,22 @@ from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
+    REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
+    REG_OPERATING_HOURS_EWT,
+    REG_OPERATING_HOURS_FAN,
+    REG_OPERATING_HOURS_FAN_LEVEL_1,
+    REG_OPERATING_HOURS_FAN_LEVEL_2,
+    REG_OPERATING_HOURS_FAN_LEVEL_3,
+    REG_OPERATING_HOURS_FAN_LEVEL_4,
+    REG_OPERATING_HOURS_HEAT_PUMP,
+    REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
+    REG_OPERATING_HOURS_VHR,
     SUPPLY_AIR_FAN_STATUS_ACTIVE,
     SUPPLY_AIR_FAN_STATUS_DISABLED,
     SUPPLY_AIR_FAN_STATUS_ERROR,
     SUPPLY_AIR_FAN_STATUS_STANDBY,
     SUPPLY_AIR_FAN_STATUS_STARTUP,
 )
-
-# Current fan level is now numeric (0-4)
-# Time program base level is now numeric (0-4)
-# Time program fan level is now numeric (0-4)
-# Sensor fan level is now numeric (0-4)
 
 # Heat pump status mapping
 # Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
@@ -103,11 +109,11 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up WRG sensors from a config entry."""
+    """Set up sensors from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
     has_heating = coordinator.has_heating()
-    
+
     entities = [
         CurrentFanLevelSensor(coordinator, entry),
         TimeProgramBaseLevelSensor(coordinator, entry),
@@ -130,7 +136,7 @@ async def async_setup_entry(
         UpstreamFilterRemainingSensor(coordinator, entry),
         ErrorMessageSensor(coordinator, entry),
     ]
-    
+
     # Add heating-related sensors only for WGT devices
     if has_heating:
         entities.extend([
@@ -142,7 +148,7 @@ async def async_setup_entry(
             TemperatureT7EvaporatorSensor(coordinator, entry),
             TemperatureT8CondenserSensor(coordinator, entry),
         ])
-    
+
     # Add room-specific sensors
     for room in rooms:
         # Add room temperature sensor for WRT devices
@@ -155,44 +161,54 @@ async def async_setup_entry(
             entities.append(
                 RoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
             )
-    
+
     # Add operating hours sensors
     entities.extend([
-        OperatingHoursSensor(coordinator, entry, "fan", 800, "operating_hours_fan"),
-        OperatingHoursSensor(coordinator, entry, "fan_level_1", 801, "operating_hours_fan_level_1"),
-        OperatingHoursSensor(coordinator, entry, "fan_level_2", 802, "operating_hours_fan_level_2"),
-        OperatingHoursSensor(coordinator, entry, "fan_level_3", 803, "operating_hours_fan_level_3"),
-        OperatingHoursSensor(coordinator, entry, "fan_level_4", 804, "operating_hours_fan_level_4"),
+        OperatingHoursSensor(
+            coordinator, entry, "fan", REG_OPERATING_HOURS_FAN, "operating_hours_fan"
+        ),
+        OperatingHoursSensor(
+            coordinator, entry, "fan_level_1", REG_OPERATING_HOURS_FAN_LEVEL_1, "operating_hours_fan_level_1"
+        ),
+        OperatingHoursSensor(
+            coordinator, entry, "fan_level_2", REG_OPERATING_HOURS_FAN_LEVEL_2, "operating_hours_fan_level_2"
+        ),
+        OperatingHoursSensor(
+            coordinator, entry, "fan_level_3", REG_OPERATING_HOURS_FAN_LEVEL_3, "operating_hours_fan_level_3"
+        ),
+        OperatingHoursSensor(
+            coordinator, entry, "fan_level_4", REG_OPERATING_HOURS_FAN_LEVEL_4, "operating_hours_fan_level_4"
+        ),
     ])
-    
+
     # Add heating-related operating hours sensors only for WGT
     if has_heating:
         entities.extend([
             OperatingHoursSensor(
-                coordinator, entry, "heat_pump", 805, "operating_hours_heat_pump"
+                coordinator, entry, "heat_pump", REG_OPERATING_HOURS_HEAT_PUMP, "operating_hours_heat_pump"
             ),
             OperatingHoursSensor(
                 coordinator,
                 entry,
                 "heat_pump_cooling",
-                806,
+                REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
                 "operating_hours_heat_pump_cooling",
             ),
             OperatingHoursSensor(
-                coordinator, entry, "vhr", 809, "operating_hours_vhr"
+                coordinator, entry, "vhr", REG_OPERATING_HOURS_VHR, "operating_hours_vhr"
             ),
             OperatingHoursSensor(
                 coordinator,
                 entry,
                 "auxiliary_heating_house",
-                810,
+                REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
                 "operating_hours_auxiliary_heating_house",
             ),
             OperatingHoursSensor(
-                coordinator, entry, "ewt", 813, "operating_hours_ewt"
+                coordinator, entry, "ewt", REG_OPERATING_HOURS_EWT, "operating_hours_ewt"
             ),
         ])
-    
+
     async_add_entities(entities)
 
 
@@ -213,7 +229,7 @@ class SensorBase(CoordinatorEntity[Coordinator], SensorEntity):
         self._key = key
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{key}"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -243,7 +259,7 @@ class CurrentFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_fan_level"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -274,7 +290,7 @@ class TimeProgramBaseLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_time_program_base_level"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -305,7 +321,7 @@ class ShockVentilationRemainingSensor(CoordinatorEntity[Coordinator], SensorEnti
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_shock_ventilation_remaining"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -334,7 +350,7 @@ class HeatPumpStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_status"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -364,7 +380,7 @@ class SupplyAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_supply_air_fan_status"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -394,7 +410,7 @@ class ExhaustAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_exhaust_air_fan_status"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -424,7 +440,7 @@ class EwtStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_ewt_state"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -453,7 +469,7 @@ class BypassStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_bypass_state"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -483,7 +499,7 @@ class OutdoorDamperStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_outdoor_damper_state"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -514,7 +530,7 @@ class TimeProgramFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_time_program_fan_level"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -545,7 +561,7 @@ class SensorFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_sensor_fan_level"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -577,7 +593,7 @@ class CurrentSupplyAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_flow"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -609,7 +625,7 @@ class CurrentExhaustAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_flow"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -641,7 +657,7 @@ class CurrentSupplyAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_rpm"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -673,7 +689,7 @@ class CurrentExhaustAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_rpm"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -706,7 +722,7 @@ class TemperatureT1AfterEwtSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t1_after_ewt"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -738,7 +754,7 @@ class TemperatureT2AfterVhrSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t2_after_vhr"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -770,7 +786,7 @@ class TemperatureT3BeforeNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t3_before_ne"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -802,7 +818,7 @@ class TemperatureT4AfterNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t4_after_ne"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -834,7 +850,7 @@ class TemperatureT5ExhaustAirSensor(CoordinatorEntity[Coordinator], SensorEntity
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t5_exhaust_air"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -866,7 +882,7 @@ class TemperatureT6InWtSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t6_in_wt"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -898,7 +914,7 @@ class TemperatureT7EvaporatorSensor(CoordinatorEntity[Coordinator], SensorEntity
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t7_evaporator"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -930,7 +946,7 @@ class TemperatureT8CondenserSensor(CoordinatorEntity[Coordinator], SensorEntity)
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t8_condenser"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -962,7 +978,7 @@ class TemperatureT10OutdoorSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_temp_t10_outdoor"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -993,7 +1009,7 @@ class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_device_filter_remaining"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -1010,7 +1026,7 @@ class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG upstream filter remaining days.
-    
+
     Restlaufzeit Vorgelagerter Filter.
     """
 
@@ -1027,7 +1043,7 @@ class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_upstream_filter_remaining"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -1043,7 +1059,7 @@ class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity
 
 
 class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG error message (Fehlermeldung)."""
+    """Sensor for WRG error message."""
 
     _attr_has_entity_name = True
     _attr_translation_key = "error_message"
@@ -1056,7 +1072,7 @@ class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._attr_unique_id = f"{entry.entry_id}_error_message"
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -1072,7 +1088,7 @@ class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 
 class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for room auxiliary heating release (Zusatzheizung Freigabe)."""
+    """Sensor for room auxiliary heating release."""
 
     _attr_entity_registry_enabled_default = False
 
@@ -1091,7 +1107,7 @@ class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
             f"{entry_id}_room_{room_number}_auxiliary_heating"
         )
         self._attr_translation_key = "auxiliary_heating_release"
-        
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {
@@ -1115,9 +1131,8 @@ class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
             return "Heating Enabled"
         return None
 
-
 class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for room temperature (WRT devices only)."""
+    """Sensor for room temperature."""
 
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT
@@ -1137,7 +1152,7 @@ class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
         entry_id = coordinator.config_entry.entry_id
         self._attr_unique_id = f"{entry_id}_room_{room_number}_temperature"
         self._attr_translation_key = "room_temperature"
-        
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
@@ -1162,7 +1177,7 @@ class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 
 class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for operating hours (Betriebsstunden)."""
+    """Sensor for operating hours."""
 
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
@@ -1184,7 +1199,7 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
         self._register = register
         self._attr_unique_id = f"{entry.entry_id}_operating_hours_{key}"
         self._attr_translation_key = translation_key
-        
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -1200,7 +1215,7 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 
 class TemperatureSensor(SensorBase):
-    """Temperature sensor for WRG."""
+    """Temperature sensor."""
 
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_state_class = SensorStateClass.MEASUREMENT

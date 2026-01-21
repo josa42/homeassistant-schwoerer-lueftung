@@ -335,31 +335,63 @@ class ModbusClient:
         """Check if connected to the Modbus device."""
         return self._client.is_socket_open()
 
+
+    # async def async_read_register(
+    #     self, address: int, count: int = 1
+    # ) -> int | None:
+    #     """Read holding registers from the device."""
+    #     try:
+    #         result = self._client.read_holding_registers(address=address, count=count)
+    #         if result.isError():
+    #             _LOGGER.error("Error reading registers at %s: %s", address, result)
+    #             return None
+    #         _LOGGER.info("Read registers at %s: %s", address, result.registers)
+    #         return result.registers[0] if result.registers else None
+    #     except ModbusException as err:
+    #         _LOGGER.error("Modbus exception reading registers: %s", err)
+    #         return None
+    #     except Exception as err:
+    #         _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
+    #         return None
+
+    def read_register(
+        self, address: int, count: int = 1
+    ) -> int | None:
+        """Read holding registers from the device."""
+        try:
+            result = self._client.read_holding_registers(address=address, count=count)
+            if result.isError():
+                _LOGGER.error("Error reading registers at %s: %s", address, result)
+                return None
+            _LOGGER.info("Read registers at %s: %s", address, result.registers)
+            return result.registers[0] if result.registers else None
+        except ModbusException as err:
+            _LOGGER.error("Modbus exception reading registers: %s", err)
+            return None
+        except Exception as err:
+            _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
+            return None
+
+    def read_temperature_register(self, address: int) -> float | None:
+        """Read temperature holding registers from the device."""
+        value = self.read_register(address, 1)
+        if value is not None:
+            return int.from_bytes(value.to_bytes(2, 'big'), 'big', signed=True) / 10.0
+        return None
+
+
+
     def read_holding_registers(
         self, address: int, count: int = 1
     ) -> list[int] | None:
         """Read holding registers from the device."""
         try:
-            result = self._client.read_holding_registers(
-                address=address, count=count, slave=self.slave_id
-            )
+            result = self._client.read_holding_registers(address=address, count=count)
             if result.isError():
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
+            _LOGGER.info("Read registers at %s: %s", address, result.registers)
             return result.registers
-        except TypeError:
-            # Try without slave parameter (newer pymodbus API)
-            try:
-                result = self._client.read_holding_registers(
-                    address=address, count=count
-                )
-                if result.isError():
-                    _LOGGER.error("Error reading registers at %s: %s", address, result)
-                    return None
-                return result.registers
-            except Exception as err:
-                _LOGGER.error("Error reading registers at %s: %s", address, err)
-                return None
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
             return None
@@ -372,25 +404,12 @@ class ModbusClient:
         try:
             # Device requires Write Multiple Registers (16), not Write Single Register (06)
             result = self._client.write_registers(
-                address=address, values=[value], slave=self.slave_id
+                address=address, values=[value]
             )
             if result.isError():
                 _LOGGER.error("Error writing register at %s: %s", address, result)
                 return False
             return True
-        except TypeError:
-            # Try without slave parameter (newer pymodbus API)
-            try:
-                result = self._client.write_registers(
-                    address=address, values=[value]
-                )
-                if result.isError():
-                    _LOGGER.error("Error writing register at %s: %s", address, result)
-                    return False
-                return True
-            except Exception as err:
-                _LOGGER.error("Error writing register at %s: %s", address, err)
-                return False
         except ModbusException as err:
             _LOGGER.error("Modbus exception writing register: %s", err)
             return False
@@ -398,16 +417,6 @@ class ModbusClient:
             _LOGGER.error("Unexpected error writing register at %s: %s", address, err)
             return False
 
-    def read_operation_mode(self) -> int | None:
-        """Read operation mode (Betriebsart)."""
-        registers = self.read_holding_registers(REG_OPERATION_MODE, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def write_operation_mode(self, mode: int) -> bool:
-        """Write operation mode (Betriebsart)."""
-        return self.write_register(REG_OPERATION_MODE, mode)
 
     def read_fan_speed(self) -> int | None:
         """Read manual fan speed (Manuelle Luftstufe)."""
@@ -419,20 +428,6 @@ class ModbusClient:
     def write_fan_speed(self, speed: int) -> bool:
         """Write manual fan speed (Manuelle Luftstufe)."""
         return self.write_register(REG_FAN_SPEED, speed)
-
-    def read_current_fan_level(self) -> int | None:
-        """Read current fan level (Aktuelle Luftstufe)."""
-        registers = self.read_holding_registers(REG_CURRENT_FAN_LEVEL, 1)
-        if registers:
-            return registers[0]
-        return None
-
-    def read_linear_fan_power(self) -> int | None:
-        """Read manual linear fan power (Manuelle Lineare Luftleistung)."""
-        registers = self.read_holding_registers(REG_LINEAR_FAN_POWER, 1)
-        if registers:
-            return registers[0]
-        return None
 
     def write_linear_fan_power(self, power: int) -> bool:
         """Write manual linear fan power (Manuelle Lineare Luftleistung)."""
@@ -581,99 +576,63 @@ class ModbusClient:
         """Read temperature T1 after EWT (T1 nach EWT)."""
         registers = self.read_holding_registers(REG_TEMP_T1_AFTER_EWT, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t2_after_vhr(self) -> float | None:
         """Read temperature T2 after VHR (T2 nach VHR)."""
         registers = self.read_holding_registers(REG_TEMP_T2_AFTER_VHR, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t3_before_ne(self) -> float | None:
         """Read temperature T3 before NE (T3 vor NE)."""
         registers = self.read_holding_registers(REG_TEMP_T3_BEFORE_NE, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t4_after_ne(self) -> float | None:
         """Read temperature T4 after NE (T4 nach NE)."""
         registers = self.read_holding_registers(REG_TEMP_T4_AFTER_NE, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t5_exhaust_air(self) -> float | None:
         """Read temperature T5 exhaust air (T5 Abluft)."""
         registers = self.read_holding_registers(REG_TEMP_T5_EXHAUST_AIR, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t6_in_wt(self) -> float | None:
         """Read temperature T6 in WT (T6 im WT)."""
         registers = self.read_holding_registers(REG_TEMP_T6_IN_WT, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t7_evaporator(self) -> float | None:
         """Read temperature T7 evaporator (T7 Verdampfer)."""
         registers = self.read_holding_registers(REG_TEMP_T7_EVAPORATOR, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t8_condenser(self) -> float | None:
         """Read temperature T8 condenser (T8 Kondensator)."""
         registers = self.read_holding_registers(REG_TEMP_T8_CONDENSER, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_temperature_t10_outdoor(self) -> float | None:
         """Read temperature T10 outdoor (T10 Aussen)."""
         registers = self.read_holding_registers(REG_TEMP_T10_OUTDOOR, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_heating_cooling_function(self) -> int | None:
@@ -832,11 +791,7 @@ class ModbusClient:
         register = 360 + room_number - 1
         registers = self.read_holding_registers(register, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def read_room_target_temperature(self, room_number: int) -> float | None:
@@ -845,11 +800,7 @@ class ModbusClient:
         register = 400 + room_number - 1
         registers = self.read_holding_registers(register, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def write_room_target_temperature(self, room_number: int, temperature: float) -> bool:
@@ -896,11 +847,7 @@ class ModbusClient:
         register = 420 + room_number - 1
         registers = self.read_holding_registers(register, 1)
         if registers:
-            # Convert to signed 16-bit integer
-            value = registers[0]
-            if value > 32767:
-                value -= 65536
-            return value / 10.0
+            return int.from_bytes(registers[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
         return None
 
     def write_room_base_temperature(self, room_number: int, temperature: float) -> bool:
@@ -914,248 +861,233 @@ class ModbusClient:
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
-        
-        # Read operation mode (Betriebsart)
-        operation_mode = self.read_operation_mode()
-        if operation_mode is not None:
-            data["operation_mode"] = operation_mode
-        
-        # Read fan speed (Manuelle Luftstufe)
-        fan_speed = self.read_fan_speed()
-        if fan_speed is not None:
-            data["fan_speed"] = fan_speed
-        
-        # Read current fan level (Aktuelle Luftstufe)
-        current_fan_level = self.read_current_fan_level()
-        if current_fan_level is not None:
-            data["current_fan_level"] = current_fan_level
-        
-        # Read linear fan power (Manuelle Lineare Luftleistung)
-        linear_fan_power = self.read_linear_fan_power()
-        if linear_fan_power is not None:
-            data["linear_fan_power"] = linear_fan_power
-        
+
+        data["operation_mode"] = self.read_register(REG_OPERATION_MODE, 1)
+        data["fan_speed"] =  self.read_register(REG_FAN_SPEED, 1)
+        data["current_fan_level"] = self.read_register(REG_CURRENT_FAN_LEVEL, 1)
+        data["linear_fan_power"] = self.read_register(REG_LINEAR_FAN_POWER, 1)
+
         # Read fan override (Luftstufen Überschreibung)
         fan_override = self.read_fan_override()
         if fan_override is not None:
             data["fan_override"] = fan_override
-        
+
         # Read time program base level (Zeitprogramm Basis Luftstufe)
         time_program_base_level = self.read_time_program_base_level()
         if time_program_base_level is not None:
             data["time_program_base_level"] = time_program_base_level
-        
+
         # Read shock ventilation (Stoßlüftung)
         shock_ventilation = self.read_shock_ventilation()
         if shock_ventilation is not None:
             data["shock_ventilation"] = shock_ventilation
-        
+
         # Read shock ventilation remaining time (Restlaufzeit Stoßlüftung)
         shock_ventilation_remaining = self.read_shock_ventilation_remaining()
         if shock_ventilation_remaining is not None:
             data["shock_ventilation_remaining"] = shock_ventilation_remaining
-        
+
         # WGT-only: heat pump status and NHR state
         if self.device_type == "wgt":
             # Read heat pump status (Status Wärmepumpe)
             heat_pump_status = self.read_heat_pump_status()
             if heat_pump_status is not None:
                 data["heat_pump_status"] = heat_pump_status
-            
+
             # Read NHR state (NHR Zustand)
             nhr_state = self.read_nhr_state()
             if nhr_state is not None:
                 data["nhr_state"] = nhr_state
-        
+
         # Read supply air fan status (Status Gebläse Zuluft)
         supply_air_fan_status = self.read_supply_air_fan_status()
         if supply_air_fan_status is not None:
             data["supply_air_fan_status"] = supply_air_fan_status
-        
+
         # Read exhaust air fan status (Status Gebläse Abluft)
         exhaust_air_fan_status = self.read_exhaust_air_fan_status()
         if exhaust_air_fan_status is not None:
             data["exhaust_air_fan_status"] = exhaust_air_fan_status
-        
+
         # Read EWT state (EWT Zustand)
         ewt_state = self.read_ewt_state()
         if ewt_state is not None:
             data["ewt_state"] = ewt_state
-        
+
         # Read bypass state (Bypass Zustand)
         bypass_state = self.read_bypass_state()
         if bypass_state is not None:
             data["bypass_state"] = bypass_state
-        
+
         # Read outdoor damper state (Aussenklappe Zustand)
         outdoor_damper_state = self.read_outdoor_damper_state()
         if outdoor_damper_state is not None:
             data["outdoor_damper_state"] = outdoor_damper_state
-        
+
         # Read preheater state (Vorheizregister Zustand)
         preheater_state = self.read_preheater_state()
         if preheater_state is not None:
             data["preheater_state"] = preheater_state
-        
+
         # Read time program fan level (Luftstufe Zeitprogramm)
         time_program_fan_level = self.read_time_program_fan_level()
         if time_program_fan_level is not None:
             data["time_program_fan_level"] = time_program_fan_level
-        
+
         # Read sensor fan level (Luftstufe Sensoren)
         sensor_fan_level = self.read_sensor_fan_level()
         if sensor_fan_level is not None:
             data["sensor_fan_level"] = sensor_fan_level
-        
+
         # Read current supply air flow (Luftleistung aktuell Zuluft)
         current_supply_air_flow = self.read_current_supply_air_flow()
         if current_supply_air_flow is not None:
             data["current_supply_air_flow"] = current_supply_air_flow
-        
+
         # Read current exhaust air flow (Luftleistung aktuell Abluft)
         current_exhaust_air_flow = self.read_current_exhaust_air_flow()
         if current_exhaust_air_flow is not None:
             data["current_exhaust_air_flow"] = current_exhaust_air_flow
-        
+
         # Read current supply air RPM (Aktuelle Drehzahl Zuluft)
         current_supply_air_rpm = self.read_current_supply_air_rpm()
         if current_supply_air_rpm is not None:
             data["current_supply_air_rpm"] = current_supply_air_rpm
-        
+
         # Read current exhaust air RPM (Aktuelle Drehzahl Abluft)
         current_exhaust_air_rpm = self.read_current_exhaust_air_rpm()
         if current_exhaust_air_rpm is not None:
             data["current_exhaust_air_rpm"] = current_exhaust_air_rpm
-        
+
         # Read temperature T1 after EWT (T1 nach EWT)
         temp_t1_after_ewt = self.read_temperature_t1_after_ewt()
         if temp_t1_after_ewt is not None:
             data["temp_t1_after_ewt"] = temp_t1_after_ewt
-        
+
         # Read temperature T2 after VHR (T2 nach VHR)
         temp_t2_after_vhr = self.read_temperature_t2_after_vhr()
         if temp_t2_after_vhr is not None:
             data["temp_t2_after_vhr"] = temp_t2_after_vhr
-        
+
         # Read temperature T3 before NE (T3 vor NE)
         temp_t3_before_ne = self.read_temperature_t3_before_ne()
         if temp_t3_before_ne is not None:
             data["temp_t3_before_ne"] = temp_t3_before_ne
-        
+
         # Read temperature T4 after NE (T4 nach NE)
         temp_t4_after_ne = self.read_temperature_t4_after_ne()
         if temp_t4_after_ne is not None:
             data["temp_t4_after_ne"] = temp_t4_after_ne
-        
+
         # Read temperature T5 exhaust air (T5 Abluft)
         temp_t5_exhaust_air = self.read_temperature_t5_exhaust_air()
         if temp_t5_exhaust_air is not None:
             data["temp_t5_exhaust_air"] = temp_t5_exhaust_air
-        
+
         # Read temperature T6 in WT (T6 im WT)
         temp_t6_in_wt = self.read_temperature_t6_in_wt()
         if temp_t6_in_wt is not None:
             data["temp_t6_in_wt"] = temp_t6_in_wt
-        
+
         # Read temperature T7 evaporator (T7 Verdampfer)
         temp_t7_evaporator = self.read_temperature_t7_evaporator()
         if temp_t7_evaporator is not None:
             data["temp_t7_evaporator"] = temp_t7_evaporator
-        
+
         # Read temperature T8 condenser (T8 Kondensator)
         temp_t8_condenser = self.read_temperature_t8_condenser()
         if temp_t8_condenser is not None:
             data["temp_t8_condenser"] = temp_t8_condenser
-        
+
         # Read temperature T10 outdoor (T10 Aussen)
         temp_t10_outdoor = self.read_temperature_t10_outdoor()
         if temp_t10_outdoor is not None:
             data["temp_t10_outdoor"] = temp_t10_outdoor
-        
+
         # WGT-specific registers (heating/cooling)
         if self.device_type == "wgt":
             # Read heating/cooling function (Heiz-Kühlfunktion)
             heating_cooling_function = self.read_heating_cooling_function()
             if heating_cooling_function is not None:
                 data["heating_cooling_function"] = heating_cooling_function
-            
+
             # Read heat pump heating enable (Wärmepumpe Heizen)
             heat_pump_heating_enable = self.read_heat_pump_heating_enable()
             if heat_pump_heating_enable is not None:
                 data["heat_pump_heating_enable"] = heat_pump_heating_enable
-            
+
             # Read heat pump cooling enable (Wärmepumpe Kühlen)
             heat_pump_cooling_enable = self.read_heat_pump_cooling_enable()
             if heat_pump_cooling_enable is not None:
                 data["heat_pump_cooling_enable"] = heat_pump_cooling_enable
-            
+
             # Read auxiliary heating enable (Zusatzheizung Haus)
             auxiliary_heating_enable = self.read_auxiliary_heating_enable()
             if auxiliary_heating_enable is not None:
                 data["auxiliary_heating_enable"] = auxiliary_heating_enable
-        
+
         # Read alarms
         alarm_pressure_switch = self.read_alarm_pressure_switch()
         if alarm_pressure_switch is not None:
             data["alarm_pressure_switch"] = alarm_pressure_switch
-        
+
         alarm_utility_lock = self.read_alarm_utility_lock()
         if alarm_utility_lock is not None:
             data["alarm_utility_lock"] = alarm_utility_lock
-        
+
         alarm_door_open = self.read_alarm_door_open()
         if alarm_door_open is not None:
             data["alarm_door_open"] = alarm_door_open
-        
+
         alarm_device_filter_dirty = self.read_alarm_device_filter_dirty()
         if alarm_device_filter_dirty is not None:
             data["alarm_device_filter_dirty"] = alarm_device_filter_dirty
-        
+
         alarm_upstream_filter_dirty = self.read_alarm_upstream_filter_dirty()
         if alarm_upstream_filter_dirty is not None:
             data["alarm_upstream_filter_dirty"] = alarm_upstream_filter_dirty
-        
+
         alarm_off_peak_disabled = self.read_alarm_off_peak_disabled()
         if alarm_off_peak_disabled is not None:
             data["alarm_off_peak_disabled"] = alarm_off_peak_disabled
-        
+
         alarm_supply_voltage_off = self.read_alarm_supply_voltage_off()
         if alarm_supply_voltage_off is not None:
             data["alarm_supply_voltage_off"] = alarm_supply_voltage_off
-        
+
         alarm_pressostat_triggered = self.read_alarm_pressostat_triggered()
         if alarm_pressostat_triggered is not None:
             data["alarm_pressostat_triggered"] = alarm_pressostat_triggered
-        
+
         alarm_external_utility_lock = self.read_alarm_external_utility_lock()
         if alarm_external_utility_lock is not None:
             data["alarm_external_utility_lock"] = alarm_external_utility_lock
-        
+
         alarm_heating_module_test = self.read_alarm_heating_module_test()
         if alarm_heating_module_test is not None:
             data["alarm_heating_module_test"] = alarm_heating_module_test
-        
+
         alarm_emergency_mode = self.read_alarm_emergency_mode()
         if alarm_emergency_mode is not None:
             data["alarm_emergency_mode"] = alarm_emergency_mode
-        
+
         alarm_supply_air_cold = self.read_alarm_supply_air_cold()
         if alarm_supply_air_cold is not None:
             data["alarm_supply_air_cold"] = alarm_supply_air_cold
-        
+
         device_filter_remaining = self.read_device_filter_remaining()
         if device_filter_remaining is not None:
             data["device_filter_remaining"] = device_filter_remaining
-        
+
         upstream_filter_remaining = self.read_upstream_filter_remaining()
         if upstream_filter_remaining is not None:
             data["upstream_filter_remaining"] = upstream_filter_remaining
-        
+
         # Read error message (Fehlermeldung)
         error_message = self.read_error_message()
         if error_message is not None:
             data["error_message"] = error_message
-        
+
         # Read room temperatures (registers 360-376 for current, 400-416 for target)
         # and heating enable (registers 440-456 for rooms 1-17)
         # and heating active (registers 460-476 for rooms 1-17)
@@ -1164,34 +1096,34 @@ class ModbusClient:
             current_temp = self.read_room_temperature(room_number)
             if current_temp is not None:
                 data[f"register_{360 + room_number - 1}"] = int(current_temp * 10)
-            
+
             # WGT-only: target and base temperatures, heating controls
             if self.device_type == "wgt":
                 # Target temperature
                 target_temp = self.read_room_target_temperature(room_number)
                 if target_temp is not None:
                     data[f"register_{400 + room_number - 1}"] = int(target_temp * 10)
-                
+
                 # Base temperature
                 base_temp = self.read_room_base_temperature(room_number)
                 if base_temp is not None:
                     data[f"room_{room_number}_base_temp"] = base_temp
-                
+
                 # Heating enable (registers 440-456 for rooms 1-17)
                 heating_enable = self.read_room_heating_enable(room_number)
                 if heating_enable is not None:
                     data[f"register_{440 + room_number - 1}"] = heating_enable
-                
+
                 # Heating active (registers 460-476 for rooms 1-17)
                 heating_active = self.read_room_heating_active(room_number)
                 if heating_active is not None:
                     data[f"register_{460 + room_number - 1}"] = heating_active
-                
+
                 # Time program heating enable (registers 500-516 for rooms 1-17)
                 time_program_heating = self.read_holding_registers(500 + room_number - 1, 1)
                 if time_program_heating:
                     data[f"register_{500 + room_number - 1}"] = time_program_heating[0]
-        
+
         # Read operating hours (Betriebsstunden)
         operating_hours_registers = [
             (800, REG_OPERATING_HOURS_FAN),
@@ -1200,7 +1132,7 @@ class ModbusClient:
             (803, REG_OPERATING_HOURS_FAN_LEVEL_3),
             (804, REG_OPERATING_HOURS_FAN_LEVEL_4),
         ]
-        
+
         # Add WGT-specific operating hours only for WGT devices
         if self.device_type == "wgt":
             operating_hours_registers.extend([
@@ -1210,10 +1142,10 @@ class ModbusClient:
                 (810, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
                 (813, REG_OPERATING_HOURS_EWT),
             ])
-        
+
         for reg_num, reg_const in operating_hours_registers:
             registers = self.read_holding_registers(reg_const, 1)
             if registers:
                 data[f"register_{reg_num}"] = registers[0]
-        
+
         return data
