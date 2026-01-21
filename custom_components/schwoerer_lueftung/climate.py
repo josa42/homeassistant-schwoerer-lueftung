@@ -84,7 +84,8 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     @property
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
-        # Register 360-376 for rooms 1-17
+        # Register 360-376 for rooms 1-17 (actual temp)
+        # Using dynamic register access as register number depends on room_number
         register = 360 + self._room_number - 1
         value = self.coordinator.data.get(f"register_{register}")
         if value is None:
@@ -94,7 +95,8 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     @property
     def target_temperature(self) -> float | None:
         """Return the target temperature."""
-        # Register 400-416 for rooms 1-17
+        # Register 400-416 for rooms 1-17 (target temp setpoint)
+        # Using dynamic register access as register number depends on room_number
         register = 400 + self._room_number - 1
         value = self.coordinator.data.get(f"register_{register}")
         if value is None:
@@ -104,7 +106,9 @@ class BicWrgRoomClimate(BicWrgEntity, ClimateEntity):
     @property
     def hvac_mode(self) -> HVACMode:
         """Return current HVAC mode."""
-        # Register 440-451 for rooms 1-12 (only rooms 1-12 have heating control)
+        # Register 440-456 for rooms 1-17 (auxiliary heating enable)
+        # Only rooms 1-12 have heating control in some configurations
+        # Using dynamic register access as register number depends on room_number
         if self._room_number > 12:
             return HVACMode.FAN_ONLY
             
