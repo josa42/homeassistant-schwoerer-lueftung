@@ -559,22 +559,15 @@ class ModbusClient:
         data["current_exhaust_air_flow"] = self.read_register(REG_CURRENT_EXHAUST_AIR_FLOW, 1)
         data["current_supply_air_rpm"] = self.read_register(REG_CURRENT_SUPPLY_AIR_RPM, 1)
         data["current_exhaust_air_rpm"] = self.read_register(REG_CURRENT_EXHAUST_AIR_RPM, 1)
-
-        # Helper for temperature conversion
-        def read_temp(reg):
-            if (regs := self.read_holding_registers(reg, 1)):
-                return int.from_bytes(regs[0].to_bytes(2, 'big'), 'big', signed=True) / 10.0
-            return None
-
-        data["temp_t1_after_ewt"] = read_temp(REG_TEMP_T1_AFTER_EWT)
-        data["temp_t2_after_vhr"] = read_temp(REG_TEMP_T2_AFTER_VHR)
-        data["temp_t3_before_ne"] = read_temp(REG_TEMP_T3_BEFORE_NE)
-        data["temp_t4_after_ne"] = read_temp(REG_TEMP_T4_AFTER_NE)
-        data["temp_t5_exhaust_air"] = read_temp(REG_TEMP_T5_EXHAUST_AIR)
-        data["temp_t6_in_wt"] = read_temp(REG_TEMP_T6_IN_WT)
-        data["temp_t7_evaporator"] = read_temp(REG_TEMP_T7_EVAPORATOR)
-        data["temp_t8_condenser"] = read_temp(REG_TEMP_T8_CONDENSER)
-        data["temp_t10_outdoor"] = read_temp(REG_TEMP_T10_OUTDOOR)
+        data["temp_t1_after_ewt"] = self.read_temperature_register(REG_TEMP_T1_AFTER_EWT)
+        data["temp_t2_after_vhr"] = self.read_temperature_register(REG_TEMP_T2_AFTER_VHR)
+        data["temp_t3_before_ne"] = self.read_temperature_register(REG_TEMP_T3_BEFORE_NE)
+        data["temp_t4_after_ne"] = self.read_temperature_register(REG_TEMP_T4_AFTER_NE)
+        data["temp_t5_exhaust_air"] = self.read_temperature_register(REG_TEMP_T5_EXHAUST_AIR)
+        data["temp_t6_in_wt"] = self.read_temperature_register(REG_TEMP_T6_IN_WT)
+        data["temp_t7_evaporator"] = self.read_temperature_register(REG_TEMP_T7_EVAPORATOR)
+        data["temp_t8_condenser"] = self.read_temperature_register(REG_TEMP_T8_CONDENSER)
+        data["temp_t10_outdoor"] = self.read_temperature_register(REG_TEMP_T10_OUTDOOR)
 
         # WGT-specific registers (heating/cooling)
         if self.device_type == "wgt":
