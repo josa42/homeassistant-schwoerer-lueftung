@@ -128,7 +128,7 @@ class BicWrgOperationModeSelect(CoordinatorEntity[BicWrgCoordinator], SelectEnti
         self._attr_unique_id = f"{entry.entry_id}_operation_mode"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -180,7 +180,7 @@ class BicWrgFanSpeedSelect(CoordinatorEntity[BicWrgCoordinator], SelectEntity):
         self._attr_unique_id = f"{entry.entry_id}_fan_speed"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -232,7 +232,7 @@ class BicWrgHeatingCoolingFunctionSelect(CoordinatorEntity[BicWrgCoordinator], S
         self._attr_unique_id = f"{entry.entry_id}_heating_cooling_function"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )

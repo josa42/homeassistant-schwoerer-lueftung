@@ -21,4 +21,4 @@ DEFAULT_DEVICE_TYPE = DEVICE_TYPE_WGT
 
 # Device information
 MANUFACTURER = "Schwörer"
-MODEL = "WRG 134-BP-HK"
+MODEL = "Lüftung"

@@ -75,7 +75,7 @@ class BicWrgShockVentilationSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
         self._attr_unique_id = f"{entry.entry_id}_shock_ventilation"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -241,7 +241,7 @@ class BicWrgHeatPumpHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_heating_enable"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -289,7 +289,7 @@ class BicWrgHeatPumpCoolingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchEn
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_cooling_enable"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -337,7 +337,7 @@ class BicWrgAuxiliaryHeatingSwitch(CoordinatorEntity[BicWrgCoordinator], SwitchE
         self._attr_unique_id = f"{entry.entry_id}_auxiliary_heating_enable"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )

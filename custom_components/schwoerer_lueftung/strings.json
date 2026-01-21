@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Connect to Schwörer Lüftung Device",
-        "description": "Enter the connection details for your Schwörer WRG 134-BP-HK",
+        "description": "Enter the connection details for your Schwörer ventilation system",
         "data": {
           "host": "IP Address",
           "port": "Port"

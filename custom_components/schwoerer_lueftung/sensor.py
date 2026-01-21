@@ -144,9 +144,15 @@ async def async_setup_entry(
             BicWrgTemperatureT8CondenserSensor(coordinator, entry),
         ])
     
-    # Add room-specific sensors (only for WGT)
-    if has_heating:
-        for room in rooms:
+    # Add room-specific sensors
+    for room in rooms:
+        # Add room temperature sensor for WRT devices
+        if not has_heating:
+            entities.append(
+                BicWrgRoomTemperatureSensor(coordinator, room["number"], room["name"])
+            )
+        # Add auxiliary heating sensor for WGT devices
+        else:
             entities.append(
                 BicWrgRoomAuxiliaryHeatingSensor(coordinator, room["number"], room["name"])
             )
@@ -192,7 +198,7 @@ class BicWrgSensorBase(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -220,7 +226,7 @@ class BicWrgCurrentFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEn
         self._attr_unique_id = f"{entry.entry_id}_current_fan_level"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -249,7 +255,7 @@ class BicWrgTimeProgramBaseLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._attr_unique_id = f"{entry.entry_id}_time_program_base_level"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -278,7 +284,7 @@ class BicWrgShockVentilationRemainingSensor(CoordinatorEntity[BicWrgCoordinator]
         self._attr_unique_id = f"{entry.entry_id}_shock_ventilation_remaining"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -305,7 +311,7 @@ class BicWrgHeatPumpStatusSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         self._attr_unique_id = f"{entry.entry_id}_heat_pump_status"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -333,7 +339,7 @@ class BicWrgSupplyAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         self._attr_unique_id = f"{entry.entry_id}_supply_air_fan_status"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -361,7 +367,7 @@ class BicWrgExhaustAirFanStatusSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         self._attr_unique_id = f"{entry.entry_id}_exhaust_air_fan_status"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -389,7 +395,7 @@ class BicWrgEwtStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
         self._attr_unique_id = f"{entry.entry_id}_ewt_state"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -416,7 +422,7 @@ class BicWrgBypassStateSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity
         self._attr_unique_id = f"{entry.entry_id}_bypass_state"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -444,7 +450,7 @@ class BicWrgOutdoorDamperStateSensor(CoordinatorEntity[BicWrgCoordinator], Senso
         self._attr_unique_id = f"{entry.entry_id}_outdoor_damper_state"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -473,7 +479,7 @@ class BicWrgTimeProgramFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         self._attr_unique_id = f"{entry.entry_id}_time_program_fan_level"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -502,7 +508,7 @@ class BicWrgSensorFanLevelSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         self._attr_unique_id = f"{entry.entry_id}_sensor_fan_level"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -532,7 +538,7 @@ class BicWrgCurrentSupplyAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_flow"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -562,7 +568,7 @@ class BicWrgCurrentExhaustAirFlowSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_flow"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -592,7 +598,7 @@ class BicWrgCurrentSupplyAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sens
         self._attr_unique_id = f"{entry.entry_id}_current_supply_air_rpm"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -622,7 +628,7 @@ class BicWrgCurrentExhaustAirRpmSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._attr_unique_id = f"{entry.entry_id}_current_exhaust_air_rpm"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -653,7 +659,7 @@ class BicWrgTemperatureT1AfterEwtSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_temp_t1_after_ewt"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -683,7 +689,7 @@ class BicWrgTemperatureT2AfterVhrSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_temp_t2_after_vhr"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -713,7 +719,7 @@ class BicWrgTemperatureT3BeforeNeSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_temp_t3_before_ne"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -743,7 +749,7 @@ class BicWrgTemperatureT4AfterNeSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         self._attr_unique_id = f"{entry.entry_id}_temp_t4_after_ne"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -773,7 +779,7 @@ class BicWrgTemperatureT5ExhaustAirSensor(CoordinatorEntity[BicWrgCoordinator], 
         self._attr_unique_id = f"{entry.entry_id}_temp_t5_exhaust_air"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -803,7 +809,7 @@ class BicWrgTemperatureT6InWtSensor(CoordinatorEntity[BicWrgCoordinator], Sensor
         self._attr_unique_id = f"{entry.entry_id}_temp_t6_in_wt"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -833,7 +839,7 @@ class BicWrgTemperatureT7EvaporatorSensor(CoordinatorEntity[BicWrgCoordinator], 
         self._attr_unique_id = f"{entry.entry_id}_temp_t7_evaporator"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -863,7 +869,7 @@ class BicWrgTemperatureT8CondenserSensor(CoordinatorEntity[BicWrgCoordinator], S
         self._attr_unique_id = f"{entry.entry_id}_temp_t8_condenser"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -893,7 +899,7 @@ class BicWrgTemperatureT10OutdoorSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_temp_t10_outdoor"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -922,7 +928,7 @@ class BicWrgDeviceFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], Se
         self._attr_unique_id = f"{entry.entry_id}_device_filter_remaining"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -951,7 +957,7 @@ class BicWrgUpstreamFilterRemainingSensor(CoordinatorEntity[BicWrgCoordinator], 
         self._attr_unique_id = f"{entry.entry_id}_upstream_filter_remaining"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -978,7 +984,7 @@ class BicWrgErrorMessageSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntit
         self._attr_unique_id = f"{entry.entry_id}_error_message"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -1029,6 +1035,47 @@ class BicWrgRoomAuxiliaryHeatingSensor(CoordinatorEntity[BicWrgCoordinator], Sen
         return None
 
 
+class BicWrgRoomTemperatureSensor(CoordinatorEntity[BicWrgCoordinator], SensorEntity):
+    """Sensor for room temperature (WRT devices only)."""
+
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: BicWrgCoordinator,
+        room_number: int,
+        room_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._room_number = room_number
+        self._room_name = room_name
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_{room_number}_temperature"
+        self._attr_translation_key = "room_temperature"
+        
+        # Room-specific device
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
+            "name": room_name,
+            "manufacturer": MANUFACTURER,
+            "model": "Room Temperature",
+            "via_device": (DOMAIN, coordinator.config_entry.entry_id),
+        }
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the room temperature."""
+        # Register 360-376 for rooms 1-17
+        register = 360 + self._room_number - 1
+        value = self.coordinator.data.get(f"register_{register}")
+        if value is None:
+            return None
+        return value / 10.0
+
+
 
 
 
@@ -1057,7 +1104,7 @@ class BicWrgOperatingHoursSensor(CoordinatorEntity[BicWrgCoordinator], SensorEnt
         self._attr_translation_key = translation_key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )

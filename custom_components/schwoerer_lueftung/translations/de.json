@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Verbindung zu Schwörer Lüftung herstellen",
-        "description": "Gib die Verbindungsdetails für dein Schwörer WRG 134-BP-HK ein",
+        "description": "Gib die Verbindungsdetails für deine Schwörer Lüftungsanlage ein",
         "data": {
           "host": "IP-Adresse",
           "port": "Port",
@@ -357,6 +357,9 @@
       },
       "operating_hours_auxiliary_heating": {
         "name": "Betriebsstunden ZH Raum"
+      },
+      "room_temperature": {
+        "name": "Temperatur"
       }
     },
     "number": {

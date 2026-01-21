@@ -28,6 +28,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up BIC WRG climate entities."""
     coordinator: BicWrgCoordinator = hass.data[DOMAIN][entry.entry_id]
+    
+    # Only create climate entities for WGT devices (with heating)
+    if not coordinator.has_heating():
+        return
+    
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
 
     entities = [

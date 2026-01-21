@@ -57,7 +57,7 @@ class BicWrgLinearFanPowerNumber(CoordinatorEntity[BicWrgCoordinator], NumberEnt
         self._attr_unique_id = f"{entry.entry_id}_linear_fan_power"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )

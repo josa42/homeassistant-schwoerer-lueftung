@@ -288,6 +288,9 @@
       },
       "operating_hours_ewt": {
         "name": "Operating Hours EWT"
+      },
+      "room_temperature": {
+        "name": "Temperature"
       }
     },
     "switch": {

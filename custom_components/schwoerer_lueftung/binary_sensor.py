@@ -78,12 +78,11 @@ async def async_setup_entry(
             BicWrgAlarmBinarySensor(
                 coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
             ),
-        ])
-        ),
-        BicWrgAlarmBinarySensor(
-            coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
-        ),
-    ]
+            BicWrgAlarmBinarySensor(
+                coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
+            ),
+        ]
+    )
     
     # Add room auxiliary heating active binary sensors
     rooms = entry.data.get("rooms", [])
@@ -111,7 +110,7 @@ class BicWrgFanOverrideBinarySensor(CoordinatorEntity[BicWrgCoordinator], Binary
         self._attr_unique_id = f"{entry.entry_id}_fan_override"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -142,7 +141,7 @@ class BicWrgNhrStateBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySen
         self._attr_unique_id = f"{entry.entry_id}_nhr_state"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -173,7 +172,7 @@ class BicWrgPreheater1BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         self._attr_unique_id = f"{entry.entry_id}_preheater_1"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -204,7 +203,7 @@ class BicWrgPreheater2BinarySensor(CoordinatorEntity[BicWrgCoordinator], BinaryS
         self._attr_unique_id = f"{entry.entry_id}_preheater_2"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
@@ -240,7 +239,7 @@ class BicWrgAlarmBinarySensor(CoordinatorEntity[BicWrgCoordinator], BinarySensor
         self._attr_entity_registry_enabled_default = enabled_by_default
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name="WRG 134-BP-HK",
+            name="Lüftung",
             manufacturer=MANUFACTURER,
             model=MODEL,
         )
