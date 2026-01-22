@@ -20,14 +20,12 @@ from custom_components.schwoerer_lueftung.modbus.registers import (
     REG_CURRENT_TEMPERATURE_1,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_TARGET_TEMPERATURE_1,
+    room_reg,
 )
 
 from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
 from .entity import Entity
-
-_LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -92,31 +90,22 @@ class RoomClimate(Entity, ClimateEntity):
     @property
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
-        # Register 360-376 for rooms 1-17 (actual temp)
-
-        return self.coordinator.getData(REG_CURRENT_TEMPERATURE_1 + (self._room_number - 1))
+        return self.coordinator.get_room_data(REG_CURRENT_TEMPERATURE_1, self._room_number)
 
     @property
     def target_temperature(self) -> float | None:
         """Return the target temperature."""
-        # Register 400-416 for rooms 1-17 (target temp setpoint)
-        return self.coordinator.getData(REG_TARGET_TEMPERATURE_1 + (self._room_number - 1))
+        return self.coordinator.get_room_data(REG_TARGET_TEMPERATURE_1, self._room_number)
 
     @property
     def hvac_mode(self) -> HVACMode:
         """Return current HVAC mode."""
-        # Register 440-456 for rooms 1-17 (auxiliary heating enable)
-        # Only rooms 1-12 have heating control in some configurations
-        # Using dynamic register access as register number depends on room_number
-        if self._room_number > 12:
-            return HVACMode.FAN_ONLY
 
-        value = self.coordinator.getData(REG_AUXILIARY_HEATING_ENABLED_ROOM_1 + (self._room_number - 1))
+        return self.coordinator.get_room_data(REG_AUXILIARY_HEATING_ENABLED_ROOM_1, self._room_number, {
+            1: HVACMode.HEAT,
+            0: HVACMode.FAN_ONLY,
+        })
 
-        if value == 1:
-            return HVACMode.HEAT
-        else:
-            return HVACMode.FAN_ONLY
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""
@@ -126,20 +115,12 @@ class RoomClimate(Entity, ClimateEntity):
         # Clamp temperature to valid range
         temperature = max(self._attr_min_temp, min(self._attr_max_temp, temperature))
 
-        # Convert to register value (multiply by 10)
-        value = int(temperature * 10)
-
-        # Register 400-416 for rooms 1-17
-        register = 400 + self._room_number - 1
-
-        await self.coordinator.write_register(register, value)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_write_register(
+            room_reg(REG_TARGET_TEMPERATURE_1, self._room_number), int(temperature * 10)
+        )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set HVAC mode."""
-        # Register 440-451 for rooms 1-12 (only rooms 1-12 have heating control)
-        if self._room_number > 12:
-            return
 
         # Map HVAC mode to register value
         if hvac_mode == HVACMode.HEAT:
@@ -147,5 +128,6 @@ class RoomClimate(Entity, ClimateEntity):
         else:  # HVACMode.FAN_ONLY
             value = 0  # Gesperrt
 
-        await self.coordinator.write_room_heating_enable(self._room_number, value)
-        await self.coordinator.async_request_refresh()
+        await self.coordinator.async_write_room_register(
+            REG_AUXILIARY_HEATING_ENABLED_ROOM_1, self._room_number, value
+        )

@@ -38,7 +38,7 @@ class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
     @property
     def native_value(self) -> int | None:
-        return self.coordinator.getData(self._register)
+        return self.coordinator.get_data(self._register)
 
 class AbstarctRoomSensor(AbstractSensor):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
@@ -70,7 +70,7 @@ class AbstractBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
 
     @property
     def is_on(self) -> bool | None:
-        value = self.coordinator.getData(self._register)
+        value = self.coordinator.get_data(self._register)
 
         if self._active_states is None:
             return value
@@ -117,7 +117,7 @@ class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
 
     @property
     def current_option(self) -> str | None:
-        return self.coordinator.getData(self._register, self._options)
+        return self.coordinator.get_data(self._register, self._options)
 
     async def async_select_option(self, option: str) -> None:
         value = None
@@ -129,13 +129,7 @@ class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
         if value is None:
             return
 
-        # Write to device
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_register, self._register, value
-        )
-
-        if success:
-            await self.coordinator.async_request_refresh()
+        await self.coordinator.async_write_register(self._register, value)
 
 class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
 
@@ -159,15 +153,10 @@ class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
 
     @property
     def native_value(self) -> float | None:
-        return self.coordinator.getData(self._register)
+        return self.coordinator.get_data(self._register)
 
     async def async_set_native_value(self, value: float) -> None:
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_register, self._register, int(value)
-        )
-
-        if success:
-            await self.coordinator.async_request_refresh()
+        await self.coordinator.async_write_register(self._register, int(value))
 
 class AbstarctRoomNumber(AbstractNumber):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
@@ -196,23 +185,14 @@ class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
 
     @property
     def is_on(self) -> bool | None:
-        value = self.coordinator.getData(self._register)
+        value = self.coordinator.get_data(self._register)
         return value == 1 if value is not None else None
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self._write(True)
+        await self.coordinator.async_write_register(self._register, 1)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self._write(False)
-
-
-    async def _write(self, value: bool) -> None:
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_register, self._register, value
-        )
-
-        if success:
-            await self.coordinator.async_request_refresh()
+        await self.coordinator.async_write_register(self._register, 0)
 
 class AbstractRoomSwitch(AbstractSwitch):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
