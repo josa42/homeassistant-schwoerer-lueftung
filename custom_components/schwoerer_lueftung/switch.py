@@ -1,12 +1,13 @@
 """Switch platform for BIC WRG."""
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -19,10 +20,13 @@ from .modbus_client import (
     HEAT_PUMP_COOLING_OFF,
     HEAT_PUMP_HEATING_ENABLED,
     HEAT_PUMP_HEATING_OFF,
+    REG_HEATING_ENABLED_1,
+    REG_SCHECHULD_HEATING_ENABLED_1,
     SHOCK_VENTILATION_ACTIVE,
     SHOCK_VENTILATION_INACTIVE,
 )
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -32,11 +36,12 @@ async def async_setup_entry(
     """Set up WRG switch entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
-    
-    entities = [
+
+    entities = []
+    entities.extend([
         ShockVentilationSwitch(coordinator, entry),
-    ]
-    
+    ])
+
     # Add heating-related switches only for WGT devices
     if has_heating:
         entities.extend([
@@ -44,7 +49,7 @@ async def async_setup_entry(
             HeatPumpCoolingSwitch(coordinator, entry),
             AuxiliaryHeatingSwitch(coordinator, entry),
         ])
-    
+
     # Add room heating switches (only for WGT)
     if has_heating:
         rooms = entry.data.get("rooms", [])
@@ -59,7 +64,7 @@ async def async_setup_entry(
                     coordinator, room["number"], room["name"]
                 )
             )
-    
+
     async_add_entities(entities)
 
 
@@ -98,7 +103,7 @@ class ShockVentilationSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_shock_ventilation, SHOCK_VENTILATION_ACTIVE
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -107,7 +112,7 @@ class ShockVentilationSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_shock_ventilation, SHOCK_VENTILATION_INACTIVE
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -133,7 +138,7 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
             f"{entry_id}_room_{room_number}_auxiliary_heating_enable"
         )
         self._attr_translation_key = "auxiliary_heating_enable"
-        
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
@@ -147,7 +152,7 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
     def is_on(self) -> bool | None:
         """Return true if auxiliary heating is enabled."""
         # Register 440-456 for rooms 1-17
-        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
+        value = self.coordinator.getData(REG_HEATING_ENABLED_1 + (self._room_number - 1))
         if value is not None:
             return value == 1
         return None
@@ -158,7 +163,7 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 1
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -168,14 +173,14 @@ class RoomAuxiliaryHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEnt
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 0
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
 
 class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     """Switch entity for room time program heating enable.
-    
+
     Freigabe Zeitprogramm Heizen.
     """
 
@@ -194,10 +199,10 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
         self._room_name = room_name
         entry_id = coordinator.config_entry.entry_id
         self._attr_unique_id = (
-            f"{entry_id}_room_{room_number}_time_program_heating_enable"
+            f"{entry_id}_room_{room_number}_scheduled_heating_enable"
         )
-        self._attr_translation_key = "time_program_heating_enable"
-        
+        self._attr_translation_key = "scheduled_heating_enable"
+
         # Room-specific device
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{entry_id}_room_{room_number}")},
@@ -211,7 +216,7 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
     def is_on(self) -> bool | None:
         """Return true if time program heating is enabled."""
         # Register 500-516 for rooms 1-17
-        return self.coordinator.data.get(f"time_program_heating_enable_{self._room_number}")
+        return self.coordinator.getData(REG_SCHECHULD_HEATING_ENABLED_1 + (self._room_number - 1))
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Enable time program heating."""
@@ -219,7 +224,7 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 1
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -229,7 +234,7 @@ class RoomTimeProgramHeatingEnableSwitch(CoordinatorEntity[Coordinator], SwitchE
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_register, register, 0
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -270,7 +275,7 @@ class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_heat_pump_heating_enable,
             HEAT_PUMP_HEATING_ENABLED,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -280,7 +285,7 @@ class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_heat_pump_heating_enable,
             HEAT_PUMP_HEATING_OFF,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -321,7 +326,7 @@ class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_heat_pump_cooling_enable,
             HEAT_PUMP_COOLING_ENABLED,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -331,7 +336,7 @@ class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_heat_pump_cooling_enable,
             HEAT_PUMP_COOLING_OFF,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -372,7 +377,7 @@ class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_auxiliary_heating_enable,
             AUXILIARY_HEATING_ENABLED,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()
 
@@ -382,6 +387,6 @@ class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             self.coordinator.client.write_auxiliary_heating_enable,
             AUXILIARY_HEATING_OFF,
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()

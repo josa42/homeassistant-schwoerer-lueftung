@@ -390,13 +390,13 @@
       "auxiliary_house_heating": {
         "name": "Zusatzheizung Haus"
       },
-      "time_program_heating_enabled": {
+      "scheduled_heating_enabled": {
         "name": "Freigabe Zeitprogramm Heizen"
       },
       "auxiliary_heating_enable": {
         "name": "Zusatzheizung Freigabe"
       },
-      "time_program_heating_enable": {
+      "scheduled_heating_enable": {
         "name": "Freigabe Zeitprogramm Heizen"
       }
     },

@@ -4,13 +4,13 @@ from __future__ import annotations
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
-from .modbus_client import LINEAR_FAN_POWER_MAX, LINEAR_FAN_POWER_MIN
+from .modbus_client import LINEAR_FAN_POWER_MAX, LINEAR_FAN_POWER_MIN, REG_BASE_TEMPERATURE_1
 
 
 async def async_setup_entry(
@@ -20,19 +20,18 @@ async def async_setup_entry(
 ) -> None:
     """Set up WRG number entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
-    
-    entities = [LinearFanPowerNumber(coordinator, entry)]
-    
+
+    entities = []
+    entities.append(LinearFanPowerNumber(coordinator, entry))
+
     # Add base temperature numbers for each configured room (WGT only)
     if coordinator.has_heating():
         rooms = entry.data.get("rooms", [])
         for room in rooms:
             entities.append(
-                RoomBaseTemperatureNumber(
-                    coordinator, entry, room["number"], room["name"]
-                )
+                RoomBaseTemperatureNumber(coordinator, entry, room["number"], room["name"])
             )
-    
+
     async_add_entities(entities)
 
 
@@ -75,7 +74,7 @@ class LinearFanPowerNumber(CoordinatorEntity[Coordinator], NumberEntity):
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_linear_fan_power, int(value)
         )
-        
+
         if success:
             # Update coordinator data immediately
             await self.coordinator.async_request_refresh()
@@ -101,19 +100,21 @@ class RoomBaseTemperatureNumber(CoordinatorEntity[Coordinator], NumberEntity):
     ) -> None:
         """Initialize the number entity."""
         super().__init__(coordinator)
-        
+
         # Validate room number (1-17 as per Modbus documentation)
         if not 1 <= room_number <= 17:
             raise ValueError(f"Room number must be between 1 and 17, got {room_number}")
-        
+
         self._room_number = room_number
         self._room_name = room_name
         self._attr_translation_key = "base_temperature"
-        self._attr_unique_id = f"{entry.entry_id}_room_{room_number}_base_temp"
-        
+        self._attr_unique_id = f"{entry.entry_id}_base_tempemerature_{room_number}"
+
         # Use same model as climate entity for consistency
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        
+
+        coordinator.client.subscribe(REG_BASE_TEMPERATURE_1 + (room_number - 1))
+
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, f"{entry.entry_id}_room_{room_number}")},
             name=room_name,
@@ -125,7 +126,7 @@ class RoomBaseTemperatureNumber(CoordinatorEntity[Coordinator], NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the current base temperature."""
-        return self.coordinator.data.get(f"room_{self._room_number}_base_temp")
+        return self.coordinator.data.get(f"base_temperature_{self._room_number}")
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the base temperature."""
@@ -135,7 +136,7 @@ class RoomBaseTemperatureNumber(CoordinatorEntity[Coordinator], NumberEntity):
             self._room_number,
             value,
         )
-        
+
         if success:
             # Update coordinator data immediately
             await self.coordinator.async_request_refresh()

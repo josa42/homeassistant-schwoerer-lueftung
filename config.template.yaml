@@ -14,4 +14,4 @@ logger:
   default: info
   logs:
     custom_components.schwoerer_lueftung: debug
-    pymodbus: debug
+    # pymodbus: debug

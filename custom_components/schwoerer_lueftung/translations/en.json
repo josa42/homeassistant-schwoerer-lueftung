@@ -309,7 +309,7 @@
       "auxiliary_heating_enable": {
         "name": "Auxiliary Heating Enable"
       },
-      "time_program_heating_enable": {
+      "scheduled_heating_enable": {
         "name": "Time Program Heating Enable"
       }
     },

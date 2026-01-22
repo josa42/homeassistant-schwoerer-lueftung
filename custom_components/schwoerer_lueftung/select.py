@@ -98,16 +98,16 @@ async def async_setup_entry(
     """Set up WRG select entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
-    
+
     entities = [
         OperationModeSelect(coordinator, entry),
         FanSpeedSelect(coordinator, entry),
     ]
-    
+
     # Add heating-related select entities only for WGT devices
     if has_heating:
         entities.append(HeatingCoolingFunctionSelect(coordinator, entry))
-    
+
     async_add_entities(entities)
 
 
@@ -150,15 +150,15 @@ class OperationModeSelect(CoordinatorEntity[Coordinator], SelectEntity):
             if name == option:
                 mode_value = value
                 break
-        
+
         if mode_value is None:
             return
-        
+
         # Write to device
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_operation_mode, mode_value
         )
-        
+
         if success:
             # Update coordinator data immediately
             await self.coordinator.async_request_refresh()
@@ -203,15 +203,15 @@ class FanSpeedSelect(CoordinatorEntity[Coordinator], SelectEntity):
             if name == option:
                 speed_value = value
                 break
-        
+
         if speed_value is None:
             return
-        
+
         # Write to device
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_fan_speed, speed_value
         )
-        
+
         if success:
             # Update coordinator data immediately
             await self.coordinator.async_request_refresh()
@@ -255,13 +255,13 @@ class HeatingCoolingFunctionSelect(CoordinatorEntity[Coordinator], SelectEntity)
             if name == option:
                 mode_value = value
                 break
-        
+
         if mode_value is None:
             return
-        
+
         success = await self.hass.async_add_executor_job(
             self.coordinator.client.write_heating_cooling_function, mode_value
         )
-        
+
         if success:
             await self.coordinator.async_request_refresh()

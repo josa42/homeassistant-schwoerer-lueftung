@@ -1,5 +1,6 @@
 """Binary sensor platform for BIC WRG."""
 from __future__ import annotations
+import logging
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -7,7 +8,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -20,7 +21,12 @@ from .modbus_client import (
     PREHEATER_STATE_VHR1_2_ACTIVE,
     PREHEATER_STATE_VHR1_ACTIVE,
     PREHEATER_STATE_VHR2_ACTIVE,
+    REG_FAN_OVERRIDE,
+    REG_HEATING_ACTIVE_1,
+    REG_NHR_STATE,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -34,39 +40,17 @@ async def async_setup_entry(
 
     entities = [
         FanOverrideBinarySensor(coordinator, entry),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_pressure_switch", "alarm_pressure_switch"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_utility_lock", "alarm_utility_lock"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_door_open", "alarm_door_open"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_device_filter_dirty", "alarm_device_filter_dirty"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_upstream_filter_dirty", "alarm_upstream_filter_dirty"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_off_peak_disabled", "alarm_off_peak_disabled"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_supply_voltage_off", "alarm_supply_voltage_off"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_pressostat_triggered", "alarm_pressostat_triggered"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_external_utility_lock", "alarm_external_utility_lock"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_emergency_mode", "alarm_emergency_mode"
-        ),
-        AlarmBinarySensor(
-            coordinator, entry, "alarm_supply_air_too_cold", "alarm_supply_air_too_cold"
-        ),
+        AlarmBinarySensor(coordinator, entry, "alarm_pressure_switch"),
+        AlarmBinarySensor(coordinator, entry, "alarm_utility_lock"),
+        AlarmBinarySensor(coordinator, entry, "alarm_door_open"),
+        AlarmBinarySensor(coordinator, entry, "alarm_device_filter_dirty"),
+        AlarmBinarySensor(coordinator, entry, "alarm_upstream_filter_dirty"),
+        AlarmBinarySensor(coordinator, entry, "alarm_off_peak_disabled"),
+        AlarmBinarySensor(coordinator, entry, "alarm_supply_voltage_off"),
+        AlarmBinarySensor(coordinator, entry, "alarm_pressostat_triggered"),
+        AlarmBinarySensor(coordinator, entry, "alarm_external_utility_lock"),
+        AlarmBinarySensor(coordinator, entry, "alarm_emergency_mode"),
+        AlarmBinarySensor(coordinator, entry, "alarm_supply_air_too_cold"),
     ]
 
     # Add heating-related binary sensors only for WGT devices
@@ -75,12 +59,8 @@ async def async_setup_entry(
             NhrStateBinarySensor(coordinator, entry),
             Preheater1BinarySensor(coordinator, entry),
             Preheater2BinarySensor(coordinator, entry),
-            AlarmBinarySensor(
-                coordinator, entry, "alarm_heating_module_test", "alarm_heating_module_test", enabled_by_default=False
-            ),
-            AlarmBinarySensor(
-                coordinator, entry, "alarm_supply_air_cold", "alarm_supply_air_cold"
-            ),
+            AlarmBinarySensor(coordinator, entry, "alarm_heating_module_test", enabled_by_default=False),
+            AlarmBinarySensor(coordinator, entry, "alarm_supply_air_cold"),
         ]
     )
 
@@ -121,7 +101,7 @@ class FanOverrideBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity
     @property
     def is_on(self) -> bool | None:
         """Return true if fan override is active."""
-        value = self.coordinator.data.get("fan_override")
+        value = self.coordinator.getData(REG_FAN_OVERRIDE)
         if value is not None:
             return value == FAN_OVERRIDE_ACTIVE
         return None
@@ -153,10 +133,7 @@ class NhrStateBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if NHR is active."""
-        value = self.coordinator.data.get("nhr_state")
-        if value is not None:
-            return value == NHR_STATE_ACTIVE
-        return None
+        return self.coordinator.getData(REG_NHR_STATE)
 
 
 class Preheater1BinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
@@ -234,13 +211,12 @@ class AlarmBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
         coordinator: Coordinator,
         entry: ConfigEntry,
         key: str,
-        translation_key: str,
         enabled_by_default: bool = True,
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._key = key
-        self._attr_translation_key = translation_key
+        self._attr_translation_key = key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_entity_registry_enabled_default = enabled_by_default
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
@@ -294,4 +270,4 @@ class RoomAuxiliaryHeatingActiveBinarySensor(
     def is_on(self) -> bool | None:
         """Return true if auxiliary heating is active."""
         # Register 460-476 for rooms 1-17
-        return self.coordinator.data.get(f"heating_active_{self._room_number}")
+        return self.coordinator.getData(REG_HEATING_ACTIVE_1 + (self._room_number - 1))

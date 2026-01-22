@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -35,6 +36,8 @@ from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
+    REG_CURRENT_TEMPERATURE_1,
+    REG_HEATING_ENABLED_1,
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
     REG_OPERATING_HOURS_EWT,
     REG_OPERATING_HOURS_FAN,
@@ -103,6 +106,7 @@ OUTDOOR_DAMPER_STATES = {
     OUTDOOR_DAMPER_STATE_OPEN: "Open",
 }
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -164,11 +168,11 @@ async def async_setup_entry(
 
     # Add operating hours sensors
     entities.extend([
-        OperatingHoursSensor( coordinator, entry, "operating_hours_fan"),
-        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_1"),
-        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_2"),
-        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_3"),
-        OperatingHoursSensor( coordinator, entry, "operating_hours_fan_level_4"),
+        OperatingHoursSensor(coordinator, entry, "operating_hours_fan"),
+        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_1"),
+        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_2"),
+        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_3"),
+        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_4"),
     ])
 
     # Add heating-related operating hours sensors only for WGT
@@ -1095,7 +1099,7 @@ class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     def native_value(self) -> str | None:
         """Return the auxiliary heating status."""
         # Register 440-456 for rooms 1-17
-        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
+        value = self.coordinator.getData(REG_HEATING_ENABLED_1 + (self._room_number - 1))
         if value == 0:
             return "Blocked"
         elif value == 1:
@@ -1137,7 +1141,7 @@ class RoomTemperatureSensor(CoordinatorEntity[Coordinator], SensorEntity):
     def native_value(self) -> float | None:
         """Return the room temperature."""
         # Register 360-376 for rooms 1-17
-        return self.coordinator.data.get(f"current_temp_temperature_{self._room_number}")
+        return self.coordinator.getData(REG_CURRENT_TEMPERATURE_1 + (self._room_number - 1))
 
 
 class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):

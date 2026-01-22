@@ -17,7 +17,7 @@ from .const import (
     DEVICE_TYPE_WGT,
     DOMAIN,
 )
-from .modbus_client import ModbusClient
+from .modbus_client import REG_KEYS, ModbusClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             slave_id=entry.data[CONF_SLAVE_ID],
             device_type=entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT),
         )
-        
+
         super().__init__(
             hass,
             _LOGGER,
@@ -63,16 +63,33 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             if not await self.hass.async_add_executor_job(self.client.connect):
                 raise UpdateFailed("Failed to connect to device")
-            
+
             data = await self.hass.async_add_executor_job(self.client.read_data)
-            
+
             # For now, return empty dict if no data (placeholder until registers are mapped)
             # Remove this check once actual register reading is implemented
             if data is None:
                 raise UpdateFailed("Failed to read data from device")
-            
+
             return data
         except Exception as err:
             raise UpdateFailed(f"Error communicating with device: {err}") from err
         finally:
             await self.hass.async_add_executor_job(self.client.disconnect)
+
+
+    def getData(self, register: int) -> Any:
+        try:
+          key = REG_KEYS.get(register)
+
+          if not self.client.is_subscribed(register):
+            self.client.subscribe(register)
+
+          if key is None:
+            return None
+
+          return self.data.get(key)
+        except Exception as err:
+          _LOGGER.error(f"Error getting data for register {register}: {err}")
+          return None
+

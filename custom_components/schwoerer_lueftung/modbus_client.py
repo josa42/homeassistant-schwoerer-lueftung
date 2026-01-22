@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Callable
 
 from pymodbus.client import ModbusTcpClient
 from pymodbus.exceptions import ModbusException
+from itertools import groupby
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -273,40 +274,407 @@ AUXILIARY_HEATING_ENABLED = 1
 ALARM_INACTIVE = 0
 ALARM_ACTIVE = 1
 
-# Error codes mapping
-# Fehlermeldung: Error code to description
-ERROR_CODES = {
-    0: "No Error",
-    257: "Supply Air Fan Speed Missing",
-    258: "Exhaust Air Fan Speed Missing",
-    259: "Supply Air Fan Minimum Speed Not Reached",
-    260: "Exhaust Air Fan Minimum Speed Not Reached",
-    261: "Supply Air Fan Maximum Speed Exceeded",
-    262: "Exhaust Air Fan Maximum Speed Exceeded",
-    513: "Communication Error with BDE",
-    514: "Communication Error Auxiliary Control Unit",
-    515: "Communication Error Heating Module",
-    516: "Communication Error Sensor",
-    517: "Communication Error Sensor Adapter",
-    518: "Communication Receiver",
-    770: "Error Sensor Element T1 After EWT",
-    771: "Error Sensor Element T2 After VHR",
-    772: "Error Sensor Element T3 Before NHR",
-    773: "Error Sensor Element T4 After NHR",
-    774: "Error Sensor Element T5 Exhaust Air",
-    775: "Error Sensor Element T6 In WT",
-    776: "Error Sensor Element T7 Evaporator",
-    777: "Error Sensor Element T8 Condenser",
-    779: "Error Sensor Element T10 Outdoor Temperature",
-    1025: "Error Parameter Memory",
-    1026: "Error System Bus",
-    1281: "Heat Pump High Pressure",
-    1282: "Heat Pump Low Pressure",
-    1283: "Maximum Defrost Time Exceeded",
-    1284: "Heat Pump Low Pressure in Cooling Mode",
+REG_CURRENT_TEMPERATURE_1 = 360
+REG_CURRENT_TEMPERATURE_2 = 361
+REG_CURRENT_TEMPERATURE_3 = 362
+REG_CURRENT_TEMPERATURE_4 = 363
+REG_CURRENT_TEMPERATURE_5 = 364
+REG_CURRENT_TEMPERATURE_6 = 365
+REG_CURRENT_TEMPERATURE_7 = 366
+REG_CURRENT_TEMPERATURE_8 = 367
+REG_CURRENT_TEMPERATURE_9 = 368
+REG_CURRENT_TEMPERATURE_10 = 369
+REG_CURRENT_TEMPERATURE_11 = 370
+REG_CURRENT_TEMPERATURE_12 = 371
+REG_CURRENT_TEMPERATURE_13 = 372
+REG_CURRENT_TEMPERATURE_14 = 373
+REG_CURRENT_TEMPERATURE_15 = 374
+REG_CURRENT_TEMPERATURE_16 = 375
+REG_CURRENT_TEMPERATURE_17 = 376
+
+REG_TARGET_TEMPERATURE_1 = 400
+REG_TARGET_TEMPERATURE_2 = 401
+REG_TARGET_TEMPERATURE_3 = 402
+REG_TARGET_TEMPERATURE_4 = 403
+REG_TARGET_TEMPERATURE_5 = 404
+REG_TARGET_TEMPERATURE_6 = 405
+REG_TARGET_TEMPERATURE_7 = 406
+REG_TARGET_TEMPERATURE_8 = 407
+REG_TARGET_TEMPERATURE_9 = 408
+REG_TARGET_TEMPERATURE_10 = 409
+REG_TARGET_TEMPERATURE_11 = 410
+REG_TARGET_TEMPERATURE_12 = 411
+REG_TARGET_TEMPERATURE_13 = 412
+REG_TARGET_TEMPERATURE_14 = 413
+REG_TARGET_TEMPERATURE_15 = 414
+REG_TARGET_TEMPERATURE_16 = 415
+REG_TARGET_TEMPERATURE_17 = 416
+
+REG_BASE_TEMPERATURE_1 = 420
+REG_BASE_TEMPERATURE_2 = 421
+REG_BASE_TEMPERATURE_3 = 422
+REG_BASE_TEMPERATURE_4 = 423
+REG_BASE_TEMPERATURE_5 = 424
+REG_BASE_TEMPERATURE_6 = 425
+REG_BASE_TEMPERATURE_7 = 426
+REG_BASE_TEMPERATURE_8 = 427
+REG_BASE_TEMPERATURE_9 = 428
+REG_BASE_TEMPERATURE_10 = 429
+REG_BASE_TEMPERATURE_11 = 430
+REG_BASE_TEMPERATURE_12 = 431
+REG_BASE_TEMPERATURE_13 = 432
+REG_BASE_TEMPERATURE_14 = 433
+REG_BASE_TEMPERATURE_15 = 434
+REG_BASE_TEMPERATURE_16 = 435
+REG_BASE_TEMPERATURE_17 = 436
+
+REG_HEATING_ENABLED_1 = 440
+REG_HEATING_ENABLED_2 = 441
+REG_HEATING_ENABLED_3 = 442
+REG_HEATING_ENABLED_4 = 443
+REG_HEATING_ENABLED_5 = 444
+REG_HEATING_ENABLED_6 = 445
+REG_HEATING_ENABLED_7 = 446
+REG_HEATING_ENABLED_8 = 447
+REG_HEATING_ENABLED_9 = 448
+REG_HEATING_ENABLED_10 = 449
+REG_HEATING_ENABLED_11 = 450
+REG_HEATING_ENABLED_12 = 451
+REG_HEATING_ENABLED_13 = 452
+REG_HEATING_ENABLED_14 = 453
+REG_HEATING_ENABLED_15 = 454
+REG_HEATING_ENABLED_16 = 455
+REG_HEATING_ENABLED_17 = 456
+
+REG_HEATING_ACTIVE_1 = 460
+REG_HEATING_ACTIVE_2 = 461
+REG_HEATING_ACTIVE_3 = 462
+REG_HEATING_ACTIVE_4 = 463
+REG_HEATING_ACTIVE_5 = 464
+REG_HEATING_ACTIVE_6 = 465
+REG_HEATING_ACTIVE_7 = 466
+REG_HEATING_ACTIVE_8 = 467
+REG_HEATING_ACTIVE_9 = 468
+REG_HEATING_ACTIVE_10 = 469
+REG_HEATING_ACTIVE_11 = 470
+REG_HEATING_ACTIVE_12 = 471
+REG_HEATING_ACTIVE_13 = 472
+REG_HEATING_ACTIVE_14 = 473
+REG_HEATING_ACTIVE_15 = 474
+REG_HEATING_ACTIVE_16 = 475
+REG_HEATING_ACTIVE_17 = 476
+
+REG_SCHECHULD_HEATING_ENABLED_1 = 500
+REG_SCHECHULD_HEATING_ENABLED_2 = 501
+REG_SCHECHULD_HEATING_ENABLED_3 = 502
+REG_SCHECHULD_HEATING_ENABLED_4 = 503
+REG_SCHECHULD_HEATING_ENABLED_5 = 504
+REG_SCHECHULD_HEATING_ENABLED_6 = 505
+REG_SCHECHULD_HEATING_ENABLED_7 = 506
+REG_SCHECHULD_HEATING_ENABLED_8 = 507
+REG_SCHECHULD_HEATING_ENABLED_9 = 508
+REG_SCHECHULD_HEATING_ENABLED_10 = 509
+REG_SCHECHULD_HEATING_ENABLED_11 = 510
+REG_SCHECHULD_HEATING_ENABLED_12 = 511
+REG_SCHECHULD_HEATING_ENABLED_13 = 512
+REG_SCHECHULD_HEATING_ENABLED_14 = 513
+REG_SCHECHULD_HEATING_ENABLED_15 = 514
+REG_SCHECHULD_HEATING_ENABLED_16 = 515
+REG_SCHECHULD_HEATING_ENABLED_17 = 516
+
+
+REG_KEYS: dict[int, str] = {
+    REG_OPERATION_MODE: "operation_mode",
+    REG_FAN_SPEED: "fan_speed",
+    REG_CURRENT_FAN_LEVEL: "current_fan_level",
+    REG_LINEAR_FAN_POWER: "linear_fan_power",
+    REG_FAN_OVERRIDE: "fan_override",
+    REG_TIME_PROGRAM_BASE_LEVEL: "time_program_base_level",
+    REG_SHOCK_VENTILATION: "shock_ventilation",
+    REG_SHOCK_VENTILATION_REMAINING: "shock_ventilation_remaining",
+
+    REG_SUPPLY_AIR_FAN_STATUS: "supply_air_fan_status",
+    REG_EXHAUST_AIR_FAN_STATUS: "exhaust_air_fan_status",
+    REG_EWT_STATE: "ewt_state",
+    REG_BYPASS_STATE: "bypass_state",
+    REG_OUTDOOR_DAMPER_STATE: "outdoor_damper_state",
+    REG_PREHEATER_STATE: "preheater_state",
+    REG_TIME_PROGRAM_FAN_LEVEL: "time_program_fan_level",
+    REG_SENSOR_FAN_LEVEL: "sensor_fan_level",
+    REG_CURRENT_SUPPLY_AIR_FLOW: "current_supply_air_flow",
+    REG_CURRENT_EXHAUST_AIR_FLOW: "current_exhaust_air_flow",
+    REG_CURRENT_SUPPLY_AIR_RPM: "current_supply_air_rpm",
+    REG_CURRENT_EXHAUST_AIR_RPM: "current_exhaust_air_rpm",
+    REG_TEMP_T1_AFTER_EWT: "temp_t1_after_ewt",
+    REG_TEMP_T2_AFTER_VHR: "temp_t2_after_vhr",
+    REG_TEMP_T3_BEFORE_NE: "temp_t3_before_ne",
+    REG_TEMP_T4_AFTER_NE: "temp_t4_after_ne",
+    REG_TEMP_T5_EXHAUST_AIR: "temp_t5_exhaust_air",
+    REG_TEMP_T6_IN_WT: "temp_t6_in_wt",
+    REG_TEMP_T7_EVAPORATOR: "temp_t7_evaporator",
+    REG_TEMP_T8_CONDENSER: "temp_t8_condenser",
+    REG_TEMP_T10_OUTDOOR: "temp_t10_outdoor",
+    # Read alarms
+    REG_ALARM_PRESSURE_SWITCH: "alarm_pressure_switch",
+    REG_ALARM_UTILITY_LOCK: "alarm_utility_lock",
+    REG_ALARM_DOOR_OPEN: "alarm_door_open",
+    REG_ALARM_DEVICE_FILTER_DIRTY: "alarm_device_filter_dirty",
+    REG_ALARM_UPSTREAM_FILTER_DIRTY: "alarm_upstream_filter_dirty",
+    REG_ALARM_OFF_PEAK_DISABLED: "alarm_off_peak_disabled",
+    REG_ALARM_SUPPLY_VOLTAGE_OFF: "alarm_supply_voltage_off",
+    REG_ALARM_PRESSOSTAT_TRIGGERED: "alarm_pressostat_triggered",
+    REG_ALARM_EXTERNAL_UTILITY_LOCK: "alarm_external_utility_lock",
+    REG_ALARM_HEATING_MODULE_TEST: "alarm_heating_module_test",
+    REG_ALARM_EMERGENCY_MODE: "alarm_emergency_mode",
+    REG_ALARM_SUPPLY_AIR_COLD: "alarm_supply_air_cold",
+    REG_DEVICE_FILTER_REMAINING: "device_filter_remaining",
+    REG_UPSTREAM_FILTER_REMAINING: "upstream_filter_remaining",
+    REG_ERROR_MESSAGE: "error_message",
+
+    REG_OPERATING_HOURS_FAN: "operating_hours_fan",
+    REG_OPERATING_HOURS_FAN_LEVEL_1: "operating_hours_fan_level_1",
+    REG_OPERATING_HOURS_FAN_LEVEL_2: "operating_hours_fan_level_2",
+    REG_OPERATING_HOURS_FAN_LEVEL_3: "operating_hours_fan_level_3",
+    REG_OPERATING_HOURS_FAN_LEVEL_4: "operating_hours_fan_level_4",
+
+    REG_OPERATING_HOURS_HEAT_PUMP: "operating_hours_heat_pump",
+    REG_OPERATING_HOURS_HEAT_PUMP_COOLING: "operating_hours_heat_pump_cooling",
+    REG_OPERATING_HOURS_VHR: "operating_hours_vhr",
+    REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE: "operating_hours_auxiliary_heating_house",
+    REG_OPERATING_HOURS_EWT: "operating_hours_ewt",
+
+    # WGT-only registers
+    REG_HEAT_PUMP_STATUS: "heat_pump_status",
+    REG_NHR_STATE: "nhr_state",
+    REG_HEATING_COOLING_FUNCTION: "heating_cooling_function",
+    REG_HEAT_PUMP_HEATING_ENABLE: "heat_pump_heating_enable",
+    REG_HEAT_PUMP_COOLING_ENABLE: "heat_pump_cooling_enable",
+    REG_AUXILIARY_HEATING_ENABLE: "auxiliary_heating_enable",
+
+    REG_CURRENT_TEMPERATURE_1: "current_temperature_1",
+    REG_CURRENT_TEMPERATURE_2: "current_temperature_2",
+    REG_CURRENT_TEMPERATURE_3: "current_temperature_3",
+    REG_CURRENT_TEMPERATURE_4: "current_temperature_4",
+    REG_CURRENT_TEMPERATURE_5: "current_temperature_5",
+    REG_CURRENT_TEMPERATURE_6: "current_temperature_6",
+    REG_CURRENT_TEMPERATURE_7: "current_temperature_7",
+    REG_CURRENT_TEMPERATURE_8: "current_temperature_8",
+    REG_CURRENT_TEMPERATURE_9: "current_temperature_9",
+    REG_CURRENT_TEMPERATURE_10: "current_temperature_10",
+    REG_CURRENT_TEMPERATURE_11: "current_temperature_11",
+    REG_CURRENT_TEMPERATURE_12: "current_temperature_12",
+    REG_CURRENT_TEMPERATURE_13: "current_temperature_13",
+    REG_CURRENT_TEMPERATURE_14: "current_temperature_14",
+    REG_CURRENT_TEMPERATURE_15: "current_temperature_15",
+    REG_CURRENT_TEMPERATURE_16: "current_temperature_16",
+    REG_CURRENT_TEMPERATURE_17: "current_temperature_17",
+
+    REG_TARGET_TEMPERATURE_1: "target_temperature_1",
+    REG_TARGET_TEMPERATURE_2: "target_temperature_2",
+    REG_TARGET_TEMPERATURE_3: "target_temperature_3",
+    REG_TARGET_TEMPERATURE_4: "target_temperature_4",
+    REG_TARGET_TEMPERATURE_5: "target_temperature_5",
+    REG_TARGET_TEMPERATURE_6: "target_temperature_6",
+    REG_TARGET_TEMPERATURE_7: "target_temperature_7",
+    REG_TARGET_TEMPERATURE_8: "target_temperature_8",
+    REG_TARGET_TEMPERATURE_9: "target_temperature_9",
+    REG_TARGET_TEMPERATURE_10: "target_temperature_10",
+    REG_TARGET_TEMPERATURE_11: "target_temperature_11",
+    REG_TARGET_TEMPERATURE_12: "target_temperature_12",
+    REG_TARGET_TEMPERATURE_13: "target_temperature_13",
+    REG_TARGET_TEMPERATURE_14: "target_temperature_14",
+    REG_TARGET_TEMPERATURE_15: "target_temperature_15",
+    REG_TARGET_TEMPERATURE_16: "target_temperature_16",
+    REG_TARGET_TEMPERATURE_17: "target_temperature_17",
+
+    REG_BASE_TEMPERATURE_1: "base_temperature_1",
+    REG_BASE_TEMPERATURE_2: "base_temperature_2",
+    REG_BASE_TEMPERATURE_3: "base_temperature_3",
+    REG_BASE_TEMPERATURE_4: "base_temperature_4",
+    REG_BASE_TEMPERATURE_5: "base_temperature_5",
+    REG_BASE_TEMPERATURE_6: "base_temperature_6",
+    REG_BASE_TEMPERATURE_7: "base_temperature_7",
+    REG_BASE_TEMPERATURE_8: "base_temperature_8",
+    REG_BASE_TEMPERATURE_9: "base_temperature_9",
+    REG_BASE_TEMPERATURE_10: "base_temperature_10",
+    REG_BASE_TEMPERATURE_11: "base_temperature_11",
+    REG_BASE_TEMPERATURE_12: "base_temperature_12",
+    REG_BASE_TEMPERATURE_13: "base_temperature_13",
+    REG_BASE_TEMPERATURE_14: "base_temperature_14",
+    REG_BASE_TEMPERATURE_15: "base_temperature_15",
+    REG_BASE_TEMPERATURE_16: "base_temperature_16",
+    REG_BASE_TEMPERATURE_17: "base_temperature_17",
+
+    REG_HEATING_ENABLED_1: "heating_enabled_1",
+    REG_HEATING_ENABLED_2: "heating_enabled_2",
+    REG_HEATING_ENABLED_3: "heating_enabled_3",
+    REG_HEATING_ENABLED_4: "heating_enabled_4",
+    REG_HEATING_ENABLED_5: "heating_enabled_5",
+    REG_HEATING_ENABLED_6: "heating_enabled_6",
+    REG_HEATING_ENABLED_7: "heating_enabled_7",
+    REG_HEATING_ENABLED_8: "heating_enabled_8",
+    REG_HEATING_ENABLED_9: "heating_enabled_9",
+    REG_HEATING_ENABLED_10: "heating_enabled_10",
+    REG_HEATING_ENABLED_11: "heating_enabled_11",
+    REG_HEATING_ENABLED_12: "heating_enabled_12",
+    REG_HEATING_ENABLED_13: "heating_enabled_13",
+    REG_HEATING_ENABLED_14: "heating_enabled_14",
+    REG_HEATING_ENABLED_15: "heating_enabled_15",
+    REG_HEATING_ENABLED_16: "heating_enabled_16",
+    REG_HEATING_ENABLED_17: "heating_enabled_17",
+
+    REG_HEATING_ACTIVE_1: "heating_active_1",
+    REG_HEATING_ACTIVE_2: "heating_active_2",
+    REG_HEATING_ACTIVE_3: "heating_active_3",
+    REG_HEATING_ACTIVE_4: "heating_active_4",
+    REG_HEATING_ACTIVE_5: "heating_active_5",
+    REG_HEATING_ACTIVE_6: "heating_active_6",
+    REG_HEATING_ACTIVE_7: "heating_active_7",
+    REG_HEATING_ACTIVE_8: "heating_active_8",
+    REG_HEATING_ACTIVE_9: "heating_active_9",
+    REG_HEATING_ACTIVE_10: "heating_active_10",
+    REG_HEATING_ACTIVE_11: "heating_active_11",
+    REG_HEATING_ACTIVE_12: "heating_active_12",
+    REG_HEATING_ACTIVE_13: "heating_active_13",
+    REG_HEATING_ACTIVE_14: "heating_active_14",
+    REG_HEATING_ACTIVE_15: "heating_active_15",
+    REG_HEATING_ACTIVE_16: "heating_active_16",
+    REG_HEATING_ACTIVE_17: "heating_active_17",
+
+    REG_SCHECHULD_HEATING_ENABLED_1: "scheduled_heating_enabled_1",
+    REG_SCHECHULD_HEATING_ENABLED_2: "scheduled_heating_enabled_2",
+    REG_SCHECHULD_HEATING_ENABLED_3: "scheduled_heating_enabled_3",
+    REG_SCHECHULD_HEATING_ENABLED_4: "scheduled_heating_enabled_4",
+    REG_SCHECHULD_HEATING_ENABLED_5: "scheduled_heating_enabled_5",
+    REG_SCHECHULD_HEATING_ENABLED_6: "scheduled_heating_enabled_6",
+    REG_SCHECHULD_HEATING_ENABLED_7: "scheduled_heating_enabled_7",
+    REG_SCHECHULD_HEATING_ENABLED_8: "scheduled_heating_enabled_8",
+    REG_SCHECHULD_HEATING_ENABLED_9: "scheduled_heating_enabled_9",
+    REG_SCHECHULD_HEATING_ENABLED_10: "scheduled_heating_enabled_10",
+    REG_SCHECHULD_HEATING_ENABLED_11: "scheduled_heating_enabled_11",
+    REG_SCHECHULD_HEATING_ENABLED_12: "scheduled_heating_enabled_12",
+    REG_SCHECHULD_HEATING_ENABLED_13: "scheduled_heating_enabled_13",
+    REG_SCHECHULD_HEATING_ENABLED_14: "scheduled_heating_enabled_14",
+    REG_SCHECHULD_HEATING_ENABLED_15: "scheduled_heating_enabled_15",
+    REG_SCHECHULD_HEATING_ENABLED_16: "scheduled_heating_enabled_16",
+    REG_SCHECHULD_HEATING_ENABLED_17: "scheduled_heating_enabled_17",
 }
 
 
+
+
+def to_temperature(value: int|None) -> float|None:
+    """Convert register value to temperature in °C."""
+    try:
+        return int.from_bytes(value.to_bytes(2, 'big'), 'big', signed=True) / 10.0 if value is not None else None
+    except Exception as err:
+        _LOGGER.error("Error converting temperature value: %s", err)
+        return None
+
+
+def to_bool(value: int|None) -> bool|None:
+    """Convert register value to temperature in °C."""
+    return value == 1 if value is not None else None
+
+
+REG_TO_TRANSFORM: dict[int, Callable] = {
+    REG_TEMP_T1_AFTER_EWT: to_temperature,
+    REG_TEMP_T2_AFTER_VHR: to_temperature,
+    REG_TEMP_T3_BEFORE_NE: to_temperature,
+    REG_TEMP_T4_AFTER_NE: to_temperature,
+    REG_TEMP_T5_EXHAUST_AIR: to_temperature,
+    REG_TEMP_T6_IN_WT: to_temperature,
+    REG_TEMP_T7_EVAPORATOR: to_temperature,
+    REG_TEMP_T8_CONDENSER: to_temperature,
+    REG_TEMP_T10_OUTDOOR: to_temperature,
+    REG_NHR_STATE: to_bool,
+    REG_CURRENT_TEMPERATURE_1: to_temperature,
+    REG_CURRENT_TEMPERATURE_2: to_temperature,
+    REG_CURRENT_TEMPERATURE_3: to_temperature,
+    REG_CURRENT_TEMPERATURE_4: to_temperature,
+    REG_CURRENT_TEMPERATURE_5: to_temperature,
+    REG_CURRENT_TEMPERATURE_6: to_temperature,
+    REG_CURRENT_TEMPERATURE_7: to_temperature,
+    REG_CURRENT_TEMPERATURE_8: to_temperature,
+    REG_CURRENT_TEMPERATURE_9: to_temperature,
+    REG_CURRENT_TEMPERATURE_10: to_temperature,
+    REG_CURRENT_TEMPERATURE_11: to_temperature,
+    REG_CURRENT_TEMPERATURE_12: to_temperature,
+    REG_CURRENT_TEMPERATURE_13: to_temperature,
+    REG_CURRENT_TEMPERATURE_14: to_temperature,
+    REG_CURRENT_TEMPERATURE_15: to_temperature,
+    REG_CURRENT_TEMPERATURE_16: to_temperature,
+    REG_CURRENT_TEMPERATURE_17: to_temperature,
+    REG_TARGET_TEMPERATURE_1: to_temperature,
+    REG_TARGET_TEMPERATURE_2: to_temperature,
+    REG_TARGET_TEMPERATURE_3: to_temperature,
+    REG_TARGET_TEMPERATURE_4: to_temperature,
+    REG_TARGET_TEMPERATURE_5: to_temperature,
+    REG_TARGET_TEMPERATURE_6: to_temperature,
+    REG_TARGET_TEMPERATURE_7: to_temperature,
+    REG_TARGET_TEMPERATURE_8: to_temperature,
+    REG_TARGET_TEMPERATURE_9: to_temperature,
+    REG_TARGET_TEMPERATURE_10: to_temperature,
+    REG_TARGET_TEMPERATURE_11: to_temperature,
+    REG_TARGET_TEMPERATURE_12: to_temperature,
+    REG_TARGET_TEMPERATURE_13: to_temperature,
+    REG_TARGET_TEMPERATURE_14: to_temperature,
+    REG_TARGET_TEMPERATURE_15: to_temperature,
+    REG_TARGET_TEMPERATURE_16: to_temperature,
+    REG_TARGET_TEMPERATURE_17: to_temperature,
+    REG_BASE_TEMPERATURE_1: to_temperature,
+    REG_BASE_TEMPERATURE_2: to_temperature,
+    REG_BASE_TEMPERATURE_3: to_temperature,
+    REG_BASE_TEMPERATURE_4: to_temperature,
+    REG_BASE_TEMPERATURE_5: to_temperature,
+    REG_BASE_TEMPERATURE_6: to_temperature,
+    REG_BASE_TEMPERATURE_7: to_temperature,
+    REG_BASE_TEMPERATURE_8: to_temperature,
+    REG_BASE_TEMPERATURE_9: to_temperature,
+    REG_BASE_TEMPERATURE_10: to_temperature,
+    REG_BASE_TEMPERATURE_11: to_temperature,
+    REG_BASE_TEMPERATURE_12: to_temperature,
+    REG_BASE_TEMPERATURE_13: to_temperature,
+    REG_BASE_TEMPERATURE_14: to_temperature,
+    REG_BASE_TEMPERATURE_15: to_temperature,
+    REG_BASE_TEMPERATURE_16: to_temperature,
+    REG_BASE_TEMPERATURE_17: to_temperature,
+    REG_HEATING_ENABLED_1: to_bool,
+    REG_HEATING_ENABLED_2: to_bool,
+    REG_HEATING_ENABLED_3: to_bool,
+    REG_HEATING_ENABLED_4: to_bool,
+    REG_HEATING_ENABLED_5: to_bool,
+    REG_HEATING_ENABLED_6: to_bool,
+    REG_HEATING_ENABLED_7: to_bool,
+    REG_HEATING_ENABLED_8: to_bool,
+    REG_HEATING_ENABLED_9: to_bool,
+    REG_HEATING_ENABLED_10: to_bool,
+    REG_HEATING_ENABLED_11: to_bool,
+    REG_HEATING_ENABLED_12: to_bool,
+    REG_HEATING_ENABLED_13: to_bool,
+    REG_HEATING_ENABLED_14: to_bool,
+    REG_HEATING_ENABLED_15: to_bool,
+    REG_HEATING_ENABLED_16: to_bool,
+    REG_HEATING_ENABLED_17: to_bool,
+}
+
+def group_consecutive(d: dict[int, tuple[str, Callable|None]]) -> list[dict[int, tuple[str, Callable|None]]]:
+    sorted_keys = sorted(d.keys())
+    groups = []
+
+    for _, group_keys in groupby(enumerate(sorted_keys), key=lambda x: x[0] - x[1]):
+        group_dict = {key: d[key] for _, key in group_keys}
+
+        # Split groups longer than 125
+        if len(group_dict) > 125:
+            keys_list = sorted(group_dict.keys())
+            for i in range(0, len(keys_list), 125):
+                chunk = {k: group_dict[k] for k in keys_list[i:i+125]}
+                groups.append(chunk)
+        else:
+            groups.append(group_dict)
+
+    return groups
 class ModbusClient:
     """Modbus TCP client for WRG device."""
 
@@ -323,6 +691,75 @@ class ModbusClient:
             retries=3,
         )
 
+        self._subscriptions: dict[int, tuple[str, None|Callable]] = {
+            REG_OPERATION_MODE: ("operation_mode", None),
+            REG_FAN_SPEED: ("fan_speed", None),
+            REG_CURRENT_FAN_LEVEL: ("current_fan_level", None),
+            REG_LINEAR_FAN_POWER: ("linear_fan_power", None),
+            REG_FAN_OVERRIDE: ("fan_override", None),
+            REG_TIME_PROGRAM_BASE_LEVEL: ("time_program_base_level", None),
+            REG_SHOCK_VENTILATION: ("shock_ventilation", None),
+            REG_SHOCK_VENTILATION_REMAINING: ("shock_ventilation_remaining", None),
+
+            REG_SUPPLY_AIR_FAN_STATUS: ("supply_air_fan_status", None),
+            REG_EXHAUST_AIR_FAN_STATUS: ("exhaust_air_fan_status", None),
+            REG_EWT_STATE: ("ewt_state", None),
+            REG_BYPASS_STATE: ("bypass_state", None),
+            REG_OUTDOOR_DAMPER_STATE: ("outdoor_damper_state", None),
+            REG_PREHEATER_STATE: ("preheater_state", None),
+            REG_TIME_PROGRAM_FAN_LEVEL: ("time_program_fan_level", None),
+            REG_SENSOR_FAN_LEVEL: ("sensor_fan_level", None),
+            REG_CURRENT_SUPPLY_AIR_FLOW: ("current_supply_air_flow", None),
+            REG_CURRENT_EXHAUST_AIR_FLOW: ("current_exhaust_air_flow", None),
+            REG_CURRENT_SUPPLY_AIR_RPM: ("current_supply_air_rpm", None),
+            REG_CURRENT_EXHAUST_AIR_RPM: ("current_exhaust_air_rpm", None),
+            REG_TEMP_T1_AFTER_EWT: ("temp_t1_after_ewt", to_temperature),
+            REG_TEMP_T2_AFTER_VHR: ("temp_t2_after_vhr", to_temperature),
+            REG_TEMP_T3_BEFORE_NE: ("temp_t3_before_ne", to_temperature),
+            REG_TEMP_T4_AFTER_NE: ("temp_t4_after_ne", to_temperature),
+            REG_TEMP_T5_EXHAUST_AIR: ("temp_t5_exhaust_air", to_temperature),
+            REG_TEMP_T6_IN_WT: ("temp_t6_in_wt", to_temperature),
+            REG_TEMP_T7_EVAPORATOR: ("temp_t7_evaporator", to_temperature),
+            REG_TEMP_T8_CONDENSER: ("temp_t8_condenser", to_temperature),
+            REG_TEMP_T10_OUTDOOR: ("temp_t10_outdoor", to_temperature),
+            # Read alarms
+            REG_ALARM_PRESSURE_SWITCH: ("alarm_pressure_switch", None),
+            REG_ALARM_UTILITY_LOCK: ("alarm_utility_lock", None),
+            REG_ALARM_DOOR_OPEN: ("alarm_door_open", None),
+            REG_ALARM_DEVICE_FILTER_DIRTY: ("alarm_device_filter_dirty", None),
+            REG_ALARM_UPSTREAM_FILTER_DIRTY: ("alarm_upstream_filter_dirty", None),
+            REG_ALARM_OFF_PEAK_DISABLED: ("alarm_off_peak_disabled", None),
+            REG_ALARM_SUPPLY_VOLTAGE_OFF: ("alarm_supply_voltage_off", None),
+            REG_ALARM_PRESSOSTAT_TRIGGERED: ("alarm_pressostat_triggered", None),
+            REG_ALARM_EXTERNAL_UTILITY_LOCK: ("alarm_external_utility_lock", None),
+            REG_ALARM_HEATING_MODULE_TEST: ("alarm_heating_module_test", None),
+            REG_ALARM_EMERGENCY_MODE: ("alarm_emergency_mode", None),
+            REG_ALARM_SUPPLY_AIR_COLD: ("alarm_supply_air_cold", None),
+            REG_DEVICE_FILTER_REMAINING: ("device_filter_remaining", None),
+            REG_UPSTREAM_FILTER_REMAINING: ("upstream_filter_remaining", None),
+            REG_ERROR_MESSAGE: ("error_message", None),
+
+            REG_OPERATING_HOURS_FAN: ("operating_hours_fan", None),
+            REG_OPERATING_HOURS_FAN_LEVEL_1: ("operating_hours_fan_level_1", None),
+            REG_OPERATING_HOURS_FAN_LEVEL_2: ("operating_hours_fan_level_2", None),
+            REG_OPERATING_HOURS_FAN_LEVEL_3: ("operating_hours_fan_level_3", None),
+            REG_OPERATING_HOURS_FAN_LEVEL_4: ("operating_hours_fan_level_4", None),
+
+            REG_OPERATING_HOURS_HEAT_PUMP: ("operating_hours_heat_pump", None),
+            REG_OPERATING_HOURS_HEAT_PUMP_COOLING: ("operating_hours_heat_pump_cooling", None),
+            REG_OPERATING_HOURS_VHR: ("operating_hours_vhr", None),
+            REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE: ("operating_hours_auxiliary_heating_house", None),
+            REG_OPERATING_HOURS_EWT: ("operating_hours_ewt", None),
+
+            # WGT-only registers
+            REG_HEAT_PUMP_STATUS: ("heat_pump_status", None),
+            # REG_NHR_STATE: ("nhr_state", to_bool),
+            REG_HEATING_COOLING_FUNCTION: ("heating_cooling_function", None),
+            REG_HEAT_PUMP_HEATING_ENABLE: ("heat_pump_heating_enable", None),
+            REG_HEAT_PUMP_COOLING_ENABLE: ("heat_pump_cooling_enable", None),
+            REG_AUXILIARY_HEATING_ENABLE: ("auxiliary_heating_enable", None),
+        }
+
     def connect(self) -> bool:
         """Connect to the Modbus device."""
         return self._client.connect()
@@ -335,41 +772,18 @@ class ModbusClient:
         """Check if connected to the Modbus device."""
         return self._client.is_socket_open()
 
-    def read_register(
-        self, address: int, count: int = 1
-    ) -> int | None:
-        """Read holding registers from the device."""
-        try:
-            result = self._client.read_holding_registers(address=address, count=count)
-            if result.isError():
-                _LOGGER.error("Error reading registers at %s: %s", address, result)
-                return None
-            _LOGGER.info("Read registers at %s: %s", address, result.registers)
-            return result.registers[0] if result.registers else None
-        except ModbusException as err:
-            _LOGGER.error("Modbus exception reading registers: %s", err)
-            return None
-        except Exception as err:
-            _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
-            return None
+    def is_subscribed(self, register: int) -> bool:
+        return register in self._subscriptions
 
-    def read_temperature_register(self, address: int) -> float | None:
-        """Read temperature holding registers from the device."""
-        value = self.read_register(address, 1)
-        if value is not None:
-            return int.from_bytes(value.to_bytes(2, 'big'), 'big', signed=True) / 10.0
-        return None
-
-    def read_bool_register(self, address: int) -> float | None:
-        """Read bool (1/0) holding registers from the device."""
-        value = self.read_register(address, 1)
-        if value is not None:
-            return value == 1
-
-
+    def subscribe(self, register: int) -> None:
+        key = REG_KEYS.get(register)
+        if key is not None:
+            self._subscriptions[register] = (key, REG_TO_TRANSFORM.get(register))
+        else:
+            _LOGGER.error("Attempted to subscribe to unknown register: %s", register)
 
     def read_registers(
-        self, addresses: int, count: int = 1
+        self, address: int, count: int
     ) -> list[int] | None:
         """Read holding registers from the device."""
         try:
@@ -377,8 +791,26 @@ class ModbusClient:
             if result.isError():
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
-            _LOGGER.info("Read registers at %s: %s", address, result.registers)
+            _LOGGER.info("Read registers at %s[%d]: %s", address, count, result.registers)
             return result.registers
+        except ModbusException as err:
+            _LOGGER.error("Modbus exception reading registers: %s", err)
+            return None
+        except Exception as err:
+            _LOGGER.error("Unexpected error reading registers at %s: %s", address, err)
+            return None
+
+    def read_register(
+        self, address: int
+    ) -> int | None:
+        """Read holding registers from the device."""
+        try:
+            result = self._client.read_holding_registers(address=address, count=1)
+            if result.isError():
+                _LOGGER.error("Error reading register at %s: %s", address, result)
+                return None
+            _LOGGER.info("Read registers at %s: %s", address, result.registers)
+            return result.registers[0] if result.registers else None
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
             return None
@@ -403,6 +835,26 @@ class ModbusClient:
         except Exception as err:
             _LOGGER.error("Unexpected error writing register at %s: %s", address, err)
             return False
+
+    def write_operation_mode(self, mode: int) -> bool:
+        """Write operation mode (Betriebsart)."""
+        return self.write_register(REG_OPERATION_MODE, mode)
+
+    def write_room_target_temperature(self, room_number: int, temperature: float) -> bool:
+        """Write room target temperature (Soll Temp Raum)."""
+        # Rooms 1-17 use registers 400-416
+        # Temperature range: 10-30°C, stored as value * 10
+        register = 400 + room_number - 1
+        value = int(temperature * 10)
+        return self.write_register(register, value)
+
+    def write_room_heating_enable(self, room_number: int, enabled: int) -> bool:
+        """Write room heating enable (Zusatzheizung Freigabe Raum)."""
+        # Rooms 1-17 have heating enable (registers 440-456)
+        if room_number < 1 or room_number > 17:
+            return False
+        register = 440 + room_number - 1
+        return self.write_register(register, enabled)
 
 
     def write_fan_speed(self, speed: int) -> bool:
@@ -454,89 +906,35 @@ class ModbusClient:
         """Read all relevant data from the device."""
         data = {}
 
-        data["operation_mode"] = self.read_register(REG_OPERATION_MODE, 1)
-        data["fan_speed"] =  self.read_register(REG_FAN_SPEED, 1)
-        data["current_fan_level"] = self.read_register(REG_CURRENT_FAN_LEVEL, 1)
-        data["linear_fan_power"] = self.read_register(REG_LINEAR_FAN_POWER, 1)
-        data["fan_override"] = self.read_register(REG_FAN_OVERRIDE, 1)
-        data["time_program_base_level"] = self.read_register(REG_TIME_PROGRAM_BASE_LEVEL, 1)
-        data["shock_ventilation"] = self.read_register(REG_SHOCK_VENTILATION, 1)
-        data["shock_ventilation_remaining"] = self.read_register(REG_SHOCK_VENTILATION_REMAINING, 1)
 
-        # WGT-only: heat pump status and NHR state
-        if self.device_type == "wgt":
-            data["heat_pump_status"] = self.read_register(REG_HEAT_PUMP_STATUS, 1)
-            data["nhr_state"] = self.read_register(REG_NHR_STATE, 1)
+        groups = group_consecutive(self._subscriptions)
 
-        data["supply_air_fan_status"] = self.read_register(REG_SUPPLY_AIR_FAN_STATUS, 1)
-        data["exhaust_air_fan_status"] = self.read_register(REG_EXHAUST_AIR_FAN_STATUS, 1)
-        data["ewt_state"] = self.read_register(REG_EWT_STATE, 1)
-        data["bypass_state"] = self.read_register(REG_BYPASS_STATE, 1)
-        data["outdoor_damper_state"] = self.read_register(REG_OUTDOOR_DAMPER_STATE, 1)
-        data["preheater_state"] = self.read_register(REG_PREHEATER_STATE, 1)
-        data["time_program_fan_level"] = self.read_register(REG_TIME_PROGRAM_FAN_LEVEL, 1)
-        data["sensor_fan_level"] = self.read_register(REG_SENSOR_FAN_LEVEL, 1)
-        data["current_supply_air_flow"] = self.read_register(REG_CURRENT_SUPPLY_AIR_FLOW, 1)
-        data["current_exhaust_air_flow"] = self.read_register(REG_CURRENT_EXHAUST_AIR_FLOW, 1)
-        data["current_supply_air_rpm"] = self.read_register(REG_CURRENT_SUPPLY_AIR_RPM, 1)
-        data["current_exhaust_air_rpm"] = self.read_register(REG_CURRENT_EXHAUST_AIR_RPM, 1)
-        data["temp_t1_after_ewt"] = self.read_temperature_register(REG_TEMP_T1_AFTER_EWT)
-        data["temp_t2_after_vhr"] = self.read_temperature_register(REG_TEMP_T2_AFTER_VHR)
-        data["temp_t3_before_ne"] = self.read_temperature_register(REG_TEMP_T3_BEFORE_NE)
-        data["temp_t4_after_ne"] = self.read_temperature_register(REG_TEMP_T4_AFTER_NE)
-        data["temp_t5_exhaust_air"] = self.read_temperature_register(REG_TEMP_T5_EXHAUST_AIR)
-        data["temp_t6_in_wt"] = self.read_temperature_register(REG_TEMP_T6_IN_WT)
-        data["temp_t7_evaporator"] = self.read_temperature_register(REG_TEMP_T7_EVAPORATOR)
-        data["temp_t8_condenser"] = self.read_temperature_register(REG_TEMP_T8_CONDENSER)
-        data["temp_t10_outdoor"] = self.read_temperature_register(REG_TEMP_T10_OUTDOOR)
+        for group in groups:
+            registers = list(group.keys())
 
-        # WGT-specific registers (heating/cooling)
-        if self.device_type == "wgt":
-            data["heating_cooling_function"] = self.read_register(REG_HEATING_COOLING_FUNCTION, 1)
-            data["heat_pump_heating_enable"] = self.read_register(REG_HEAT_PUMP_HEATING_ENABLE, 1)
-            data["heat_pump_cooling_enable"] = self.read_register(REG_HEAT_PUMP_COOLING_ENABLE, 1)
-            data["auxiliary_heating_enable"] = self.read_register(REG_AUXILIARY_HEATING_ENABLE, 1)
+            values = self.read_registers(registers[0], len(registers))
+            if values is None:
+                continue
 
-        # Read alarms
-        data["alarm_pressure_switch"] = self.read_register(REG_ALARM_PRESSURE_SWITCH, 1)
-        data["alarm_utility_lock"] = self.read_register(REG_ALARM_UTILITY_LOCK, 1)
-        data["alarm_door_open"] = self.read_register(REG_ALARM_DOOR_OPEN, 1)
-        data["alarm_device_filter_dirty"] = self.read_register(REG_ALARM_DEVICE_FILTER_DIRTY, 1)
-        data["alarm_upstream_filter_dirty"] = self.read_register(REG_ALARM_UPSTREAM_FILTER_DIRTY, 1)
-        data["alarm_off_peak_disabled"] = self.read_register(REG_ALARM_OFF_PEAK_DISABLED, 1)
-        data["alarm_supply_voltage_off"] = self.read_register(REG_ALARM_SUPPLY_VOLTAGE_OFF, 1)
-        data["alarm_pressostat_triggered"] = self.read_register(REG_ALARM_PRESSOSTAT_TRIGGERED, 1)
-        data["alarm_external_utility_lock"] = self.read_register(REG_ALARM_EXTERNAL_UTILITY_LOCK, 1)
-        data["alarm_heating_module_test"] = self.read_register(REG_ALARM_HEATING_MODULE_TEST, 1)
-        data["alarm_emergency_mode"] = self.read_register(REG_ALARM_EMERGENCY_MODE, 1)
-        data["alarm_supply_air_cold"] = self.read_register(REG_ALARM_SUPPLY_AIR_COLD, 1)
-        data["device_filter_remaining"] = self.read_register(REG_DEVICE_FILTER_REMAINING, 1)
-        data["upstream_filter_remaining"] = self.read_register(REG_UPSTREAM_FILTER_REMAINING, 1)
-        data["error_message"] = self.read_register(REG_ERROR_MESSAGE, 1)
+            for i, address in enumerate(registers):
+                try:
+                    key = REG_KEYS.get(address)
+                    transform = REG_TO_TRANSFORM.get(address)
 
-        for room_number in range(1, 18):  # Rooms 1-17
-            data[f"current_temp_temperature_{room_number}"] = self.read_temperature_register(360 + room_number - 1)
+                    if key is None:
+                        _LOGGER.error("Register %d not in REG_KEYS", address)
+                        continue
 
-            # WGT-only: target and base temperatures, heating controls
-            if self.device_type == "wgt":
-                data[f"target_temperature_{room_number}"] = self.read_temperature_register(400 + room_number - 1)
-                data[f"room_{room_number}_base_temp"] = self.read_temperature_register(420 + room_number - 1)
-                data[f"heating_enable_{room_number}"] = self.read_bool_register(440 + room_number - 1)
-                data[f"heating_active_{room_number}"] = self.read_register(460 + room_number - 1)
-                data[f"time_program_heating_enable_{room_number}"] = self.read_bool_register(500 + room_number - 1)
+                    # _LOGGER.info("Register %d (%s): %s", address, REG_KEYS.get(address), data[REG_KEYS.get(address)])
+                    data[key] = transform(values[i]) if transform else values[i]
 
-        data["operating_hours_fan"] = self.read_register(REG_OPERATING_HOURS_FAN)
-        data["operating_hours_fan_level_1"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_1)
-        data["operating_hours_fan_level_2"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_2)
-        data["operating_hours_fan_level_3"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_3)
-        data["operating_hours_fan_level_4"] = self.read_register(REG_OPERATING_HOURS_FAN_LEVEL_4)
+                    if key != REG_KEYS.get(address):
+                        _LOGGER.error("Register %d key mismatch: expected %s, got %s", address, REG_KEYS.get(address), key)
 
-        data["operating_hours_heat_pump"] = self.read_register(REG_OPERATING_HOURS_HEAT_PUMP)
-        data["operating_hours_heat_pump_cooling"] = self.read_register(REG_OPERATING_HOURS_HEAT_PUMP_COOLING)
-        data["operating_hours_vhr"] = self.read_register(REG_OPERATING_HOURS_VHR)
-        data["operating_hours_auxiliary_heating_house"] = self.read_register(
-            REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE
-        )
-        data["operating_hours_ewt"] = self.read_register(REG_OPERATING_HOURS_EWT)
+                    _LOGGER.info("Register %d -> %s", address, REG_KEYS[address])
+                except Exception as err:
+                    _LOGGER.error("Error transforming register %d value %s: %s", address, values[i], err)
+
 
         return data
+

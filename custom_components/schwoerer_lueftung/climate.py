@@ -6,6 +6,8 @@ from typing import Any
 
 from homeassistant.components.climate import (
     ClimateEntity,
+)
+from homeassistant.components.climate.const import (
     ClimateEntityFeature,
     HVACMode,
 )
@@ -13,6 +15,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from custom_components.schwoerer_lueftung.modbus_client import REG_CURRENT_TEMPERATURE_1, REG_HEATING_ENABLED_1, REG_TARGET_TEMPERATURE_1
 
 from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
@@ -85,13 +89,14 @@ class RoomClimate(Entity, ClimateEntity):
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
         # Register 360-376 for rooms 1-17 (actual temp)
-        return self.coordinator.data.get(f"current_temp_temperature_{self._room_number}")
+
+        return self.coordinator.getData(REG_CURRENT_TEMPERATURE_1 + (self._room_number - 1))
 
     @property
     def target_temperature(self) -> float | None:
         """Return the target temperature."""
         # Register 400-416 for rooms 1-17 (target temp setpoint)
-        return self.coordinator.data.get(f"target_temperature_{self._room_number}")
+        return self.coordinator.getData(REG_TARGET_TEMPERATURE_1 + (self._room_number - 1))
 
     @property
     def hvac_mode(self) -> HVACMode:
@@ -102,7 +107,7 @@ class RoomClimate(Entity, ClimateEntity):
         if self._room_number > 12:
             return HVACMode.FAN_ONLY
 
-        value = self.coordinator.data.get(f"heating_enable_{self._room_number}")
+        value = self.coordinator.getData(REG_HEATING_ENABLED_1 + (self._room_number - 1))
 
         if value == 1:
             return HVACMode.HEAT
