@@ -1,4 +1,4 @@
-"""Fixtures for BIC WRG tests."""
+"""Fixtures for tests."""
 from __future__ import annotations
 
 import pytest

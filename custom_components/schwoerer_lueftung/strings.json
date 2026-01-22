@@ -97,7 +97,7 @@
       "alarm_supply_air_cold": {
         "name": "Supply Air Too Cold Alarm"
       },
-      "auxiliary_heating_active": {
+      "auxiliary_heating_active_room": {
         "name": "Auxiliary Heating Active"
       },
       "fan_override": {
@@ -290,6 +290,9 @@
       },
       "current_temperature": {
         "name": "Temperature"
+      },
+      "auxiliary_heating_enabled_room": {
+        "name": "Auxiliary Heating Enabled"
       }
     },
     "switch": {

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -12,12 +11,11 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .abstract import (AbstractSensor, AbstarctRoomSensor)
 
-from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
+from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
     BYPASS_STATE_CLOSED,
@@ -81,6 +79,8 @@ from .modbus.registers import (
     SUPPLY_AIR_FAN_STATUS_STANDBY,
     SUPPLY_AIR_FAN_STATUS_STARTUP,
 )
+
+# TODO clean up unused mappings
 
 # Heat pump status mapping
 # Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
@@ -252,6 +252,8 @@ class EwtStateSensor(AbstractSensor):
 
 
 class BypassStateSensor(AbstractSensor):
+    _attr_entity_registry_enabled_default = False
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_BYPASS_STATE)
 
@@ -315,6 +317,7 @@ class TemperatureT1AfterEwtSensor(AbstractSensor):
 class TemperatureT2AfterVhrSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T2_AFTER_VHR)
@@ -323,6 +326,7 @@ class TemperatureT2AfterVhrSensor(AbstractSensor):
 class TemperatureT3BeforeNeSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T3_BEFORE_NE)
@@ -331,6 +335,7 @@ class TemperatureT3BeforeNeSensor(AbstractSensor):
 class TemperatureT4AfterNeSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T4_AFTER_NE)
@@ -339,6 +344,7 @@ class TemperatureT4AfterNeSensor(AbstractSensor):
 class TemperatureT5ExhaustAirSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T5_EXHAUST_AIR)
@@ -347,6 +353,7 @@ class TemperatureT5ExhaustAirSensor(AbstractSensor):
 class TemperatureT6InWtSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T6_IN_WT)
@@ -355,6 +362,7 @@ class TemperatureT6InWtSensor(AbstractSensor):
 class TemperatureT7EvaporatorSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T7_EVAPORATOR)
@@ -363,6 +371,7 @@ class TemperatureT7EvaporatorSensor(AbstractSensor):
 class TemperatureT8CondenserSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.TEMPERATURE
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TEMP_T8_CONDENSER)

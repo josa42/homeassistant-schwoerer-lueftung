@@ -113,10 +113,6 @@ class ModbusClient:
 
                     data[key] = transform(values[i]) if transform else values[i]
 
-                    if key != REG_KEYS.get(address):
-                        _LOGGER.error(
-                            "Register %d key mismatch: expected %s, got %s", address, REG_KEYS.get(address), key
-                        )
                 except Exception as err:
                     _LOGGER.error("Error transforming register %d value %s: %s", address, values[i], err)
 
@@ -124,11 +120,9 @@ class ModbusClient:
 
     def _get_grouped_subscriptions(self) -> list[list[int]]:
         """Group consecutive register addresses together for efficient reading."""
-        subscriptions = sorted(self._subscriptions)
-
         groups = []
 
-        for _, groupped_subscriptions in groupby(enumerate(subscriptions), key=lambda x: x[0] - x[1]):
+        for _, groupped_subscriptions in groupby(enumerate(sorted(self._subscriptions)), key=lambda x: x[0] - x[1]):
             group = [x for _, x in list(groupped_subscriptions)]
 
             # Split groups longer than 125

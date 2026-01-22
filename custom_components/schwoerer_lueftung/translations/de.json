@@ -152,31 +152,31 @@
         "name": "Aktuelle Drehzahl Abluft"
       },
       "temp_t1_after_ewt": {
-        "name": "T1 nach EWT"
+        "name": " nach EWT (T1)"
       },
       "temp_t2_after_vhr": {
-        "name": "T2 nach VHR"
+        "name": "Temperatur nach VHR (T2)"
       },
       "temp_t3_before_ne": {
-        "name": "T3 vor NE"
+        "name": "Temperatur vor NE (T3)"
       },
       "temp_t4_after_ne": {
-        "name": "T4 nach NE"
+        "name": "Temperatur nach NE (T4)"
       },
       "temp_t5_exhaust_air": {
-        "name": "T5 Abluft"
+        "name": "Ablufttemperatur (T5)"
       },
       "temp_t6_in_wt": {
-        "name": "T6 im WT"
+        "name": "Temperatur im WT (T6)"
       },
       "temp_t7_evaporator": {
-        "name": "T7 Verdampfer"
+        "name": "Temperatur im Verdampfer (T7)"
       },
       "temp_t8_condenser": {
-        "name": "T8 Kondensator"
+        "name": "Temperatur im Kondensator (T8)"
       },
       "temp_t10_outdoor": {
-        "name": "T10 Aussen"
+        "name": "Außentemperartur (T10)"
       },
       "pressure_monitor_alarm": {
         "name": "Meldung Druckwächter Aktiv",
@@ -338,7 +338,7 @@
           "heating_enabled": "Heizen frei"
         }
       },
-      "auxiliary_heating_active": {
+      "auxiliary_heating_active_room": {
         "name": "Zusatzheizung aktiv",
         "state": {
           "inactive": "Inaktiv",
@@ -366,6 +366,9 @@
       },
       "current_temperature": {
         "name": "Temperatur"
+      },
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
       }
     },
     "number": {
@@ -441,7 +444,7 @@
       "alarm_supply_air_cold": {
         "name": "Zuluft zu kalt"
       },
-      "auxiliary_heating_active": {
+      "auxiliary_heating_active_room": {
         "name": "Zusatzheizung aktiv"
       },
       "fan_override": {

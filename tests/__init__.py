@@ -1,1 +1,1 @@
-"""Tests for the BIC WRG integration."""
+"""Tests for the integration."""

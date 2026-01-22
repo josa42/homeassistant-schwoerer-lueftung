@@ -1,4 +1,3 @@
-"""Climate platform for BIC WRG integration."""
 from __future__ import annotations
 
 import logging
@@ -23,7 +22,7 @@ from custom_components.schwoerer_lueftung.modbus.registers import (
     room_reg,
 )
 
-from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
+from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .entity import Entity
 
@@ -32,7 +31,6 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up BIC WRG climate entities."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
 
     # Only create climate entities for WGT devices (with heating)
@@ -75,17 +73,8 @@ class RoomClimate(Entity, ClimateEntity):
         self._attr_translation_key = "room_climate"
         self._attr_translation_placeholders = {"room_name": room_name}
 
-        # Determine model based on device type
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-
         # Room-specific device
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room_number}")},
-            "name": room_name,
-            "manufacturer": MANUFACTURER,
-            "model": model,
-            "via_device": (DOMAIN, coordinator.config_entry.entry_id),
-        }
+        self._attr_device_info = coordinator.get_room_device(room_number)
 
     @property
     def current_temperature(self) -> float | None:

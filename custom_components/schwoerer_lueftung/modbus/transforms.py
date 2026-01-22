@@ -5,7 +5,6 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
-
 def to_temperature(value: int | None) -> float | None:
     """Convert register value to temperature in °C."""
     try:
@@ -13,7 +12,6 @@ def to_temperature(value: int | None) -> float | None:
     except Exception as err:
         _LOGGER.error("Error converting temperature value: %s", err)
         return None
-
 
 def to_bool(value: int | None) -> bool | None:
     """Convert register value to bool."""

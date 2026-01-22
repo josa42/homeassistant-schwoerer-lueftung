@@ -1,4 +1,4 @@
-"""Config flow for BIC WRG integration."""
+"""Config flow for Schwörer Lüftung integration."""
 from __future__ import annotations
 
 import logging
@@ -11,6 +11,12 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import translation
+
+from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
+)
 
 from .const import (
     CONF_DEVICE_TYPE,
@@ -34,9 +40,18 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
             DEVICE_TYPE_WGT: "WGT (mit Heizung)",
             DEVICE_TYPE_WRT: "WRT (nur Lüftung)",
         }),
-        vol.Required(CONF_ROOMS, default=1): vol.All(
-            vol.Coerce(int), vol.Range(min=0, max=17)
-        ),
+        vol.Required(CONF_ROOMS, default=1): NumberSelector(
+            NumberSelectorConfig(
+                min=1,
+                max=17,
+                step=1,
+                mode=NumberSelectorMode.BOX,
+            )
+        )
+
+    # vol.All(
+    #         vol.Coerce(int), vol.Range(min=1, max=17)
+    #     ),
     }
 )
 
@@ -71,8 +86,6 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for BIC WRG."""
-
     VERSION = 1
 
     async def async_step_user(
@@ -111,13 +124,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 room_key = f"component.{DOMAIN}.entity.device.room.name"
                 room_prefix = translations.get(room_key, "Room")
 
-                for i in range(1, num_rooms + 1):
+                for i in range(1, int(num_rooms) + 1):
                     data[CONF_ROOMS].append({"number": i, "name": f"{room_prefix} {i}"})
 
-                # TODO fix reeturn type
+                # TODO fix return type
                 return self.async_create_entry(title=info["title"], data=data)
 
-        # TODO fix reeturn type
+        # TODO fix return type
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )

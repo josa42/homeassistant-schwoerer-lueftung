@@ -1,14 +1,12 @@
-"""Select platform for BIC WRG."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .abstract import AbstractSelect
 
-from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
+from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
     AUXILIARY_HEATING_ENABLED,
@@ -38,6 +36,8 @@ from .modbus.registers import (
     REG_HEATING_COOLING_FUNCTION,
     REG_OPERATION_MODE,
 )
+
+  # TODO clean up unused mappings
 
 # Operation mode mapping
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft

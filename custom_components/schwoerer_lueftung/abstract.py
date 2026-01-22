@@ -1,9 +1,10 @@
+import logging
 from typing import Any
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.number import NumberEntity
 from homeassistant.components.select import SelectEntity
 from homeassistant.components.switch import SwitchEntity
-from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS
+from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS, room_reg
 from .coordinator import Coordinator
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -17,7 +18,6 @@ import re
 class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
     _attr_has_entity_name = True
     _attr_state_class = SensorStateClass.MEASUREMENT
-
     _register: int
 
     def __init__(
@@ -42,7 +42,9 @@ class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
 
 class AbstarctRoomSensor(AbstractSensor):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
+        super().__init__(
+            coordinator, room_reg(base_register, room_number), device=coordinator.get_room_device(room_number)
+        )
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 
 
@@ -88,8 +90,14 @@ class AbstarctBinaryRoomSensor(AbstractBinarySensor):
         base_register: int,
         active_states: set[int]|None = None,
     ) -> None:
-        super().__init__(coordinator, base_register + (room_number - 1), active_states, device=coordinator.get_room_device(room_number))
+        super().__init__(
+            coordinator,
+            room_reg(base_register, room_number),
+            active_states,
+            device=coordinator.get_room_device(room_number)
+        )
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
+
 
 class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
     _attr_has_entity_name = True
@@ -160,7 +168,9 @@ class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
 
 class AbstarctRoomNumber(AbstractNumber):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
+        super().__init__(
+            coordinator, room_reg(base_register, room_number), device=coordinator.get_room_device(room_number)
+        )
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 
 class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
@@ -196,6 +206,8 @@ class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
 
 class AbstractRoomSwitch(AbstractSwitch):
     def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
+        super().__init__(
+            coordinator, room_reg(base_register, room_number), device=coordinator.get_room_device(room_number)
+        )
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 

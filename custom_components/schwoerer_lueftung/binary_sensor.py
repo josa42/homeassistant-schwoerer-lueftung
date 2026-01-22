@@ -1,21 +1,14 @@
-"""Binary sensor platform for BIC WRG."""
 from __future__ import annotations
-
-import logging
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
-    BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from custom_components.schwoerer_lueftung.abstract import (AbstractBinarySensor, AbstarctBinaryRoomSensor)
-
-from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
+from .abstract import (AbstractBinarySensor, AbstarctBinaryRoomSensor)
+from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
     ALARM_ACTIVE,
@@ -36,12 +29,10 @@ from .modbus.registers import (
     REG_ALARM_UPSTREAM_FILTER_DIRTY,
     REG_ALARM_UTILITY_LOCK,
     REG_FAN_OVERRIDE,
-    REG_HEATING_ACTIVE_1,
+    REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
     REG_NHR_STATE,
     REG_PREHEATER_STATE,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -52,27 +43,18 @@ async def async_setup_entry(
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
 
-    model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-    device = DeviceInfo(
-        identifiers={(DOMAIN, entry.entry_id)},
-        name="Lüftung",
-        manufacturer=MANUFACTURER,
-        model=model,
-    )
-
-
     entities = []
     entities.extend([
         FanOverrideBinarySensor(coordinator),
-        AlarmBinarySensor(coordinator, REG_ALARM_PRESSURE_SWITCH),
-        AlarmBinarySensor(coordinator, REG_ALARM_UTILITY_LOCK),
+        AlarmBinarySensor(coordinator, REG_ALARM_PRESSURE_SWITCH, enabled_by_default=False),
+        AlarmBinarySensor(coordinator, REG_ALARM_UTILITY_LOCK, enabled_by_default=False),
         AlarmBinarySensor(coordinator, REG_ALARM_DOOR_OPEN),
         AlarmBinarySensor(coordinator, REG_ALARM_DEVICE_FILTER_DIRTY),
         AlarmBinarySensor(coordinator, REG_ALARM_UPSTREAM_FILTER_DIRTY),
-        AlarmBinarySensor(coordinator, REG_ALARM_OFF_PEAK_DISABLED),
-        AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_VOLTAGE_OFF),
-        AlarmBinarySensor(coordinator, REG_ALARM_PRESSOSTAT_TRIGGERED),
-        AlarmBinarySensor(coordinator, REG_ALARM_EXTERNAL_UTILITY_LOCK),
+        AlarmBinarySensor(coordinator, REG_ALARM_OFF_PEAK_DISABLED, enabled_by_default=False),
+        AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_VOLTAGE_OFF, enabled_by_default=False),
+        AlarmBinarySensor(coordinator, REG_ALARM_PRESSOSTAT_TRIGGERED, enabled_by_default=False),
+        AlarmBinarySensor(coordinator, REG_ALARM_EXTERNAL_UTILITY_LOCK, enabled_by_default=False),
         AlarmBinarySensor(coordinator, REG_ALARM_EMERGENCY_MODE),
     ])
 
@@ -84,17 +66,13 @@ async def async_setup_entry(
             Preheater2BinarySensor(coordinator),
             AlarmBinarySensor(coordinator, REG_ALARM_HEATING_MODULE_TEST, enabled_by_default=False),
             AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_AIR_COLD),
-        ]
-    )
+        ])
 
     # Add room auxiliary heating active binary sensors ()
     device_type = entry.data.get("device_type", "wgt")
     if device_type == "wgt":
-        rooms = entry.data.get("rooms", [])
-        for room in rooms:
-            entities.append(
-                RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"])
-            )
+        for room in entry.data.get("rooms", []):
+            entities.append(RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"]))
 
     async_add_entities(entities)
 
@@ -106,6 +84,7 @@ class FanOverrideBinarySensor(AbstractBinarySensor):
 class NhrStateBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_NHR_STATE)
+        self._attr_entity_registry_enabled_default = False
 
 class Preheater1BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
@@ -126,7 +105,6 @@ class Preheater2BinarySensor(AbstractBinarySensor):
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_preheater_2"
 
 class AlarmBinarySensor(AbstractBinarySensor):
-    _attr_device_class = BinarySensorDeviceClass.PROBLEM
 
     def __init__(
         self,
@@ -137,15 +115,13 @@ class AlarmBinarySensor(AbstractBinarySensor):
         super().__init__(coordinator, register, {ALARM_ACTIVE})
 
         self._attr_entity_registry_enabled_default = enabled_by_default
+        self._attr_device_class = BinarySensorDeviceClass.PROBLEM
 
 class RoomAuxiliaryHeatingActiveBinarySensor(AbstarctBinaryRoomSensor):
-    _attr_device_class = BinarySensorDeviceClass.HEAT
-
     def __init__(
         self,
         coordinator: Coordinator,
         room_number: int,
     ) -> None:
-        super().__init__(coordinator, room_number, REG_HEATING_ACTIVE_1, None)
-        self._attr_translation_key = "auxiliary_heating_active"
-
+        super().__init__(coordinator, room_number, REG_AUXILIARY_HEATING_ACTIVE_ROOM_1, None)
+        self._attr_device_class = BinarySensorDeviceClass.HEAT

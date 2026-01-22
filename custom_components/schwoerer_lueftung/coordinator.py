@@ -1,4 +1,3 @@
-"""DataUpdateCoordinator for BIC WRG."""
 from __future__ import annotations
 
 import logging
@@ -22,7 +21,7 @@ from .const import (
     MODEL_WGT,
     MODEL_WRT,
 )
-from .modbus import ModbusClient
+from .modbus.client import ModbusClient
 from .modbus.registers import REG_KEYS, room_reg
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,7 +48,11 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
 
     def has_heating(self) -> bool:
-        return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT) == DEVICE_TYPE_WGT
+        return self.get_device_type() == DEVICE_TYPE_WGT
+
+    def get_device_type(self) -> str:
+        return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT)
+
 
     async def async_write_register(self, register: int, value: int) -> None:
         try:
@@ -72,7 +75,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         await self.async_write_register(room_reg(base_register, roomt_number), value)
 
     def get_data(self, register: int|None, map: dict[int, Any]|None = None) -> Any:
-        if register is None:
+        if self.data is None or register is None:
             return None
 
         try:
@@ -99,7 +102,8 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def get_device(self) -> DeviceInfo:
         if self._device is None:
-            model = MODEL_WGT if self.has_heating() else MODEL_WRT
+
+            model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
             self._device = DeviceInfo(
                 identifiers={(DOMAIN, self.config_entry.entry_id)},
                 name=model,
@@ -109,19 +113,21 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         return self._device
 
-    def get_room_device(self, room: int):
-        if room not in self._room_devices:
+    def get_room_device(self, room_number: int):
+        if room_number not in self._room_devices:
             rooms = self.config_entry.data.get(CONF_ROOMS, [])
+            room_name = next((room["name"] for room in rooms if room['number'] == room_number), None)
+            model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
 
-            self._room_devices[room] = DeviceInfo(
-                identifiers={(DOMAIN, f"{self.config_entry.entry_id}_room_{room}")},
-                name=rooms[room - 1]["name"],
+            self._room_devices[room_number] = DeviceInfo(
+                identifiers={(DOMAIN, f"{self.config_entry.entry_id}_room_{room_number}")},
+                name=f"{model} - {room_name}",
                 manufacturer=MANUFACTURER,
-                model="Room Climate Control",
+                model=f"{model} - {room_name}",
                 via_device=(DOMAIN, self.config_entry.entry_id),
             )
 
-        return self._room_devices[room]
+        return self._room_devices[room_number]
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from device."""
@@ -129,14 +135,8 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not await self.hass.async_add_executor_job(self.client.connect):
                 raise UpdateFailed("Failed to connect to device")
 
-            data = await self.hass.async_add_executor_job(self.client.read_data)
+            return await self.hass.async_add_executor_job(self.client.read_data)
 
-            # For now, return empty dict if no data (placeholder until registers are mapped)
-            # Remove this check once actual register reading is implemented
-            if data is None:
-                raise UpdateFailed("Failed to read data from device")
-
-            return data
         except Exception as err:
             raise UpdateFailed(f"Error communicating with device: {err}") from err
         finally:
