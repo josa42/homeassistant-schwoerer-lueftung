@@ -145,11 +145,6 @@ FAN_SPEED_LINEAR = 6
 
 # Current fan level values
 # Aktuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-CURRENT_FAN_LEVEL_OFF = 0
-CURRENT_FAN_LEVEL_1 = 1
-CURRENT_FAN_LEVEL_2 = 2
-CURRENT_FAN_LEVEL_3 = 3
-CURRENT_FAN_LEVEL_4 = 4
 
 # Linear fan power range
 # Manuelle Lineare Luftleistung: 30-100%
@@ -158,16 +153,10 @@ LINEAR_FAN_POWER_MAX = 100
 
 # Fan override values
 # Luftstufen Überschreibung: 0=Inaktiv, 1=Aktiv
-FAN_OVERRIDE_INACTIVE = 0
 FAN_OVERRIDE_ACTIVE = 1
 
 # Time program base level values
 # Zeitprogramm Basis Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-TIME_PROGRAM_BASE_LEVEL_OFF = 0
-TIME_PROGRAM_BASE_LEVEL_1 = 1
-TIME_PROGRAM_BASE_LEVEL_2 = 2
-TIME_PROGRAM_BASE_LEVEL_3 = 3
-TIME_PROGRAM_BASE_LEVEL_4 = 4
 
 # Shock ventilation values
 # Stoßlüftung: 0=Inaktiv, 1=Aktiv
@@ -182,8 +171,6 @@ HEAT_PUMP_STATUS_COOLING = 49
 
 # NHR state values
 # NHR Zustand: 0=Inaktiv, 1=Aktiv
-NHR_STATE_INACTIVE = 0
-NHR_STATE_ACTIVE = 1
 
 # Supply air fan status values
 # Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
@@ -220,26 +207,15 @@ OUTDOOR_DAMPER_STATE_OPEN = 1
 
 # Preheater state values
 # Vorheizregister Zustand: 0=Aus, 1=VHR 1 aktiv, 2=VHR 2 aktiv, 3=VHR 1 & 2 aktiv
-PREHEATER_STATE_OFF = 0
 PREHEATER_STATE_VHR1_ACTIVE = 1
 PREHEATER_STATE_VHR2_ACTIVE = 2
 PREHEATER_STATE_VHR1_2_ACTIVE = 3
 
 # Time program fan level values
 # Luftstufe Zeitprogramm: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-TIME_PROGRAM_FAN_LEVEL_OFF = 0
-TIME_PROGRAM_FAN_LEVEL_1 = 1
-TIME_PROGRAM_FAN_LEVEL_2 = 2
-TIME_PROGRAM_FAN_LEVEL_3 = 3
-TIME_PROGRAM_FAN_LEVEL_4 = 4
 
 # Sensor fan level values
 # Luftstufe Sensoren: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-SENSOR_FAN_LEVEL_OFF = 0
-SENSOR_FAN_LEVEL_1 = 1
-SENSOR_FAN_LEVEL_2 = 2
-SENSOR_FAN_LEVEL_3 = 3
-SENSOR_FAN_LEVEL_4 = 4
 
 # Heating/Cooling function values
 # Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang
@@ -266,7 +242,6 @@ AUXILIARY_HEATING_ENABLED = 1
 
 # Alarm values
 # All alarms: 0=inaktiv, 1=Meldung steht an
-ALARM_INACTIVE = 0
 ALARM_ACTIVE = 1
 
 REG_CURRENT_TEMPERATURE_1 = 360

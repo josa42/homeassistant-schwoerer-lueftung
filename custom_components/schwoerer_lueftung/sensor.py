@@ -146,12 +146,21 @@ async def async_setup_entry(
     rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
     has_heating = coordinator.has_heating()
 
+    model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
+    device = DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name="Lüftung",
+        manufacturer=MANUFACTURER,
+        model=model,
+    )
+
+
     entities = [
-        CurrentFanLevelSensor(coordinator, entry),
-        TimeProgramBaseLevelSensor(coordinator, entry),
-        ShockVentilationRemainingSensor(coordinator, entry),
-        SupplyAirFanStatusSensor(coordinator, entry),
-        ExhaustAirFanStatusSensor(coordinator, entry),
+        CurrentFanLevelSensor(coordinator, entry, device),
+        TimeProgramBaseLevelSensor(coordinator, entry, device),
+        ShockVentilationRemainingSensor(coordinator, entry, device),
+        SupplyAirFanStatusSensor(coordinator, entry, device),
+        ExhaustAirFanStatusSensor(coordinator, entry, device),
         BypassStateSensor(coordinator, entry),
         OutdoorDamperStateSensor(coordinator, entry),
         TimeProgramFanLevelSensor(coordinator, entry),
@@ -172,7 +181,7 @@ async def async_setup_entry(
     # Add heating-related sensors only for WGT devices
     if has_heating:
         entities.extend([
-            HeatPumpStatusSensor(coordinator, entry),
+            HeatPumpStatusSensor(coordinator, entry, device),
             EwtStateSensor(coordinator, entry),
             TemperatureT2AfterVhrSensor(coordinator, entry),
             TemperatureT3BeforeNeSensor(coordinator, entry),
@@ -215,185 +224,75 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
-class CurrentFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG current fan level (Aktuelle Luftstufe)."""
-
+class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
     _attr_has_entity_name = True
-    _attr_translation_key = "current_fan_level"
     _attr_state_class = SensorStateClass.MEASUREMENT
+
+    _register: int
 
     def __init__(
         self,
         coordinator: Coordinator,
         entry: ConfigEntry,
+        device: DeviceInfo,
+        register: int,
     ) -> None:
-        """Initialize the sensor."""
         super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_current_fan_level"
 
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
+        key = REG_KEYS.get(register)
+
+        self._attr_device_info = device
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_translation_key = key
+        self._register = register
+
 
     @property
     def native_value(self) -> int | None:
-        """Return the current fan level as number (0-4)."""
-        return self.coordinator.getData(REG_CURRENT_FAN_LEVEL)
+        return self.coordinator.getData(self._register)
 
 
-class TimeProgramBaseLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG time program base level (Zeitprogramm Basis Luftstufe)."""
+class CurrentFanLevelSensor(AbstractSensor):
+    def __init__(self, coordinator: Coordinator, entry: ConfigEntry, device: DeviceInfo) -> None:
+        super().__init__(coordinator, entry, device, REG_CURRENT_FAN_LEVEL)
 
-    _attr_has_entity_name = True
-    _attr_translation_key = "time_program_base_level"
+class TimeProgramBaseLevelSensor(AbstractSensor):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_registry_enabled_default = False
 
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_time_program_base_level"
+    def __init__(self, coordinator: Coordinator, entry: ConfigEntry, device: DeviceInfo) -> None:
+        super().__init__(coordinator, entry, device, REG_TIME_PROGRAM_BASE_LEVEL)
 
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the time program base level as number (0-4)."""
-        return self.coordinator.getData(REG_TIME_PROGRAM_BASE_LEVEL)
-
-
-class ShockVentilationRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG shock ventilation remaining time (Restlaufzeit Stoßlüftung)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "shock_ventilation_remaining"
+class ShockVentilationRemainingSensor(AbstractSensor):
     _attr_device_class = SensorDeviceClass.DURATION
     _attr_native_unit_of_measurement = UnitOfTime.MINUTES
 
+    def __init__(self, coordinator: Coordinator, entry: ConfigEntry, device: DeviceInfo) -> None:
+        super().__init__(coordinator, entry, device, REG_SHOCK_VENTILATION_REMAINING)
+
+
+class HeatPumpStatusSensor(AbstractSensor):
     def __init__(
         self,
         coordinator: Coordinator,
         entry: ConfigEntry,
+        device: DeviceInfo,
     ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_shock_ventilation_remaining"
-
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the shock ventilation remaining time in minutes."""
-        return self.coordinator.getData(REG_SHOCK_VENTILATION_REMAINING)
+        super().__init__(coordinator, entry, device, REG_HEAT_PUMP_STATUS)
 
 
-class HeatPumpStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG heat pump status (Status Wärmepumpe)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "heat_pump_status"
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_heat_pump_status"
-
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the heat pump status code."""
-        return self.coordinator.getData(REG_HEAT_PUMP_STATUS)
-
-
-class SupplyAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG supply air fan status (Status Gebläse Zuluft)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "supply_air_fan_status"
+class SupplyAirFanStatusSensor(AbstractSensor):
     _attr_entity_registry_enabled_default = False
 
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_supply_air_fan_status"
-
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the supply air fan status code."""
-        return self.coordinator.getData(REG_SUPPLY_AIR_FAN_STATUS)
+    def __init__(self, coordinator: Coordinator, entry: ConfigEntry, device: DeviceInfo) -> None:
+        super().__init__(coordinator, entry, device, REG_SUPPLY_AIR_FAN_STATUS)
 
 
-class ExhaustAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
-    """Sensor for WRG exhaust air fan status (Status Gebläse Abluft)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "exhaust_air_fan_status"
+class ExhaustAirFanStatusSensor(AbstractSensor):
     _attr_entity_registry_enabled_default = False
 
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_exhaust_air_fan_status"
-
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self) -> int | None:
-        """Return the exhaust air fan status code."""
-        return self.coordinator.getData(REG_EXHAUST_AIR_FAN_STATUS)
+    def __init__(self, coordinator: Coordinator, entry: ConfigEntry, device: DeviceInfo) -> None:
+        super().__init__(coordinator, entry, device, REG_EXHAUST_AIR_FAN_STATUS)
 
 
 class EwtStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
