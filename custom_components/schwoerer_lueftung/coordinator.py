@@ -130,7 +130,6 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         return self._room_devices[room_number]
 
     async def _async_update_data(self) -> dict[str, Any]:
-        """Fetch data from device."""
         try:
             if not await self.hass.async_add_executor_job(self.client.connect):
                 raise UpdateFailed("Failed to connect to device")

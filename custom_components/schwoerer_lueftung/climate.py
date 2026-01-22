@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from homeassistant.components.climate import (
@@ -16,8 +15,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.schwoerer_lueftung.modbus.registers import (
-    REG_CURRENT_TEMPERATURE_1,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+    REG_CURRENT_TEMPERATURE_1,
     REG_TARGET_TEMPERATURE_1,
     room_reg,
 )
@@ -25,6 +24,7 @@ from custom_components.schwoerer_lueftung.modbus.registers import (
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .entity import Entity
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -48,8 +48,6 @@ async def async_setup_entry(
 
 
 class RoomClimate(Entity, ClimateEntity):
-    """Climate entity for a room."""
-
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
     _attr_hvac_modes = [HVACMode.FAN_ONLY, HVACMode.HEAT]
@@ -60,7 +58,6 @@ class RoomClimate(Entity, ClimateEntity):
     def __init__(
         self, coordinator: Coordinator, room_number: int, room_name: str
     ) -> None:
-        """Initialize the climate entity."""
         super().__init__(coordinator)
 
         # Validate room number (1-17 as per Modbus documentation)
@@ -78,18 +75,14 @@ class RoomClimate(Entity, ClimateEntity):
 
     @property
     def current_temperature(self) -> float | None:
-        """Return the current temperature."""
         return self.coordinator.get_room_data(REG_CURRENT_TEMPERATURE_1, self._room_number)
 
     @property
     def target_temperature(self) -> float | None:
-        """Return the target temperature."""
         return self.coordinator.get_room_data(REG_TARGET_TEMPERATURE_1, self._room_number)
 
     @property
     def hvac_mode(self) -> HVACMode:
-        """Return current HVAC mode."""
-
         return self.coordinator.get_room_data(REG_AUXILIARY_HEATING_ENABLED_ROOM_1, self._room_number, {
             1: HVACMode.HEAT,
             0: HVACMode.FAN_ONLY,

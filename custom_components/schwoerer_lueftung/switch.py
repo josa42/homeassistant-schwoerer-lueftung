@@ -6,15 +6,18 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.schwoerer_lueftung.abstract import AbstractSwitch,AbstractRoomSwitch
+from custom_components.schwoerer_lueftung.abstract import (
+    AbstractRoomSwitch,
+    AbstractSwitch,
+)
 
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
     REG_AUXILIARY_HEATING_ENABLED,
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_HEAT_PUMP_COOLING_ENABLED,
     REG_HEAT_PUMP_HEATING_ENABLED,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_SCHEDULED_HEATING_ENABLED_1,
     REG_SHOCK_VENTILATION,
 )

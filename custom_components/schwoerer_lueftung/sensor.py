@@ -1,5 +1,4 @@
 """Sensor platform"""
-
 from __future__ import annotations
 
 from typing import Any
@@ -13,8 +12,7 @@ from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import (AbstractSensor, AbstarctRoomSensor)
-
+from .abstract import AbstarctRoomSensor, AbstractSensor
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
@@ -34,6 +32,7 @@ from .modbus.registers import (
     HEAT_PUMP_STATUS_OFF,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_BYPASS_STATE,
     REG_CURRENT_EXHAUST_AIR_FLOW,
     REG_CURRENT_EXHAUST_AIR_RPM,
@@ -46,7 +45,6 @@ from .modbus.registers import (
     REG_EWT_STATE,
     REG_EXHAUST_AIR_FAN_STATUS,
     REG_HEAT_PUMP_STATUS,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
     REG_OPERATING_HOURS_EWT,
     REG_OPERATING_HOURS_FAN,

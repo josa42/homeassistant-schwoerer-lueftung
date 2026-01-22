@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import (AbstractBinarySensor, AbstarctBinaryRoomSensor)
+from .abstract import AbstarctBinaryRoomSensor, AbstractBinarySensor
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
@@ -28,11 +28,12 @@ from .modbus.registers import (
     REG_ALARM_SUPPLY_VOLTAGE_OFF,
     REG_ALARM_UPSTREAM_FILTER_DIRTY,
     REG_ALARM_UTILITY_LOCK,
-    REG_FAN_OVERRIDE,
     REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
+    REG_FAN_OVERRIDE,
     REG_NHR_STATE,
     REG_PREHEATER_STATE,
 )
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

@@ -1,19 +1,21 @@
-import logging
+import re
 from typing import Any
+
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.number import NumberEntity
 from homeassistant.components.select import SelectEntity
-from homeassistant.components.switch import SwitchEntity
-from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS, room_reg
-from .coordinator import Coordinator
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
+from homeassistant.components.switch import SwitchEntity
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-import re
+from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS, room_reg
+
+from .coordinator import Coordinator
+
 
 class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
     _attr_has_entity_name = True

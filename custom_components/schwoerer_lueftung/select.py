@@ -5,7 +5,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .abstract import AbstractSelect
-
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (

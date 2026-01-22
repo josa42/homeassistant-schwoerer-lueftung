@@ -6,6 +6,7 @@ from itertools import groupby
 from typing import Any
 
 from pymodbus.client import ModbusTcpClient
+
 from .registers import REG_KEYS, REG_TO_TRANSFORM
 
 _LOGGER = logging.getLogger(__name__)
@@ -129,5 +130,3 @@ class ModbusClient:
             groups.extend(group[i:i + 125] for i in range(0, len(group), 125))
 
         return groups
-
-

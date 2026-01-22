@@ -6,7 +6,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .abstract import AbstarctRoomNumber, AbstractNumber
-
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
@@ -15,6 +14,7 @@ from .modbus.registers import (
     REG_BASE_TEMPERATURE_1,
     REG_LINEAR_FAN_POWER,
 )
+
 
 async def async_setup_entry(
     hass: HomeAssistant,

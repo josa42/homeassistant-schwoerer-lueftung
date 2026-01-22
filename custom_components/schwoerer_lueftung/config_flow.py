@@ -8,10 +8,8 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import translation
-
 from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
@@ -48,16 +46,11 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
                 mode=NumberSelectorMode.BOX,
             )
         )
-
-    # vol.All(
-    #         vol.Coerce(int), vol.Range(min=1, max=17)
-    #     ),
     }
 )
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect."""
     try:
         from .modbus.client import ModbusClient
     except ImportError as err:
@@ -77,6 +70,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
         await hass.async_add_executor_job(client.disconnect)
 
+        # TODO better naem
         return {"title": f"WRG {data[CONF_HOST]}"}
     except CannotConnect:
         raise
@@ -88,9 +82,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -127,10 +119,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 for i in range(1, int(num_rooms) + 1):
                     data[CONF_ROOMS].append({"number": i, "name": f"{room_prefix} {i}"})
 
-                # TODO fix return type
                 return self.async_create_entry(title=info["title"], data=data)
 
-        # TODO fix return type
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
