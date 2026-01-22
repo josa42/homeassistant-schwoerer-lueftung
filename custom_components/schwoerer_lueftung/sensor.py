@@ -19,7 +19,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
-from .modbus_client import (
+from .modbus.registers import (
     BYPASS_STATE_CLOSED,
     BYPASS_STATE_OPEN_COOLING,
     BYPASS_STATE_OPEN_HEATING,

@@ -15,7 +15,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
-from .modbus_client import (
+from .modbus.registers import (
     ALARM_ACTIVE,
     FAN_OVERRIDE_ACTIVE,
     PREHEATER_STATE_VHR1_2_ACTIVE,

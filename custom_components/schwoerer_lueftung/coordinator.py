@@ -17,7 +17,8 @@ from .const import (
     DEVICE_TYPE_WGT,
     DOMAIN,
 )
-from .modbus_client import REG_KEYS, ModbusClient
+from .modbus import ModbusClient
+from .modbus.registers import REG_KEYS
 
 _LOGGER = logging.getLogger(__name__)
 

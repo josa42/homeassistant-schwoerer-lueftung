@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
-from .modbus_client import (
+from .modbus.registers import (
     LINEAR_FAN_POWER_MAX,
     LINEAR_FAN_POWER_MIN,
     REG_BASE_TEMPERATURE_1,
