@@ -114,8 +114,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 for i in range(1, num_rooms + 1):
                     data[CONF_ROOMS].append({"number": i, "name": f"{room_prefix} {i}"})
 
+                # TODO fix reeturn type
                 return self.async_create_entry(title=info["title"], data=data)
 
+        # TODO fix reeturn type
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )

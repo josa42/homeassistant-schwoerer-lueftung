@@ -117,7 +117,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             model = MODEL_WGT if self.has_heating() else MODEL_WRT
             self._device = DeviceInfo(
                 identifiers={(DOMAIN, self.config_entry.entry_id)},
-                name="Lüftung",
+                name=model,
                 manufacturer=MANUFACTURER,
                 model=model,
             )
@@ -128,8 +128,6 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     def get_room_device(self, room: int):
         if room not in self._room_devices:
             rooms = self.config_entry.data.get(CONF_ROOMS, [])
-
-            _LOGGER.debug(f"Creating device for room {room}: {rooms} -> {rooms[room - 1]["name"]}")
 
             self._room_devices[room] = DeviceInfo(
                 identifiers={
