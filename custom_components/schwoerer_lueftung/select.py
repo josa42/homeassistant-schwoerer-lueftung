@@ -34,6 +34,9 @@ from .modbus_client import (
     OPERATION_MODE_SUMMER,
     OPERATION_MODE_SUMMER_EXHAUST,
     OPERATION_MODE_WINTER,
+    REG_FAN_SPEED,
+    REG_HEATING_COOLING_FUNCTION,
+    REG_OPERATION_MODE,
 )
 
 # Operation mode mapping
@@ -137,7 +140,7 @@ class OperationModeSelect(CoordinatorEntity[Coordinator], SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return the current operation mode."""
-        mode = self.coordinator.data.get("operation_mode")
+        mode = self.coordinator.getData(REG_OPERATION_MODE)
         if mode is not None and mode in OPERATION_MODES:
             return OPERATION_MODES[mode]
         return None
@@ -190,7 +193,7 @@ class FanSpeedSelect(CoordinatorEntity[Coordinator], SelectEntity):
     @property
     def current_option(self) -> str | None:
         """Return the current fan speed."""
-        speed = self.coordinator.data.get("fan_speed")
+        speed = self.coordinator.getData(REG_FAN_SPEED)
         if speed is not None and speed in FAN_SPEEDS:
             return FAN_SPEEDS[speed]
         return None
@@ -243,7 +246,7 @@ class HeatingCoolingFunctionSelect(CoordinatorEntity[Coordinator], SelectEntity)
     @property
     def current_option(self) -> str | None:
         """Return the current heating/cooling function."""
-        mode = self.coordinator.data.get("heating_cooling_function")
+        mode = self.coordinator.getData(REG_HEATING_COOLING_FUNCTION)
         if mode is not None and mode in HEATING_COOLING_MODES:
             return HEATING_COOLING_MODES[mode]
         return None

@@ -10,7 +10,12 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
-from .modbus_client import LINEAR_FAN_POWER_MAX, LINEAR_FAN_POWER_MIN, REG_BASE_TEMPERATURE_1
+from .modbus_client import (
+    LINEAR_FAN_POWER_MAX,
+    LINEAR_FAN_POWER_MIN,
+    REG_BASE_TEMPERATURE_1,
+    REG_LINEAR_FAN_POWER,
+)
 
 
 async def async_setup_entry(
@@ -66,7 +71,7 @@ class LinearFanPowerNumber(CoordinatorEntity[Coordinator], NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the current linear fan power."""
-        return self.coordinator.data.get("linear_fan_power")
+        return self.coordinator.getData(REG_LINEAR_FAN_POWER)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the linear fan power."""
@@ -126,7 +131,7 @@ class RoomBaseTemperatureNumber(CoordinatorEntity[Coordinator], NumberEntity):
     @property
     def native_value(self) -> float | None:
         """Return the current base temperature."""
-        return self.coordinator.data.get(f"base_temperature_{self._room_number}")
+        return self.coordinator.getData(REG_BASE_TEMPERATURE_1 + (self._room_number - 1))
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the base temperature."""

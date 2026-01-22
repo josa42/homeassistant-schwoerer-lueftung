@@ -20,8 +20,12 @@ from .modbus_client import (
     HEAT_PUMP_COOLING_OFF,
     HEAT_PUMP_HEATING_ENABLED,
     HEAT_PUMP_HEATING_OFF,
+    REG_AUXILIARY_HEATING_ENABLE,
+    REG_HEAT_PUMP_COOLING_ENABLE,
+    REG_HEAT_PUMP_HEATING_ENABLE,
     REG_HEATING_ENABLED_1,
     REG_SCHECHULD_HEATING_ENABLED_1,
+    REG_SHOCK_VENTILATION,
     SHOCK_VENTILATION_ACTIVE,
     SHOCK_VENTILATION_INACTIVE,
 )
@@ -93,7 +97,7 @@ class ShockVentilationSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if shock ventilation is active."""
-        value = self.coordinator.data.get("shock_ventilation")
+        value = self.coordinator.getData(REG_SHOCK_VENTILATION)
         if value is not None:
             return value == SHOCK_VENTILATION_ACTIVE
         return None
@@ -264,7 +268,7 @@ class HeatPumpHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if heat pump heating is enabled."""
-        value = self.coordinator.data.get("heat_pump_heating_enable")
+        value = self.coordinator.getData(REG_HEAT_PUMP_HEATING_ENABLE)
         if value is not None:
             return value == HEAT_PUMP_HEATING_ENABLED
         return None
@@ -315,7 +319,7 @@ class HeatPumpCoolingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if heat pump cooling is enabled."""
-        value = self.coordinator.data.get("heat_pump_cooling_enable")
+        value = self.coordinator.getData(REG_HEAT_PUMP_COOLING_ENABLE)
         if value is not None:
             return value == HEAT_PUMP_COOLING_ENABLED
         return None
@@ -366,7 +370,7 @@ class AuxiliaryHeatingSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if auxiliary house heating is enabled."""
-        value = self.coordinator.data.get("auxiliary_heating_enable")
+        value = self.coordinator.getData(REG_AUXILIARY_HEATING_ENABLE)
         if value is not None:
             return value == AUXILIARY_HEATING_ENABLED
         return None

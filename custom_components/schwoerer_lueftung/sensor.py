@@ -36,8 +36,20 @@ from .modbus_client import (
     HEAT_PUMP_STATUS_OFF,
     OUTDOOR_DAMPER_STATE_CLOSED,
     OUTDOOR_DAMPER_STATE_OPEN,
+    REG_BYPASS_STATE,
+    REG_CURRENT_EXHAUST_AIR_FLOW,
+    REG_CURRENT_EXHAUST_AIR_RPM,
+    REG_CURRENT_FAN_LEVEL,
+    REG_CURRENT_SUPPLY_AIR_FLOW,
+    REG_CURRENT_SUPPLY_AIR_RPM,
     REG_CURRENT_TEMPERATURE_1,
+    REG_DEVICE_FILTER_REMAINING,
+    REG_ERROR_MESSAGE,
+    REG_EWT_STATE,
+    REG_EXHAUST_AIR_FAN_STATUS,
+    REG_HEAT_PUMP_STATUS,
     REG_HEATING_ENABLED_1,
+    REG_KEYS,
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
     REG_OPERATING_HOURS_EWT,
     REG_OPERATING_HOURS_FAN,
@@ -48,6 +60,22 @@ from .modbus_client import (
     REG_OPERATING_HOURS_HEAT_PUMP,
     REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
     REG_OPERATING_HOURS_VHR,
+    REG_OUTDOOR_DAMPER_STATE,
+    REG_SENSOR_FAN_LEVEL,
+    REG_SHOCK_VENTILATION_REMAINING,
+    REG_SUPPLY_AIR_FAN_STATUS,
+    REG_TEMP_T1_AFTER_EWT,
+    REG_TEMP_T2_AFTER_VHR,
+    REG_TEMP_T3_BEFORE_NE,
+    REG_TEMP_T4_AFTER_NE,
+    REG_TEMP_T5_EXHAUST_AIR,
+    REG_TEMP_T6_IN_WT,
+    REG_TEMP_T7_EVAPORATOR,
+    REG_TEMP_T8_CONDENSER,
+    REG_TEMP_T10_OUTDOOR,
+    REG_TIME_PROGRAM_BASE_LEVEL,
+    REG_TIME_PROGRAM_FAN_LEVEL,
+    REG_UPSTREAM_FILTER_REMAINING,
     SUPPLY_AIR_FAN_STATUS_ACTIVE,
     SUPPLY_AIR_FAN_STATUS_DISABLED,
     SUPPLY_AIR_FAN_STATUS_ERROR,
@@ -168,57 +196,24 @@ async def async_setup_entry(
 
     # Add operating hours sensors
     entities.extend([
-        OperatingHoursSensor(coordinator, entry, "operating_hours_fan"),
-        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_1"),
-        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_2"),
-        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_3"),
-        OperatingHoursSensor(coordinator, entry, "operating_hours_fan_level_4"),
+        OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_FAN),
+        OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_FAN_LEVEL_1),
+        OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_FAN_LEVEL_2),
+        OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_FAN_LEVEL_3),
+        OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_FAN_LEVEL_4),
     ])
 
     # Add heating-related operating hours sensors only for WGT
     if has_heating:
         entities.extend([
-            OperatingHoursSensor(coordinator, entry, "operating_hours_heat_pump"),
-            OperatingHoursSensor(coordinator, entry, "operating_hours_heat_pump_cooling",),
-            OperatingHoursSensor(coordinator, entry, "operating_hours_vhr"),
-            OperatingHoursSensor(coordinator, entry, "operating_hours_auxiliary_heating_house"),
-            OperatingHoursSensor(coordinator, entry, "operating_hours_ewt"),
+            OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_HEAT_PUMP),
+            OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_HEAT_PUMP_COOLING,),
+            OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_VHR),
+            OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
+            OperatingHoursSensor(coordinator, entry, REG_OPERATING_HOURS_EWT),
         ])
 
     async_add_entities(entities)
-
-
-class SensorBase(CoordinatorEntity[Coordinator], SensorEntity):
-    """Base class for WRG sensors."""
-
-    _attr_has_entity_name = True
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        entry: ConfigEntry,
-        key: str,
-        name: str,
-    ) -> None:
-        """Initialize the sensor."""
-        super().__init__(coordinator)
-        self._key = key
-        self._attr_name = name
-        self._attr_unique_id = f"{entry.entry_id}_{key}"
-
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def native_value(self):
-        """Return the state of the sensor."""
-        return self.coordinator.data.get(self._key)
-
 
 class CurrentFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     """Sensor for WRG current fan level (Aktuelle Luftstufe)."""
@@ -247,7 +242,7 @@ class CurrentFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the current fan level as number (0-4)."""
-        return self.coordinator.data.get("current_fan_level")
+        return self.coordinator.getData(REG_CURRENT_FAN_LEVEL)
 
 
 class TimeProgramBaseLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -278,7 +273,7 @@ class TimeProgramBaseLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the time program base level as number (0-4)."""
-        return self.coordinator.data.get("time_program_base_level")
+        return self.coordinator.getData(REG_TIME_PROGRAM_BASE_LEVEL)
 
 
 class ShockVentilationRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -309,7 +304,7 @@ class ShockVentilationRemainingSensor(CoordinatorEntity[Coordinator], SensorEnti
     @property
     def native_value(self) -> int | None:
         """Return the shock ventilation remaining time in minutes."""
-        return self.coordinator.data.get("shock_ventilation_remaining")
+        return self.coordinator.getData(REG_SHOCK_VENTILATION_REMAINING)
 
 
 class HeatPumpStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -338,7 +333,7 @@ class HeatPumpStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the heat pump status code."""
-        return self.coordinator.data.get("heat_pump_status")
+        return self.coordinator.getData(REG_HEAT_PUMP_STATUS)
 
 
 class SupplyAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -368,7 +363,7 @@ class SupplyAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the supply air fan status code."""
-        return self.coordinator.data.get("supply_air_fan_status")
+        return self.coordinator.getData(REG_SUPPLY_AIR_FAN_STATUS)
 
 
 class ExhaustAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -398,7 +393,7 @@ class ExhaustAirFanStatusSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the exhaust air fan status code."""
-        return self.coordinator.data.get("exhaust_air_fan_status")
+        return self.coordinator.getData(REG_EXHAUST_AIR_FAN_STATUS)
 
 
 class EwtStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -428,7 +423,7 @@ class EwtStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the EWT state code."""
-        return self.coordinator.data.get("ewt_state")
+        return self.coordinator.getData(REG_EWT_STATE)
 
 
 class BypassStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -457,7 +452,7 @@ class BypassStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the bypass state code."""
-        return self.coordinator.data.get("bypass_state")
+        return self.coordinator.getData(REG_BYPASS_STATE)
 
 
 class OutdoorDamperStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -487,7 +482,7 @@ class OutdoorDamperStateSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the outdoor damper state code."""
-        return self.coordinator.data.get("outdoor_damper_state")
+        return self.coordinator.getData(REG_OUTDOOR_DAMPER_STATE)
 
 
 class TimeProgramFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -518,7 +513,7 @@ class TimeProgramFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the time program fan level as number (0-4)."""
-        return self.coordinator.data.get("time_program_fan_level")
+        return self.coordinator.getData(REG_TIME_PROGRAM_FAN_LEVEL)
 
 
 class SensorFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -549,7 +544,7 @@ class SensorFanLevelSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the sensor fan level as number (0-4)."""
-        return self.coordinator.data.get("sensor_fan_level")
+        return self.coordinator.getData(REG_SENSOR_FAN_LEVEL)
 
 
 class CurrentSupplyAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -581,7 +576,7 @@ class CurrentSupplyAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the current supply air flow percentage."""
-        return self.coordinator.data.get("current_supply_air_flow")
+        return self.coordinator.getData(REG_CURRENT_SUPPLY_AIR_FLOW)
 
 
 class CurrentExhaustAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -613,7 +608,7 @@ class CurrentExhaustAirFlowSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the current exhaust air flow percentage."""
-        return self.coordinator.data.get("current_exhaust_air_flow")
+        return self.coordinator.getData(REG_CURRENT_EXHAUST_AIR_FLOW)
 
 
 class CurrentSupplyAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -645,7 +640,7 @@ class CurrentSupplyAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the current supply air RPM."""
-        return self.coordinator.data.get("current_supply_air_rpm")
+        return self.coordinator.getData(REG_CURRENT_SUPPLY_AIR_RPM)
 
 
 class CurrentExhaustAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -677,7 +672,7 @@ class CurrentExhaustAirRpmSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the current exhaust air RPM."""
-        return self.coordinator.data.get("current_exhaust_air_rpm")
+        return self.coordinator.getData(REG_CURRENT_EXHAUST_AIR_RPM)
 
 
 class TemperatureT1AfterEwtSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -710,7 +705,7 @@ class TemperatureT1AfterEwtSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T1 after EWT."""
-        return self.coordinator.data.get("temp_t1_after_ewt")
+        return self.coordinator.getData(REG_TEMP_T1_AFTER_EWT)
 
 
 class TemperatureT2AfterVhrSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -742,7 +737,7 @@ class TemperatureT2AfterVhrSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T2 after VHR."""
-        return self.coordinator.data.get("temp_t2_after_vhr")
+        return self.coordinator.getData(REG_TEMP_T2_AFTER_VHR)
 
 
 class TemperatureT3BeforeNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -774,7 +769,7 @@ class TemperatureT3BeforeNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T3 before NE."""
-        return self.coordinator.data.get("temp_t3_before_ne")
+        return self.coordinator.getData(REG_TEMP_T3_BEFORE_NE)
 
 
 class TemperatureT4AfterNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -806,7 +801,7 @@ class TemperatureT4AfterNeSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T4 after NE."""
-        return self.coordinator.data.get("temp_t4_after_ne")
+        return self.coordinator.getData(REG_TEMP_T4_AFTER_NE)
 
 
 class TemperatureT5ExhaustAirSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -838,7 +833,7 @@ class TemperatureT5ExhaustAirSensor(CoordinatorEntity[Coordinator], SensorEntity
     @property
     def native_value(self) -> float | None:
         """Return the temperature T5 exhaust air."""
-        return self.coordinator.data.get("temp_t5_exhaust_air")
+        return self.coordinator.getData(REG_TEMP_T5_EXHAUST_AIR)
 
 
 class TemperatureT6InWtSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -870,7 +865,7 @@ class TemperatureT6InWtSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T6 in WT."""
-        return self.coordinator.data.get("temp_t6_in_wt")
+        return self.coordinator.getData(REG_TEMP_T6_IN_WT)
 
 
 class TemperatureT7EvaporatorSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -902,7 +897,7 @@ class TemperatureT7EvaporatorSensor(CoordinatorEntity[Coordinator], SensorEntity
     @property
     def native_value(self) -> float | None:
         """Return the temperature T7 evaporator."""
-        return self.coordinator.data.get("temp_t7_evaporator")
+        return self.coordinator.getData(REG_TEMP_T7_EVAPORATOR)
 
 
 class TemperatureT8CondenserSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -934,7 +929,7 @@ class TemperatureT8CondenserSensor(CoordinatorEntity[Coordinator], SensorEntity)
     @property
     def native_value(self) -> float | None:
         """Return the temperature T8 condenser."""
-        return self.coordinator.data.get("temp_t8_condenser")
+        return self.coordinator.getData(REG_TEMP_T8_CONDENSER)
 
 
 class TemperatureT10OutdoorSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -966,7 +961,7 @@ class TemperatureT10OutdoorSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the temperature T10 outdoor."""
-        return self.coordinator.data.get("temp_t10_outdoor")
+        return self.coordinator.getData(REG_TEMP_T10_OUTDOOR)
 
 
 class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -997,7 +992,7 @@ class DeviceFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the device filter remaining days."""
-        return self.coordinator.data.get("device_filter_remaining")
+        return self.coordinator.getData(REG_DEVICE_FILTER_REMAINING)
 
 
 class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -1031,7 +1026,7 @@ class UpstreamFilterRemainingSensor(CoordinatorEntity[Coordinator], SensorEntity
     @property
     def native_value(self) -> int | None:
         """Return the upstream filter remaining days."""
-        return self.coordinator.data.get("upstream_filter_remaining")
+        return self.coordinator.getData(REG_UPSTREAM_FILTER_REMAINING)
 
 
 class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -1060,7 +1055,7 @@ class ErrorMessageSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the error code as number."""
-        return self.coordinator.data.get("error_message")
+        return self.coordinator.getData(REG_ERROR_MESSAGE)
 
 
 class RoomAuxiliaryHeatingSensor(CoordinatorEntity[Coordinator], SensorEntity):
@@ -1157,13 +1152,16 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
         self,
         coordinator: Coordinator,
         entry: ConfigEntry,
-        key: str,
+        register: int,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
+
+        key = REG_KEYS.get(register)
         self._key = key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
+        self._register = register
 
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
@@ -1176,12 +1174,4 @@ class OperatingHoursSensor(CoordinatorEntity[Coordinator], SensorEntity):
     @property
     def native_value(self) -> int | None:
         """Return the operating hours."""
-        return self.coordinator.data.get(self._key)
-
-
-class TemperatureSensor(SensorBase):
-    """Temperature sensor."""
-
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+        return self.coordinator.getData(self._register)

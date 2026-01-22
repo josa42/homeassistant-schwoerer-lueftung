@@ -1,5 +1,6 @@
 """Binary sensor platform for BIC WRG."""
 from __future__ import annotations
+
 import logging
 
 from homeassistant.components.binary_sensor import (
@@ -17,17 +18,29 @@ from .coordinator import Coordinator
 from .modbus_client import (
     ALARM_ACTIVE,
     FAN_OVERRIDE_ACTIVE,
-    NHR_STATE_ACTIVE,
     PREHEATER_STATE_VHR1_2_ACTIVE,
     PREHEATER_STATE_VHR1_ACTIVE,
     PREHEATER_STATE_VHR2_ACTIVE,
+    REG_ALARM_DEVICE_FILTER_DIRTY,
+    REG_ALARM_DOOR_OPEN,
+    REG_ALARM_EMERGENCY_MODE,
+    REG_ALARM_EXTERNAL_UTILITY_LOCK,
+    REG_ALARM_HEATING_MODULE_TEST,
+    REG_ALARM_OFF_PEAK_DISABLED,
+    REG_ALARM_PRESSOSTAT_TRIGGERED,
+    REG_ALARM_PRESSURE_SWITCH,
+    REG_ALARM_SUPPLY_AIR_COLD,
+    REG_ALARM_SUPPLY_VOLTAGE_OFF,
+    REG_ALARM_UPSTREAM_FILTER_DIRTY,
+    REG_ALARM_UTILITY_LOCK,
     REG_FAN_OVERRIDE,
     REG_HEATING_ACTIVE_1,
+    REG_KEYS,
     REG_NHR_STATE,
+    REG_PREHEATER_STATE,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -38,20 +51,20 @@ async def async_setup_entry(
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
 
-    entities = [
+    entities = []
+    entities.extend([
         FanOverrideBinarySensor(coordinator, entry),
-        AlarmBinarySensor(coordinator, entry, "alarm_pressure_switch"),
-        AlarmBinarySensor(coordinator, entry, "alarm_utility_lock"),
-        AlarmBinarySensor(coordinator, entry, "alarm_door_open"),
-        AlarmBinarySensor(coordinator, entry, "alarm_device_filter_dirty"),
-        AlarmBinarySensor(coordinator, entry, "alarm_upstream_filter_dirty"),
-        AlarmBinarySensor(coordinator, entry, "alarm_off_peak_disabled"),
-        AlarmBinarySensor(coordinator, entry, "alarm_supply_voltage_off"),
-        AlarmBinarySensor(coordinator, entry, "alarm_pressostat_triggered"),
-        AlarmBinarySensor(coordinator, entry, "alarm_external_utility_lock"),
-        AlarmBinarySensor(coordinator, entry, "alarm_emergency_mode"),
-        AlarmBinarySensor(coordinator, entry, "alarm_supply_air_too_cold"),
-    ]
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_PRESSURE_SWITCH),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_UTILITY_LOCK),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_DOOR_OPEN),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_DEVICE_FILTER_DIRTY),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_UPSTREAM_FILTER_DIRTY),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_OFF_PEAK_DISABLED),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_SUPPLY_VOLTAGE_OFF),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_PRESSOSTAT_TRIGGERED),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_EXTERNAL_UTILITY_LOCK),
+        AlarmBinarySensor(coordinator, entry, REG_ALARM_EMERGENCY_MODE),
+    ])
 
     # Add heating-related binary sensors only for WGT devices
     if has_heating:
@@ -59,8 +72,8 @@ async def async_setup_entry(
             NhrStateBinarySensor(coordinator, entry),
             Preheater1BinarySensor(coordinator, entry),
             Preheater2BinarySensor(coordinator, entry),
-            AlarmBinarySensor(coordinator, entry, "alarm_heating_module_test", enabled_by_default=False),
-            AlarmBinarySensor(coordinator, entry, "alarm_supply_air_cold"),
+            AlarmBinarySensor(coordinator, entry, REG_ALARM_HEATING_MODULE_TEST, enabled_by_default=False),
+            AlarmBinarySensor(coordinator, entry, REG_ALARM_SUPPLY_AIR_COLD),
         ]
     )
 
@@ -162,7 +175,7 @@ class Preheater1BinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity)
     @property
     def is_on(self) -> bool | None:
         """Return true if preheater 1 (VHR 1) is active."""
-        value = self.coordinator.data.get("preheater_state")
+        value = self.coordinator.getData(REG_PREHEATER_STATE)
         if value is not None:
             return value in (PREHEATER_STATE_VHR1_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE)
         return None
@@ -194,7 +207,7 @@ class Preheater2BinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity)
     @property
     def is_on(self) -> bool | None:
         """Return true if preheater 2 (VHR 2) is active."""
-        value = self.coordinator.data.get("preheater_state")
+        value = self.coordinator.getData(REG_PREHEATER_STATE)
         if value is not None:
             return value in (PREHEATER_STATE_VHR2_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE)
         return None
@@ -210,15 +223,19 @@ class AlarmBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
         self,
         coordinator: Coordinator,
         entry: ConfigEntry,
-        key: str,
+        register: int,
         enabled_by_default: bool = True,
     ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
+
+        key = REG_KEYS.get(register)
         self._key = key
         self._attr_translation_key = key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_entity_registry_enabled_default = enabled_by_default
+        self._register = register
+
         model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -230,7 +247,7 @@ class AlarmBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         """Return true if the binary sensor is on (alarm active)."""
-        value = self.coordinator.data.get(self._key)
+        value = self.coordinator.getData(self._register)
         if value is not None:
             return value == ALARM_ACTIVE
         return None

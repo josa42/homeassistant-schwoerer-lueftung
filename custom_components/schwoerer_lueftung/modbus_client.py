@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 import logging
+from itertools import groupby
 from typing import Any, Callable
 
 from pymodbus.client import ModbusTcpClient
 from pymodbus.exceptions import ModbusException
-from itertools import groupby
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -791,7 +791,7 @@ class ModbusClient:
             if result.isError():
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
-            _LOGGER.info("Read registers at %s[%d]: %s", address, count, result.registers)
+            # _LOGGER.info("Read registers at %s[%d]: %s", address, count, result.registers)
             return result.registers
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
@@ -809,7 +809,7 @@ class ModbusClient:
             if result.isError():
                 _LOGGER.error("Error reading register at %s: %s", address, result)
                 return None
-            _LOGGER.info("Read registers at %s: %s", address, result.registers)
+            # _LOGGER.info("Read registers at %s: %s", address, result.registers)
             return result.registers[0] if result.registers else None
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
@@ -930,8 +930,7 @@ class ModbusClient:
 
                     if key != REG_KEYS.get(address):
                         _LOGGER.error("Register %d key mismatch: expected %s, got %s", address, REG_KEYS.get(address), key)
-
-                    _LOGGER.info("Register %d -> %s", address, REG_KEYS[address])
+                    # _LOGGER.info("Register %d -> %s", address, REG_KEYS[address])
                 except Exception as err:
                     _LOGGER.error("Error transforming register %d value %s: %s", address, values[i], err)
 
