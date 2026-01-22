@@ -16,7 +16,7 @@ from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.schwoerer_lueftung.modbus_client import (
+from custom_components.schwoerer_lueftung.modbus.registers import (
     REG_CURRENT_TEMPERATURE_1,
     REG_HEATING_ENABLED_1,
     REG_TARGET_TEMPERATURE_1,

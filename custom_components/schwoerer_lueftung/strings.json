@@ -131,7 +131,6 @@
           "49": "Cooling"
         }
       },
-
       "supply_air_fan_status": {
         "name": "Supply Air Fan Status",
         "state": {
@@ -193,31 +192,31 @@
       "current_exhaust_air_rpm": {
         "name": "Current Exhaust Air RPM"
       },
-      "temperature_t1_after_ewt": {
+      "temp_t1_after_ewt": {
         "name": "Temperature T1 After EWT"
       },
-      "temperature_t2_after_vhr": {
+      "temp_t2_after_vhr": {
         "name": "Temperature T2 After VHR"
       },
-      "temperature_t3_before_ne": {
+      "temp_t3_before_ne": {
         "name": "Temperature T3 Before NE"
       },
-      "temperature_t4_after_ne": {
+      "temp_t4_after_ne": {
         "name": "Temperature T4 After NE"
       },
-      "temperature_t5_exhaust_air": {
+      "temp_t5_exhaust_air": {
         "name": "Temperature T5 Exhaust Air"
       },
-      "temperature_t6_in_wt": {
+      "temp_t6_in_wt": {
         "name": "Temperature T6 in WT"
       },
-      "temperature_t7_evaporator": {
+      "temp_t7_evaporator": {
         "name": "Temperature T7 Evaporator"
       },
-      "temperature_t8_condenser": {
+      "temp_t8_condenser": {
         "name": "Temperature T8 Condenser"
       },
-      "temperature_t10_outdoor": {
+      "temp_t10_outdoor": {
         "name": "Temperature T10 Outdoor"
       },
       "device_filter_remaining": {
@@ -289,7 +288,7 @@
       "operating_hours_ewt": {
         "name": "Operating Hours EWT"
       },
-      "room_temperature": {
+      "current_temperature": {
         "name": "Temperature"
       }
     },

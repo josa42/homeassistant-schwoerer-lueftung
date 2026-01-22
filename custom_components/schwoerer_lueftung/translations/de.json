@@ -90,7 +90,6 @@
           "49": "WP Kühlen"
         }
       },
-
       "supply_air_fan_status": {
         "name": "Status Gebläse Zuluft",
         "state": {
@@ -152,31 +151,31 @@
       "current_exhaust_air_rpm": {
         "name": "Aktuelle Drehzahl Abluft"
       },
-      "temperature_t1_after_ewt": {
+      "temp_t1_after_ewt": {
         "name": "T1 nach EWT"
       },
-      "temperature_t2_after_vhr": {
+      "temp_t2_after_vhr": {
         "name": "T2 nach VHR"
       },
-      "temperature_t3_before_ne": {
+      "temp_t3_before_ne": {
         "name": "T3 vor NE"
       },
-      "temperature_t4_after_ne": {
+      "temp_t4_after_ne": {
         "name": "T4 nach NE"
       },
-      "temperature_t5_exhaust_air": {
+      "temp_t5_exhaust_air": {
         "name": "T5 Abluft"
       },
-      "temperature_t6_in_wt": {
+      "temp_t6_in_wt": {
         "name": "T6 im WT"
       },
-      "temperature_t7_evaporator": {
+      "temp_t7_evaporator": {
         "name": "T7 Verdampfer"
       },
-      "temperature_t8_condenser": {
+      "temp_t8_condenser": {
         "name": "T8 Kondensator"
       },
-      "temperature_t10_outdoor": {
+      "temp_t10_outdoor": {
         "name": "T10 Aussen"
       },
       "pressure_monitor_alarm": {
@@ -365,7 +364,7 @@
           "heating_enabled": "Heizen frei"
         }
       },
-      "room_temperature": {
+      "current_temperature": {
         "name": "Temperatur"
       }
     },
