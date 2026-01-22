@@ -52,22 +52,24 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT) == DEVICE_TYPE_WGT
 
     async def async_write_register(self, register: int, value: int) -> None:
-        success = await self.hass.async_add_executor_job(
-            self.client.write_register, register, int(value)
-        )
+        try:
+          if not await self.hass.async_add_executor_job(self.client.connect):
+              raise UpdateFailed("Failed to connect to device")
 
-        if success:
-            await self.async_request_refresh()
+          success = await self.hass.async_add_executor_job(
+              self.client.write_register, register, int(value)
+          )
+
+          if success:
+              await self.async_request_refresh()
+
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with device: {err}") from err
+        finally:
+            await self.hass.async_add_executor_job(self.client.disconnect)
 
     async def async_write_room_register(self, base_register: int, roomt_number: int, value: int) -> None:
         await self.async_write_register(room_reg(base_register, roomt_number), value)
-
-
-    # async def write_register(self, address: int, value: int) -> bool:
-    #     """Write a register to the device."""
-    #     return await self.hass.async_add_executor_job(
-    #         self.client.write_register, address, value
-    #     )
 
     def get_data(self, register: int|None, map: dict[int, Any]|None = None) -> Any:
         if register is None:
@@ -107,7 +109,6 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         return self._device
 
-
     def get_room_device(self, room: int):
         if room not in self._room_devices:
             rooms = self.config_entry.data.get(CONF_ROOMS, [])
@@ -121,4 +122,23 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             )
 
         return self._room_devices[room]
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        """Fetch data from device."""
+        try:
+            if not await self.hass.async_add_executor_job(self.client.connect):
+                raise UpdateFailed("Failed to connect to device")
+
+            data = await self.hass.async_add_executor_job(self.client.read_data)
+
+            # For now, return empty dict if no data (placeholder until registers are mapped)
+            # Remove this check once actual register reading is implemented
+            if data is None:
+                raise UpdateFailed("Failed to read data from device")
+
+            return data
+        except Exception as err:
+            raise UpdateFailed(f"Error communicating with device: {err}") from err
+        finally:
+            await self.hass.async_add_executor_job(self.client.disconnect)
 

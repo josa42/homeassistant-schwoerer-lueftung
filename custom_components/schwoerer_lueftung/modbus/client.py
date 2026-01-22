@@ -97,8 +97,6 @@ class ModbusClient:
 
         groups = self._get_grouped_subscriptions()
 
-        _LOGGER.debug("Reading data in %d groups: %s", len(groups), groups)
-
         for group in groups:
             registers = list(group.keys())
 
