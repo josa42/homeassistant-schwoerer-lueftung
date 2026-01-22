@@ -691,74 +691,7 @@ class ModbusClient:
             retries=3,
         )
 
-        self._subscriptions: dict[int, tuple[str, None|Callable]] = {
-            REG_OPERATION_MODE: ("operation_mode", None),
-            REG_FAN_SPEED: ("fan_speed", None),
-            REG_CURRENT_FAN_LEVEL: ("current_fan_level", None),
-            REG_LINEAR_FAN_POWER: ("linear_fan_power", None),
-            REG_FAN_OVERRIDE: ("fan_override", None),
-            REG_TIME_PROGRAM_BASE_LEVEL: ("time_program_base_level", None),
-            REG_SHOCK_VENTILATION: ("shock_ventilation", None),
-            REG_SHOCK_VENTILATION_REMAINING: ("shock_ventilation_remaining", None),
-
-            REG_SUPPLY_AIR_FAN_STATUS: ("supply_air_fan_status", None),
-            REG_EXHAUST_AIR_FAN_STATUS: ("exhaust_air_fan_status", None),
-            REG_EWT_STATE: ("ewt_state", None),
-            REG_BYPASS_STATE: ("bypass_state", None),
-            REG_OUTDOOR_DAMPER_STATE: ("outdoor_damper_state", None),
-            REG_PREHEATER_STATE: ("preheater_state", None),
-            REG_TIME_PROGRAM_FAN_LEVEL: ("time_program_fan_level", None),
-            REG_SENSOR_FAN_LEVEL: ("sensor_fan_level", None),
-            REG_CURRENT_SUPPLY_AIR_FLOW: ("current_supply_air_flow", None),
-            REG_CURRENT_EXHAUST_AIR_FLOW: ("current_exhaust_air_flow", None),
-            REG_CURRENT_SUPPLY_AIR_RPM: ("current_supply_air_rpm", None),
-            REG_CURRENT_EXHAUST_AIR_RPM: ("current_exhaust_air_rpm", None),
-            REG_TEMP_T1_AFTER_EWT: ("temp_t1_after_ewt", to_temperature),
-            REG_TEMP_T2_AFTER_VHR: ("temp_t2_after_vhr", to_temperature),
-            REG_TEMP_T3_BEFORE_NE: ("temp_t3_before_ne", to_temperature),
-            REG_TEMP_T4_AFTER_NE: ("temp_t4_after_ne", to_temperature),
-            REG_TEMP_T5_EXHAUST_AIR: ("temp_t5_exhaust_air", to_temperature),
-            REG_TEMP_T6_IN_WT: ("temp_t6_in_wt", to_temperature),
-            REG_TEMP_T7_EVAPORATOR: ("temp_t7_evaporator", to_temperature),
-            REG_TEMP_T8_CONDENSER: ("temp_t8_condenser", to_temperature),
-            REG_TEMP_T10_OUTDOOR: ("temp_t10_outdoor", to_temperature),
-            # Read alarms
-            REG_ALARM_PRESSURE_SWITCH: ("alarm_pressure_switch", None),
-            REG_ALARM_UTILITY_LOCK: ("alarm_utility_lock", None),
-            REG_ALARM_DOOR_OPEN: ("alarm_door_open", None),
-            REG_ALARM_DEVICE_FILTER_DIRTY: ("alarm_device_filter_dirty", None),
-            REG_ALARM_UPSTREAM_FILTER_DIRTY: ("alarm_upstream_filter_dirty", None),
-            REG_ALARM_OFF_PEAK_DISABLED: ("alarm_off_peak_disabled", None),
-            REG_ALARM_SUPPLY_VOLTAGE_OFF: ("alarm_supply_voltage_off", None),
-            REG_ALARM_PRESSOSTAT_TRIGGERED: ("alarm_pressostat_triggered", None),
-            REG_ALARM_EXTERNAL_UTILITY_LOCK: ("alarm_external_utility_lock", None),
-            REG_ALARM_HEATING_MODULE_TEST: ("alarm_heating_module_test", None),
-            REG_ALARM_EMERGENCY_MODE: ("alarm_emergency_mode", None),
-            REG_ALARM_SUPPLY_AIR_COLD: ("alarm_supply_air_cold", None),
-            REG_DEVICE_FILTER_REMAINING: ("device_filter_remaining", None),
-            REG_UPSTREAM_FILTER_REMAINING: ("upstream_filter_remaining", None),
-            REG_ERROR_MESSAGE: ("error_message", None),
-
-            REG_OPERATING_HOURS_FAN: ("operating_hours_fan", None),
-            REG_OPERATING_HOURS_FAN_LEVEL_1: ("operating_hours_fan_level_1", None),
-            REG_OPERATING_HOURS_FAN_LEVEL_2: ("operating_hours_fan_level_2", None),
-            REG_OPERATING_HOURS_FAN_LEVEL_3: ("operating_hours_fan_level_3", None),
-            REG_OPERATING_HOURS_FAN_LEVEL_4: ("operating_hours_fan_level_4", None),
-
-            REG_OPERATING_HOURS_HEAT_PUMP: ("operating_hours_heat_pump", None),
-            REG_OPERATING_HOURS_HEAT_PUMP_COOLING: ("operating_hours_heat_pump_cooling", None),
-            REG_OPERATING_HOURS_VHR: ("operating_hours_vhr", None),
-            REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE: ("operating_hours_auxiliary_heating_house", None),
-            REG_OPERATING_HOURS_EWT: ("operating_hours_ewt", None),
-
-            # WGT-only registers
-            REG_HEAT_PUMP_STATUS: ("heat_pump_status", None),
-            # REG_NHR_STATE: ("nhr_state", to_bool),
-            REG_HEATING_COOLING_FUNCTION: ("heating_cooling_function", None),
-            REG_HEAT_PUMP_HEATING_ENABLE: ("heat_pump_heating_enable", None),
-            REG_HEAT_PUMP_COOLING_ENABLE: ("heat_pump_cooling_enable", None),
-            REG_AUXILIARY_HEATING_ENABLE: ("auxiliary_heating_enable", None),
-        }
+        self._subscriptions: dict[int, tuple[str, None|Callable]] = {}
 
     def connect(self) -> bool:
         """Connect to the Modbus device."""
@@ -791,7 +724,7 @@ class ModbusClient:
             if result.isError():
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
-            # _LOGGER.info("Read registers at %s[%d]: %s", address, count, result.registers)
+            _LOGGER.info("-> Read registers at %s [len: %d]: %s", address, count, result.registers)
             return result.registers
         except ModbusException as err:
             _LOGGER.error("Modbus exception reading registers: %s", err)
@@ -905,6 +838,9 @@ class ModbusClient:
     def read_data(self) -> dict[str, Any]:
         """Read all relevant data from the device."""
         data = {}
+
+        if len(self._subscriptions) == 0:
+            return data
 
 
         groups = group_consecutive(self._subscriptions)
