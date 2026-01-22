@@ -4,9 +4,11 @@ from __future__ import annotations
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from custom_components.schwoerer_lueftung.abstract import AbstractSelect
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
@@ -36,6 +38,7 @@ from .modbus.registers import (
     OPERATION_MODE_WINTER,
     REG_FAN_SPEED,
     REG_HEATING_COOLING_FUNCTION,
+    REG_KEYS,
     REG_OPERATION_MODE,
 )
 
@@ -102,169 +105,47 @@ async def async_setup_entry(
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
 
+    model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
+    device = DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name="Lüftung",
+        manufacturer=MANUFACTURER,
+        model=model,
+    )
+
+
     entities = [
-        OperationModeSelect(coordinator, entry),
-        FanSpeedSelect(coordinator, entry),
+        OperationModeSelect(coordinator, device),
+        FanSpeedSelect(coordinator, device),
     ]
 
     # Add heating-related select entities only for WGT devices
     if has_heating:
-        entities.append(HeatingCoolingFunctionSelect(coordinator, entry))
+        entities.append(HeatingCoolingFunctionSelect(coordinator, device))
 
     async_add_entities(entities)
 
-
-class OperationModeSelect(CoordinatorEntity[Coordinator], SelectEntity):
-    """Select entity for WRG operation mode (Betriebsart)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "operation_mode"
-    _attr_options = list(OPERATION_MODES.values())
-
+class OperationModeSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        entry: ConfigEntry,
+        device: DeviceInfo,
     ) -> None:
-        """Initialize the select entity."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_operation_mode"
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def current_option(self) -> str | None:
-        """Return the current operation mode."""
-        mode = self.coordinator.getData(REG_OPERATION_MODE)
-        if mode is not None and mode in OPERATION_MODES:
-            return OPERATION_MODES[mode]
-        return None
-
-    async def async_select_option(self, option: str) -> None:
-        """Change the operation mode."""
-        # Find the mode value for the selected option
-        mode_value = None
-        for value, name in OPERATION_MODES.items():
-            if name == option:
-                mode_value = value
-                break
-
-        if mode_value is None:
-            return
-
-        # Write to device
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_operation_mode, mode_value
-        )
-
-        if success:
-            # Update coordinator data immediately
-            await self.coordinator.async_request_refresh()
+        super().__init__(coordinator, device, REG_OPERATION_MODE, OPERATION_MODES)
 
 
-class FanSpeedSelect(CoordinatorEntity[Coordinator], SelectEntity):
-    """Select entity for WRG fan speed (Manuelle Luftstufe)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "manual_fan_level"
-    _attr_options = list(FAN_SPEEDS.values())
-
+class FanSpeedSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        entry: ConfigEntry,
+        device: DeviceInfo,
     ) -> None:
-        """Initialize the select entity."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_fan_speed"
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
+        super().__init__(coordinator, device, REG_FAN_SPEED, FAN_SPEEDS)
 
-    @property
-    def current_option(self) -> str | None:
-        """Return the current fan speed."""
-        speed = self.coordinator.getData(REG_FAN_SPEED)
-        if speed is not None and speed in FAN_SPEEDS:
-            return FAN_SPEEDS[speed]
-        return None
-
-    async def async_select_option(self, option: str) -> None:
-        """Change the fan speed."""
-        # Find the speed value for the selected option
-        speed_value = None
-        for value, name in FAN_SPEEDS.items():
-            if name == option:
-                speed_value = value
-                break
-
-        if speed_value is None:
-            return
-
-        # Write to device
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_fan_speed, speed_value
-        )
-
-        if success:
-            # Update coordinator data immediately
-            await self.coordinator.async_request_refresh()
-
-
-class HeatingCoolingFunctionSelect(CoordinatorEntity[Coordinator], SelectEntity):
-    """Select entity for WRG heating/cooling function (Heiz-Kühlfunktion)."""
-
-    _attr_has_entity_name = True
-    _attr_translation_key = "heating_cooling_function"
-    _attr_options = list(HEATING_COOLING_MODES.values())
-
+class HeatingCoolingFunctionSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        entry: ConfigEntry,
+        device: DeviceInfo,
     ) -> None:
-        """Initialize the select entity."""
-        super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_heating_cooling_function"
-        model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            name="Lüftung",
-            manufacturer=MANUFACTURER,
-            model=model,
-        )
-
-    @property
-    def current_option(self) -> str | None:
-        """Return the current heating/cooling function."""
-        mode = self.coordinator.getData(REG_HEATING_COOLING_FUNCTION)
-        if mode is not None and mode in HEATING_COOLING_MODES:
-            return HEATING_COOLING_MODES[mode]
-        return None
-
-    async def async_select_option(self, option: str) -> None:
-        """Change the heating/cooling function."""
-        mode_value = None
-        for value, name in HEATING_COOLING_MODES.items():
-            if name == option:
-                mode_value = value
-                break
-
-        if mode_value is None:
-            return
-
-        success = await self.hass.async_add_executor_job(
-            self.coordinator.client.write_heating_cooling_function, mode_value
-        )
-
-        if success:
-            await self.coordinator.async_request_refresh()
+        super().__init__(coordinator, device, REG_HEATING_COOLING_FUNCTION, HEATING_COOLING_MODES)

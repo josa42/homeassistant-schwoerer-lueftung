@@ -79,7 +79,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             await self.hass.async_add_executor_job(self.client.disconnect)
 
 
-    def getData(self, register: int|None) -> Any:
+    def getData(self, register: int|None, map: dict[int, Any]|None = None) -> Any:
         if register is None:
             return None
 
@@ -91,7 +91,13 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
           if not self.client.is_subscribed(register):
             self.client.subscribe(register)
 
-          return self.data.get(key)
+          value = self.data.get(key)
+
+          if map is not None and value is not None:
+              return map[value]
+
+          return value
+
         except Exception as err:
           _LOGGER.error(f"Error getting data for register {register}: {err}")
           return None
