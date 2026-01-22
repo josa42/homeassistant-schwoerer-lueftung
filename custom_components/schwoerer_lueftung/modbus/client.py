@@ -3,20 +3,21 @@ from __future__ import annotations
 
 import logging
 from itertools import groupby
-from typing import Any, Callable
+from typing import Any
 
 from pymodbus.client import ModbusTcpClient
 from .registers import REG_KEYS, REG_TO_TRANSFORM
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class ModbusClient:
     """Modbus TCP client for WRG device."""
 
+    _subscriptions: set[int] = set()
+
     def __init__(self, host: str, port: int, slave_id: int, device_type: str = "wgt") -> None:
         """Initialize the Modbus client."""
-        self.host = host
+        self.hot = host
         self.port = port
         self.slave_id = slave_id
         self.device_type = device_type
@@ -26,7 +27,6 @@ class ModbusClient:
             timeout=5,
             retries=3,
         )
-        self._subscriptions: dict[int, tuple[str, None | Callable]] = {}
 
     ############################################################################
     # Connection management
@@ -52,11 +52,11 @@ class ModbusClient:
 
     def subscribe(self, register: int) -> None:
         """Subscribe to a register for reading."""
-        key = REG_KEYS.get(register)
-        if key is not None:
-            self._subscriptions[register] = (key, REG_TO_TRANSFORM.get(register))
-        else:
-            _LOGGER.error("Attempted to subscribe to unknown register: %s", register)
+        if not self.is_subscribed(register):
+            if REG_KEYS.get(register) is not None:
+                self._subscriptions.add(register)
+            else:
+                _LOGGER.error("Attempted to subscribe to unknown register: %s", register)
 
     ############################################################################
     # Read/Write operations
@@ -97,9 +97,7 @@ class ModbusClient:
 
         groups = self._get_grouped_subscriptions()
 
-        for group in groups:
-            registers = list(group.keys())
-
+        for registers in groups:
             values = self.read_registers(registers[0], len(registers))
             if values is None:
                 continue
@@ -124,22 +122,17 @@ class ModbusClient:
 
         return data
 
-    def _get_grouped_subscriptions(self) -> list[dict[int, tuple[str, Callable | None]]]:
+    def _get_grouped_subscriptions(self) -> list[list[int]]:
         """Group consecutive register addresses together for efficient reading."""
-        sorted_keys = sorted(self._subscriptions.keys())
+        subscriptions = sorted(self._subscriptions)
+
         groups = []
 
-        for _, group_keys in groupby(enumerate(sorted_keys), key=lambda x: x[0] - x[1]):
-            group_dict = {key: self._subscriptions[key] for _, key in group_keys}
+        for _, groupped_subscriptions in groupby(enumerate(subscriptions), key=lambda x: x[0] - x[1]):
+            group = [x for _, x in list(groupped_subscriptions)]
 
             # Split groups longer than 125
-            if len(group_dict) > 125:
-                keys_list = sorted(group_dict.keys())
-                for i in range(0, len(keys_list), 125):
-                    chunk = {k: group_dict[k] for k in keys_list[i:i+125]}
-                    groups.append(chunk)
-            else:
-                groups.append(group_dict)
+            groups.extend(group[i:i + 125] for i in range(0, len(group), 125))
 
         return groups
 
