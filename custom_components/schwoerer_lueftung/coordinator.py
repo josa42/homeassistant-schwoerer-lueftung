@@ -8,14 +8,19 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     CONF_DEVICE_TYPE,
+    CONF_ROOMS,
     CONF_SLAVE_ID,
     DEFAULT_SCAN_INTERVAL,
     DEVICE_TYPE_WGT,
     DOMAIN,
+    MANUFACTURER,
+    MODEL_WGT,
+    MODEL_WRT,
 )
 from .modbus import ModbusClient
 from .modbus.registers import REG_KEYS
@@ -25,6 +30,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching WRG data."""
+
+    _device: DeviceInfo | None = None
+    _room_devices: dict[int, DeviceInfo] = {}
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         """Initialize."""
@@ -101,4 +109,37 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         except Exception as err:
           _LOGGER.error(f"Error getting data for register {register}: {err}")
           return None
+
+
+
+    def get_device(self) -> DeviceInfo:
+        if self._device is None:
+            model = MODEL_WGT if self.has_heating() else MODEL_WRT
+            self._device = DeviceInfo(
+                identifiers={(DOMAIN, self.config_entry.entry_id)},
+                name="Lüftung",
+                manufacturer=MANUFACTURER,
+                model=model,
+            )
+
+        return self._device
+
+
+    def get_room_device(self, room: int):
+        if room not in self._room_devices:
+            rooms = self.config_entry.data.get(CONF_ROOMS, [])
+
+            _LOGGER.debug(f"Creating device for room {room}: {rooms} -> {rooms[room - 1]["name"]}")
+
+            self._room_devices[room] = DeviceInfo(
+                identifiers={
+                    (DOMAIN, f"{self.config_entry.entry_id}_room_{room}")
+                },
+                name=rooms[room - 1]["name"],
+                manufacturer=MANUFACTURER,
+                model="Room Climate Control",
+                via_device=(DOMAIN, self.config_entry.entry_id),
+            )
+
+        return self._room_devices[room]
 

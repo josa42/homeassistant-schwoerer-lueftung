@@ -101,24 +101,14 @@ async def async_setup_entry(
     """Set up WRG select entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
-
-    model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-    device = DeviceInfo(
-        identifiers={(DOMAIN, entry.entry_id)},
-        name="Lüftung",
-        manufacturer=MANUFACTURER,
-        model=model,
-    )
-
-
     entities = [
-        OperationModeSelect(coordinator, device),
-        FanSpeedSelect(coordinator, device),
+        OperationModeSelect(coordinator),
+        FanSpeedSelect(coordinator),
     ]
 
     # Add heating-related select entities only for WGT devices
     if has_heating:
-        entities.append(HeatingCoolingFunctionSelect(coordinator, device))
+        entities.append(HeatingCoolingFunctionSelect(coordinator))
 
     async_add_entities(entities)
 
@@ -126,23 +116,20 @@ class OperationModeSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
     ) -> None:
-        super().__init__(coordinator, device, REG_OPERATION_MODE, OPERATION_MODES)
+        super().__init__(coordinator, REG_OPERATION_MODE, OPERATION_MODES)
 
 
 class FanSpeedSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
     ) -> None:
-        super().__init__(coordinator, device, REG_FAN_SPEED, FAN_SPEEDS)
+        super().__init__(coordinator, REG_FAN_SPEED, FAN_SPEEDS)
 
 class HeatingCoolingFunctionSelect(AbstractSelect):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
     ) -> None:
-        super().__init__(coordinator, device, REG_HEATING_COOLING_FUNCTION, HEATING_COOLING_MODES)
+        super().__init__(coordinator, REG_HEATING_COOLING_FUNCTION, HEATING_COOLING_MODES)

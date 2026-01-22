@@ -27,32 +27,15 @@ async def async_setup_entry(
     """Set up WRG number entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    model = MODEL_WGT if coordinator.has_heating() else MODEL_WRT
-    device = DeviceInfo(
-        identifiers={(DOMAIN, entry.entry_id)},
-        name="Lüftung",
-        manufacturer=MANUFACTURER,
-        model=model,
-    )
-
     entities = []
-    entities.append(LinearFanPowerNumber(coordinator, device))
+    entities.append(LinearFanPowerNumber(coordinator))
 
     # Add base temperature numbers for each configured room (WGT only)
     if coordinator.has_heating():
         rooms = entry.data.get("rooms", [])
         for room in rooms:
-            room_device = DeviceInfo(
-                identifiers={
-                    (DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room["number"]}")
-                },
-                name=room["name"],
-                manufacturer=MANUFACTURER,
-                model="Room Climate Control",
-                via_device=(DOMAIN, coordinator.config_entry.entry_id),
-            )
             entities.append(
-                RoomBaseTemperatureNumber(coordinator, room_device, room["number"])
+                RoomBaseTemperatureNumber(coordinator, room["number"])
             )
 
     async_add_entities(entities)
@@ -64,11 +47,9 @@ class LinearFanPowerNumber(AbstractNumber):
 
     def __init__(
         self,
-        coordinator: Coordinator,
-        device: DeviceInfo
-    ) -> None:
+        coordinator: Coordinator) -> None:
         """Initialize the number entity."""
-        super().__init__(coordinator, device, REG_LINEAR_FAN_POWER)
+        super().__init__(coordinator, REG_LINEAR_FAN_POWER)
 
         self._attr_translation_key = "linear_fan_power"
         self._attr_native_min_value = LINEAR_FAN_POWER_MIN
@@ -84,11 +65,10 @@ class RoomBaseTemperatureNumber(AbstarctRoomNumber):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         room_number: int,
     ) -> None:
         """Initialize the number entity."""
-        super().__init__(coordinator, device, room_number, REG_BASE_TEMPERATURE_1)
+        super().__init__(coordinator, room_number, REG_BASE_TEMPERATURE_1)
         self._attr_native_min_value = 10.0
         self._attr_native_max_value = 30.0
         self._attr_native_step = 0.1

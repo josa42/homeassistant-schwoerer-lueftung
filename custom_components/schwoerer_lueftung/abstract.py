@@ -23,15 +23,15 @@ class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         register: int,
+        device: DeviceInfo | None = None,
     ) -> None:
         super().__init__(coordinator)
 
         key = REG_KEYS.get(register)
         entry = coordinator.config_entry
 
-        self._attr_device_info = device
+        self._attr_device_info = coordinator.get_device() if device is None else device
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
         self._register = register
@@ -41,8 +41,8 @@ class AbstractSensor(CoordinatorEntity[Coordinator], SensorEntity):
         return self.coordinator.getData(self._register)
 
 class AbstarctRoomSensor(AbstractSensor):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, device, base_register + (room_number - 1))
+    def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
+        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 
 
@@ -53,16 +53,16 @@ class AbstractBinarySensor(CoordinatorEntity[Coordinator], BinarySensorEntity):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         register: int,
         active_states: set[int]|None = None,
+        device: DeviceInfo | None = None,
     ) -> None:
         super().__init__(coordinator)
 
         key = REG_KEYS.get(register)
         entry = coordinator.config_entry
 
-        self._attr_device_info = device
+        self._attr_device_info = coordinator.get_device() if device is None else device
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
         self._register = register
@@ -84,12 +84,11 @@ class AbstarctBinaryRoomSensor(AbstractBinarySensor):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         room_number: int,
         base_register: int,
         active_states: set[int]|None = None,
     ) -> None:
-        super().__init__(coordinator, device, base_register + (room_number - 1), active_states)
+        super().__init__(coordinator, base_register + (room_number - 1), active_states, device=coordinator.get_room_device(room_number))
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 
 class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
@@ -98,16 +97,16 @@ class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         register: int,
         options: dict[int, str],
+        device: DeviceInfo | None = None,
     ) -> None:
         super().__init__(coordinator)
 
         key = REG_KEYS.get(register)
         entry = coordinator.config_entry
 
-        self._attr_device_info = device
+        self._attr_device_info = coordinator.get_device() if device is None else device
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
         self._attr_options = list(options.values())
@@ -145,15 +144,15 @@ class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         register: int,
+        device: DeviceInfo | None = None,
     ) -> None:
         super().__init__(coordinator)
 
         key = REG_KEYS.get(register)
         entry = coordinator.config_entry
 
-        self._attr_device_info = device
+        self._attr_device_info = coordinator.get_device() if device is None else device
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
         self._register = register
@@ -171,8 +170,8 @@ class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
             await self.coordinator.async_request_refresh()
 
 class AbstarctRoomNumber(AbstractNumber):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, device, base_register + (room_number - 1))
+    def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
+        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 
 class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
@@ -181,16 +180,16 @@ class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
     def __init__(
         self,
         coordinator: Coordinator,
-        device: DeviceInfo,
         register: int,
         active_states: set[int]|None = None,
+        device: DeviceInfo | None = None,
     ) -> None:
         super().__init__(coordinator)
 
         key = REG_KEYS.get(register)
         entry = coordinator.config_entry
 
-        self._attr_device_info = device
+        self._attr_device_info = coordinator.get_device() if device is None else device
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_translation_key = key
         self._register = register
@@ -216,7 +215,7 @@ class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
             await self.coordinator.async_request_refresh()
 
 class AbstractRoomSwitch(AbstractSwitch):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int, base_register: int) -> None:
-        super().__init__(coordinator, device, base_register + (room_number - 1))
+    def __init__(self, coordinator: Coordinator, room_number: int, base_register: int) -> None:
+        super().__init__(coordinator, base_register + (room_number - 1), device=coordinator.get_room_device(room_number))
         self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 

@@ -42,33 +42,22 @@ async def async_setup_entry(
 
 
     entities = []
-    entities.extend([
-        ShockVentilationSwitch(coordinator, device),
-    ])
+    entities.extend([ ShockVentilationSwitch(coordinator)])
 
     # Add heating-related switches only for WGT devices
     if has_heating:
         entities.extend([
-            HeatPumpHeatingSwitch(coordinator, device),
-            HeatPumpCoolingSwitch(coordinator, device),
-            AuxiliaryHeatingSwitch(coordinator, device),
+            HeatPumpHeatingSwitch(coordinator),
+            HeatPumpCoolingSwitch(coordinator),
+            AuxiliaryHeatingSwitch(coordinator),
         ])
 
     # Add room heating switches (only for WGT)
     if has_heating:
         rooms = entry.data.get("rooms", [])
         for room in rooms:
-            room_device = DeviceInfo(
-                identifiers={
-                    (DOMAIN, f"{coordinator.config_entry.entry_id}_room_{room["number"]}")
-                },
-                name=room["name"],
-                manufacturer=MANUFACTURER,
-                model="Room Climate Control",
-                via_device=(DOMAIN, coordinator.config_entry.entry_id),
-            )
-            entities.append(RoomAuxiliaryHeatingEnableSwitch(coordinator, room_device, room["number"]))
-            entities.append(RoomTimeProgramHeatingEnableSwitch(coordinator, room_device, room["number"])
+            entities.append(RoomAuxiliaryHeatingEnableSwitch(coordinator, room["number"]))
+            entities.append(RoomTimeProgramHeatingEnableSwitch(coordinator, room["number"])
             )
 
     async_add_entities(entities)
@@ -77,8 +66,8 @@ async def async_setup_entry(
 class ShockVentilationSwitch(AbstractSwitch):
     """Switch entity for WRG shock ventilation (Stoßlüftung)."""
 
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo) -> None:
-        super().__init__(coordinator, device, REG_SHOCK_VENTILATION)
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(coordinator, REG_SHOCK_VENTILATION)
 
 
 class RoomAuxiliaryHeatingEnableSwitch(AbstractRoomSwitch):
@@ -86,8 +75,8 @@ class RoomAuxiliaryHeatingEnableSwitch(AbstractRoomSwitch):
 
     _attr_entity_registry_enabled_default = False
 
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int) -> None:
-        super().__init__(coordinator, device, room_number, REG_AUXILIARY_HEATING_ENABLED_ROOM_1)
+    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
+        super().__init__(coordinator, room_number, REG_AUXILIARY_HEATING_ENABLED_ROOM_1)
 
 class RoomTimeProgramHeatingEnableSwitch(AbstractRoomSwitch):
     """Switch entity for room time program heating enable.
@@ -97,18 +86,18 @@ class RoomTimeProgramHeatingEnableSwitch(AbstractRoomSwitch):
 
     _attr_entity_registry_enabled_default = False
 
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int) -> None:
-        super().__init__(coordinator, device, room_number, REG_SCHEDULED_HEATING_ENABLED_1)
+    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
+        super().__init__(coordinator, room_number, REG_SCHEDULED_HEATING_ENABLED_1)
 
 class HeatPumpHeatingSwitch(AbstractSwitch):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo) -> None:
-        super().__init__(coordinator, device, REG_HEAT_PUMP_HEATING_ENABLED)
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(coordinator, REG_HEAT_PUMP_HEATING_ENABLED)
 
 class HeatPumpCoolingSwitch(AbstractSwitch):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo) -> None:
-        super().__init__(coordinator, device, REG_HEAT_PUMP_COOLING_ENABLED)
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(coordinator, REG_HEAT_PUMP_COOLING_ENABLED)
 
 class AuxiliaryHeatingSwitch(AbstractSwitch):
-    def __init__(self, coordinator: Coordinator, device: DeviceInfo) -> None:
-        super().__init__(coordinator, device, REG_AUXILIARY_HEATING_ENABLED)
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(coordinator, REG_AUXILIARY_HEATING_ENABLED)
 
