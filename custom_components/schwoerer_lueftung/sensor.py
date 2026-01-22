@@ -15,7 +15,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from custom_components.schwoerer_lueftung.abstract import (AbstractSensor, AbstarctRoomSensor)
+from .abstract import (AbstractSensor, AbstarctRoomSensor)
 
 from .const import CONF_ROOMS, DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
@@ -48,7 +48,7 @@ from .modbus.registers import (
     REG_EWT_STATE,
     REG_EXHAUST_AIR_FAN_STATUS,
     REG_HEAT_PUMP_STATUS,
-    REG_HEATING_ENABLED_1,
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
     REG_OPERATING_HOURS_EWT,
     REG_OPERATING_HOURS_FAN,
@@ -431,7 +431,7 @@ class RoomAuxiliaryHeatingSensor(AbstarctRoomSensor):
     _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int) -> None:
-        super().__init__(coordinator, device, room_number, REG_HEATING_ENABLED_1)
+        super().__init__(coordinator, device, room_number, REG_AUXILIARY_HEATING_ENABLED_ROOM_1)
         self._attr_translation_key = "auxiliary_heating_enabled"
 
     @property

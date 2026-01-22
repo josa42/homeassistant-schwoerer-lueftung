@@ -11,11 +11,11 @@ from pymodbus.exceptions import ModbusException
 from .registers import (
     LINEAR_FAN_POWER_MAX,
     LINEAR_FAN_POWER_MIN,
-    REG_AUXILIARY_HEATING_ENABLE,
+    REG_AUXILIARY_HEATING_ENABLED,
     REG_FAN_SPEED,
     REG_HEATING_COOLING_FUNCTION,
-    REG_HEAT_PUMP_COOLING_ENABLE,
-    REG_HEAT_PUMP_HEATING_ENABLE,
+    REG_HEAT_PUMP_COOLING_ENABLED,
+    REG_HEAT_PUMP_HEATING_ENABLED,
     REG_KEYS,
     REG_LINEAR_FAN_POWER,
     REG_OPERATION_MODE,
@@ -188,15 +188,15 @@ class ModbusClient:
 
     def write_heat_pump_heating_enable(self, enabled: int) -> bool:
         """Write heat pump heating enable (Wärmepumpe Heizen)."""
-        return self.write_register(REG_HEAT_PUMP_HEATING_ENABLE, enabled)
+        return self.write_register(REG_HEAT_PUMP_HEATING_ENABLED, enabled)
 
     def write_heat_pump_cooling_enable(self, enabled: int) -> bool:
         """Write heat pump cooling enable (Wärmepumpe Kühlen)."""
-        return self.write_register(REG_HEAT_PUMP_COOLING_ENABLE, enabled)
+        return self.write_register(REG_HEAT_PUMP_COOLING_ENABLED, enabled)
 
     def write_auxiliary_heating_enable(self, enabled: int) -> bool:
         """Write auxiliary heating enable (Zusatzheizung Haus)."""
-        return self.write_register(REG_AUXILIARY_HEATING_ENABLE, enabled)
+        return self.write_register(REG_AUXILIARY_HEATING_ENABLED, enabled)
 
     def write_room_base_temperature(self, room_number: int, temperature: float) -> bool:
         """Write room base temperature (Grundtemperatur Raum)."""

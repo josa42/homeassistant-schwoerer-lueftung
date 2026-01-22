@@ -18,7 +18,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from custom_components.schwoerer_lueftung.modbus.registers import (
     REG_CURRENT_TEMPERATURE_1,
-    REG_HEATING_ENABLED_1,
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_TARGET_TEMPERATURE_1,
 )
 
@@ -111,7 +111,7 @@ class RoomClimate(Entity, ClimateEntity):
         if self._room_number > 12:
             return HVACMode.FAN_ONLY
 
-        value = self.coordinator.getData(REG_HEATING_ENABLED_1 + (self._room_number - 1))
+        value = self.coordinator.getData(REG_AUXILIARY_HEATING_ENABLED_ROOM_1 + (self._room_number - 1))
 
         if value == 1:
             return HVACMode.HEAT

@@ -1,5 +1,8 @@
+from typing import Any
 from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.number import NumberEntity
 from homeassistant.components.select import SelectEntity
+from homeassistant.components.switch import SwitchEntity
 from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS
 from .coordinator import Coordinator
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -135,4 +138,85 @@ class AbstractSelect(CoordinatorEntity[Coordinator], SelectEntity):
         if success:
             await self.coordinator.async_request_refresh()
 
+class AbstractNumber(CoordinatorEntity[Coordinator], NumberEntity):
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        device: DeviceInfo,
+        register: int,
+    ) -> None:
+        super().__init__(coordinator)
+
+        key = REG_KEYS.get(register)
+        entry = coordinator.config_entry
+
+        self._attr_device_info = device
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_translation_key = key
+        self._register = register
+
+    @property
+    def native_value(self) -> float | None:
+        return self.coordinator.getData(self._register)
+
+    async def async_set_native_value(self, value: float) -> None:
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_register, self._register, int(value)
+        )
+
+        if success:
+            await self.coordinator.async_request_refresh()
+
+class AbstarctRoomNumber(AbstractNumber):
+    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int, base_register: int) -> None:
+        super().__init__(coordinator, device, base_register + (room_number - 1))
+        self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
+
+class AbstractSwitch(CoordinatorEntity[Coordinator], SwitchEntity):
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        device: DeviceInfo,
+        register: int,
+        active_states: set[int]|None = None,
+    ) -> None:
+        super().__init__(coordinator)
+
+        key = REG_KEYS.get(register)
+        entry = coordinator.config_entry
+
+        self._attr_device_info = device
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_translation_key = key
+        self._register = register
+
+    @property
+    def is_on(self) -> bool | None:
+        value = self.coordinator.getData(self._register)
+        return value == 1 if value is not None else None
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self._write(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self._write(False)
+
+
+    async def _write(self, value: bool) -> None:
+        success = await self.hass.async_add_executor_job(
+            self.coordinator.client.write_register, self._register, value
+        )
+
+        if success:
+            await self.coordinator.async_request_refresh()
+
+class AbstractRoomSwitch(AbstractSwitch):
+    def __init__(self, coordinator: Coordinator, device: DeviceInfo, room_number: int, base_register: int) -> None:
+        super().__init__(coordinator, device, base_register + (room_number - 1))
+        self._attr_translation_key = re.sub(r'_\d+$', '',  self._attr_translation_key or '') or ''
 

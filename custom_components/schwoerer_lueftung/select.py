@@ -1,14 +1,12 @@
 """Select platform for BIC WRG."""
 from __future__ import annotations
 
-from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from custom_components.schwoerer_lueftung.abstract import AbstractSelect
+from .abstract import AbstractSelect
 
 from .const import DOMAIN, MANUFACTURER, MODEL_WGT, MODEL_WRT
 from .coordinator import Coordinator
@@ -38,7 +36,6 @@ from .modbus.registers import (
     OPERATION_MODE_WINTER,
     REG_FAN_SPEED,
     REG_HEATING_COOLING_FUNCTION,
-    REG_KEYS,
     REG_OPERATION_MODE,
 )
 

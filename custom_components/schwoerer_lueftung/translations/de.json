@@ -380,22 +380,22 @@
       "shock_ventilation": {
         "name": "Stoßlüftung"
       },
-      "heat_pump_heating": {
+      "heat_pump_heating_enabled": {
         "name": "Wärmepumpe Heizen"
       },
-      "heat_pump_cooling": {
+      "heat_pump_cooling_enabled": {
         "name": "Wärmepumpe Kühlen"
       },
       "auxiliary_house_heating": {
         "name": "Zusatzheizung Haus"
       },
-      "scheduled_heating_enabled": {
-        "name": "Freigabe Zeitprogramm Heizen"
-      },
-      "auxiliary_heating_enable": {
+      "auxiliary_heating_enabled": {
         "name": "Zusatzheizung Freigabe"
       },
-      "scheduled_heating_enable": {
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
+      },
+      "scheduled_heating_enabled": {
         "name": "Freigabe Zeitprogramm Heizen"
       }
     },

@@ -296,19 +296,19 @@
       "shock_ventilation": {
         "name": "Shock Ventilation"
       },
-      "heat_pump_heating": {
+      "heat_pump_heating_enabled": {
         "name": "Heat Pump Heating"
       },
-      "heat_pump_cooling": {
+      "heat_pump_cooling_enabled": {
         "name": "Heat Pump Cooling"
       },
       "auxiliary_house_heating": {
         "name": "Auxiliary House Heating"
       },
-      "auxiliary_heating_enable": {
+      "auxiliary_heating_enabled": {
         "name": "Auxiliary Heating Enable"
       },
-      "scheduled_heating_enable": {
+      "scheduled_heating_enabled": {
         "name": "Time Program Heating Enable"
       }
     },
