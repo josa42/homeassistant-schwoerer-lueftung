@@ -1,3 +1,4 @@
+import logging
 import re
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -5,14 +6,20 @@ from homeassistant.components.number import NumberEntity
 from homeassistant.components.select import SelectEntity
 from homeassistant.components.sensor import (
     SensorEntity,
-    SensorStateClass,
+    # SensorStateClass,
 )
 from homeassistant.components.switch import SwitchEntity
 
 from custom_components.schwoerer_lueftung.entity import Entity
-from custom_components.schwoerer_lueftung.modbus.registers import REG_KEYS, room_reg
+from custom_components.schwoerer_lueftung.modbus.registers import (
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+    REG_KEYS,
+    room_reg,
+)
 
 from .coordinator import Coordinator
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AbstractSensor(Entity, SensorEntity):
@@ -22,11 +29,11 @@ class AbstractSensor(Entity, SensorEntity):
         register: int,
         **kwargs
     ) -> None:
-        state_class = kwargs.pop('state_class', None) or SensorStateClass.MEASUREMENT
+        # state_class = kwargs.pop('state_class', None) or SensorStateClass.MEASUREMENT
         super().__init__(
             coordinator,
             register,
-            state_class=state_class,
+            # state_class=state_class,
             **kwargs
         )
 
@@ -42,7 +49,12 @@ class AbstarctRoomSensor(AbstractSensor):
         **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
-        translation_key = kwargs.pop('translation_key', None) or re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
+        translation_key = kwargs.pop(
+            'translation_key', None
+        ) or re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
+        if register == REG_AUXILIARY_HEATING_ENABLED_ROOM_1:
+            _LOGGER.warning("Register %d ==> %s", register, translation_key)
+
         super().__init__(
             coordinator,
             room_reg(base_register, room_number),

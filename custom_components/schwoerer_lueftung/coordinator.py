@@ -108,12 +108,16 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             **self.get_device()
         )
 
+    def get_device_id(self) -> str:
+        #  self.config_entry.entry_id
+        return f"{DOMAIN}_{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}"
+
     def get_device(self) -> DeviceInfo:
         if self._device is None:
 
             model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
             self._device = DeviceInfo(
-                identifiers={(DOMAIN, self.config_entry.entry_id)},
+                identifiers={(DOMAIN, self.get_device_id())},
                 name=model,
                 manufacturer=MANUFACTURER,
                 model=model,
@@ -132,7 +136,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
                 name=f"{model} - {room_name}",
                 manufacturer=MANUFACTURER,
                 model=f"{model} - {room_name}",
-                via_device=(DOMAIN, self.config_entry.entry_id),
+                via_device=(DOMAIN, self.get_device_id()),
             )
 
             _LOGGER.debug(f"Created device info for room {room_number}: [ via_device: {self.config_entry.entry_id} ]")

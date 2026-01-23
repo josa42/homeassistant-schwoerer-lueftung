@@ -1,6 +1,7 @@
 """Sensor platform"""
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -16,22 +17,6 @@ from .abstract import AbstarctRoomSensor, AbstractSensor
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
-    BYPASS_STATE_CLOSED,
-    BYPASS_STATE_OPEN_COOLING,
-    BYPASS_STATE_OPEN_HEATING,
-    EWT_STATE_COOLING,
-    EWT_STATE_HEATING,
-    EWT_STATE_OFF,
-    EXHAUST_AIR_FAN_STATUS_ACTIVE,
-    EXHAUST_AIR_FAN_STATUS_DISABLED,
-    EXHAUST_AIR_FAN_STATUS_ERROR,
-    EXHAUST_AIR_FAN_STATUS_STANDBY,
-    EXHAUST_AIR_FAN_STATUS_STARTUP,
-    HEAT_PUMP_STATUS_COOLING,
-    HEAT_PUMP_STATUS_HEATING,
-    HEAT_PUMP_STATUS_OFF,
-    OUTDOOR_DAMPER_STATE_CLOSED,
-    OUTDOOR_DAMPER_STATE_OPEN,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_BYPASS_STATE,
     REG_CURRENT_EXHAUST_AIR_FLOW,
@@ -71,65 +56,9 @@ from .modbus.registers import (
     REG_TIME_PROGRAM_BASE_LEVEL,
     REG_TIME_PROGRAM_FAN_LEVEL,
     REG_UPSTREAM_FILTER_REMAINING,
-    SUPPLY_AIR_FAN_STATUS_ACTIVE,
-    SUPPLY_AIR_FAN_STATUS_DISABLED,
-    SUPPLY_AIR_FAN_STATUS_ERROR,
-    SUPPLY_AIR_FAN_STATUS_STANDBY,
-    SUPPLY_AIR_FAN_STATUS_STARTUP,
 )
 
-# TODO clean up unused mappings
-
-# Heat pump status mapping
-# Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
-HEAT_PUMP_STATUSES = {
-    HEAT_PUMP_STATUS_OFF: "Off",
-    HEAT_PUMP_STATUS_HEATING: "Heating",
-    HEAT_PUMP_STATUS_COOLING: "Cooling",
-}
-
-# Supply air fan status mapping
-# Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
-SUPPLY_AIR_FAN_STATUSES = {
-    SUPPLY_AIR_FAN_STATUS_DISABLED: "Disabled",
-    SUPPLY_AIR_FAN_STATUS_STARTUP: "Startup",
-    SUPPLY_AIR_FAN_STATUS_ACTIVE: "Active",
-    SUPPLY_AIR_FAN_STATUS_STANDBY: "Standby",
-    SUPPLY_AIR_FAN_STATUS_ERROR: "Error",
-}
-
-# Exhaust air fan status mapping
-# Status Gebläse Abluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
-EXHAUST_AIR_FAN_STATUSES = {
-    EXHAUST_AIR_FAN_STATUS_DISABLED: "Disabled",
-    EXHAUST_AIR_FAN_STATUS_STARTUP: "Startup",
-    EXHAUST_AIR_FAN_STATUS_ACTIVE: "Active",
-    EXHAUST_AIR_FAN_STATUS_STANDBY: "Standby",
-    EXHAUST_AIR_FAN_STATUS_ERROR: "Error",
-}
-
-# EWT state mapping
-# EWT Zustand: 0=EWT aus/geschlossen, 1=EWT im Heizbetrieb aktiv, 2=EWT im Kühlbetrieb aktiv
-EWT_STATES = {
-    EWT_STATE_OFF: "Off",
-    EWT_STATE_HEATING: "Heating",
-    EWT_STATE_COOLING: "Cooling",
-}
-
-# Bypass state mapping
-# Bypass Zustand: 0=Bypass geschlossen, 1=Bypass offen (Kühlen), 2=Bypass offen (Heizen)
-BYPASS_STATES = {
-    BYPASS_STATE_CLOSED: "Closed",
-    BYPASS_STATE_OPEN_COOLING: "Open (Cooling)",
-    BYPASS_STATE_OPEN_HEATING: "Open (Heating)",
-}
-
-# Outdoor damper state mapping
-# Aussenklappe Zustand: 0=geschlossen, 1=offen
-OUTDOOR_DAMPER_STATES = {
-    OUTDOOR_DAMPER_STATE_CLOSED: "Closed",
-    OUTDOOR_DAMPER_STATE_OPEN: "Open",
-}
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -186,14 +115,12 @@ async def async_setup_entry(
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_EWT),
         ])
-
-    # Add room-specific sensors
-    for room in rooms:
-        entities.append(
-            (RoomAuxiliaryHeatingSensor if has_heating else RoomTemperatureSensor)(
-                    coordinator, room["number"]
-            )
-        )
+        for room in rooms:
+            _LOGGER.debug("::::Adding auxiliary heating sensor for room %d", room["number"])
+            entities.append(RoomAuxiliaryHeatingSensor(coordinator, room["number"]))
+    else:
+        for room in rooms:
+            entities.append(RoomTemperatureSensor(coordinator, room["number"]))
 
     async_add_entities(entities)
 
@@ -401,7 +328,7 @@ class RoomAuxiliaryHeatingSensor(AbstarctRoomSensor):
             coordinator,
             REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
             room_number,
-            enabled_by_default=False
+            enabled_by_default=True
         )
 
     @property

@@ -31,9 +31,17 @@ class Entity(CoordinatorEntity[Coordinator]):
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{key}"
         self._attr_translation_key = translation_key if translation_key is not None else key
         self._register = register
-        self._attr_device_class = device_class
-        self._attr_state_class = state_class
-        self._attr_native_unit_of_measurement = unit_of_measurement
+
+        if device_class is not None:
+            self._attr_device_class = device_class
+        if state_class is not None:
+            self._attr_state_class = state_class
+        if unit_of_measurement is not None:
+            self._attr_native_unit_of_measurement = unit_of_measurement
+
+        # if state_class is None:
+        #     self._attr_state_class = SensorStateClass.MEASUREMENT
+
         self._attr_entity_registry_enabled_default = enabled_by_default
 
 
