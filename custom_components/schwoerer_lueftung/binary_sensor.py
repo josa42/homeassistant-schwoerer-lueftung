@@ -124,5 +124,9 @@ class RoomAuxiliaryHeatingActiveBinarySensor(AbstarctBinaryRoomSensor):
         coordinator: Coordinator,
         room_number: int,
     ) -> None:
-        super().__init__(coordinator, room_number, REG_AUXILIARY_HEATING_ACTIVE_ROOM_1, None)
-        self._attr_device_class = BinarySensorDeviceClass.HEAT
+        super().__init__(
+            coordinator,
+            REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
+            room_number,
+            device_class=BinarySensorDeviceClass.HEAT
+        )

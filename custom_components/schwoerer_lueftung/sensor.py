@@ -162,6 +162,12 @@ async def async_setup_entry(
         DeviceFilterRemainingSensor(coordinator),
         UpstreamFilterRemainingSensor(coordinator),
         ErrorMessageSensor(coordinator),
+        # Add operating hours sensors
+        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN),
+        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_1),
+        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_2),
+        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_3),
+        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_4),
     ]
     # Add heating-related sensors only for WGT devices
     if has_heating:
@@ -173,6 +179,12 @@ async def async_setup_entry(
             TemperatureT4AfterNeSensor(coordinator),
             TemperatureT7EvaporatorSensor(coordinator),
             TemperatureT8CondenserSensor(coordinator),
+            # Add heating-related operating hours sensors only for WGT
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP_COOLING,),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_VHR),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_EWT),
         ])
 
     # Add room-specific sensors
@@ -183,25 +195,6 @@ async def async_setup_entry(
             )
         )
 
-    # Add operating hours sensors
-    entities.extend([
-        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN),
-        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_1),
-        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_2),
-        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_3),
-        OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_4),
-    ])
-
-    # Add heating-related operating hours sensors only for WGT
-    if has_heating:
-        entities.extend([
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP_COOLING,),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_VHR),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_EWT),
-        ])
-
     async_add_entities(entities)
 
 class CurrentFanLevelSensor(AbstractSensor):
@@ -209,219 +202,207 @@ class CurrentFanLevelSensor(AbstractSensor):
         super().__init__(coordinator, REG_CURRENT_FAN_LEVEL)
 
 class TimeProgramBaseLevelSensor(AbstractSensor):
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TIME_PROGRAM_BASE_LEVEL)
+        super().__init__(
+            coordinator,
+            REG_TIME_PROGRAM_BASE_LEVEL,
+            state_class = SensorStateClass.MEASUREMENT,
+            enabled_by_default = False
+        )
 
 class ShockVentilationRemainingSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.DURATION
-    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_SHOCK_VENTILATION_REMAINING)
+        super().__init__(
+            coordinator,
+            REG_SHOCK_VENTILATION_REMAINING,
+            device_class = SensorDeviceClass.DURATION,
+            unit_of_measurement = UnitOfTime.MINUTES,
+        )
 
 
 class HeatPumpStatusSensor(AbstractSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_HEAT_PUMP_STATUS)
 
-
 class SupplyAirFanStatusSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_SUPPLY_AIR_FAN_STATUS)
-
+        super().__init__(coordinator, REG_SUPPLY_AIR_FAN_STATUS, enabled_by_default=False)
 
 class ExhaustAirFanStatusSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_EXHAUST_AIR_FAN_STATUS)
-
+        super().__init__(coordinator, REG_EXHAUST_AIR_FAN_STATUS, enabled_by_default=False)
 
 class EwtStateSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_EWT_STATE)
-
+        super().__init__(coordinator, REG_EWT_STATE, enabled_by_default=False)
 
 class BypassStateSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_BYPASS_STATE)
-
+        super().__init__(coordinator, REG_BYPASS_STATE, enabled_by_default=False)
 
 class OutdoorDamperStateSensor(AbstractSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE)
 
-
 class TimeProgramFanLevelSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TIME_PROGRAM_FAN_LEVEL)
-
+        super().__init__(coordinator, REG_TIME_PROGRAM_FAN_LEVEL, enabled_by_default=False)
 
 class SensorFanLevelSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_SENSOR_FAN_LEVEL)
-
+        super().__init__(coordinator, REG_SENSOR_FAN_LEVEL, enabled_by_default=False)
 
 class CurrentSupplyAirFlowSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_FLOW)
-
+        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_FLOW, enabled_by_default=False)
 
 class CurrentExhaustAirFlowSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_FLOW)
-
+        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_FLOW, enabled_by_default=False)
 
 class CurrentSupplyAirRpmSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_RPM)
-
+        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_RPM, enabled_by_default=False)
 
 class CurrentExhaustAirRpmSensor(AbstractSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_RPM)
-
+        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_RPM, enabled_by_default=False)
 
 class TemperatureT1AfterEwtSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T1_AFTER_EWT)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T1_AFTER_EWT,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT2AfterVhrSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T2_AFTER_VHR)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T2_AFTER_VHR,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT3BeforeNeSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T3_BEFORE_NE)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T3_BEFORE_NE,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT4AfterNeSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T4_AFTER_NE)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T4_AFTER_NE,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT5ExhaustAirSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T5_EXHAUST_AIR)
+        super().__init__(
+            coordinator,
+            REG_TEMP_T5_EXHAUST_AIR,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 
 class TemperatureT6InWtSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T6_IN_WT)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T6_IN_WT,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT7EvaporatorSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T7_EVAPORATOR)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T7_EVAPORATOR,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT8CondenserSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T8_CONDENSER)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T8_CONDENSER,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
+        )
 
 class TemperatureT10OutdoorSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_TEMP_T10_OUTDOOR)
-
+        super().__init__(
+            coordinator,
+            REG_TEMP_T10_OUTDOOR,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+        )
 
 class DeviceFilterRemainingSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.DURATION
-    _attr_native_unit_of_measurement = UnitOfTime.DAYS
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_DEVICE_FILTER_REMAINING)
-
+        super().__init__(
+            coordinator,
+            REG_DEVICE_FILTER_REMAINING,
+            device_class=SensorDeviceClass.DURATION,
+            unit_of_measurement=UnitOfTime.DAYS,
+        )
 
 class UpstreamFilterRemainingSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.DURATION
-    _attr_native_unit_of_measurement = UnitOfTime.DAYS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_UPSTREAM_FILTER_REMAINING)
-
+        super().__init__(
+            coordinator,
+            REG_UPSTREAM_FILTER_REMAINING,
+            device_class=SensorDeviceClass.DURATION,
+            unit_of_measurement=UnitOfTime.DAYS,
+            enabled_by_default=False,
+        )
 
 class ErrorMessageSensor(AbstractSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_ERROR_MESSAGE)
 
 class OperatingHoursSensor(AbstractSensor):
-    _attr_device_class = SensorDeviceClass.DURATION
-    _attr_state_class = SensorStateClass.TOTAL_INCREASING
-    _attr_native_unit_of_measurement = UnitOfTime.HOURS
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator, register: int) -> None:
-        super().__init__(coordinator, register)
-
+        super().__init__(
+            coordinator,
+            register,
+            device_class=SensorDeviceClass.DURATION,
+            state_class=SensorStateClass.TOTAL_INCREASING,
+            unit_of_measurement=UnitOfTime.HOURS,
+            enabled_by_default=False,
+        )
 
 ## Room Sensors
 
 # TODO should be a binary sensor
 class RoomAuxiliaryHeatingSensor(AbstarctRoomSensor):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(coordinator, room_number, REG_AUXILIARY_HEATING_ENABLED_ROOM_1)
+        super().__init__(
+            coordinator,
+            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+            room_number,
+            enabled_by_default=False
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -434,10 +415,13 @@ class RoomAuxiliaryHeatingSensor(AbstarctRoomSensor):
         return None
 
 class RoomTemperatureSensor(AbstarctRoomSensor):
-    _attr_device_class = SensorDeviceClass.TEMPERATURE
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(coordinator, room_number,  REG_CURRENT_TEMPERATURE_1)
+        super().__init__(
+            coordinator,
+            REG_CURRENT_TEMPERATURE_1,
+            room_number,
+            device_class = SensorDeviceClass.TEMPERATURE,
+            state_class = SensorStateClass.MEASUREMENT,
+            unit_of_measurement = UnitOfTemperature.CELSIUS,
+        )
 

@@ -7,6 +7,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -100,6 +101,13 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     def get_room_data(self, base_register: int, room_number: int, map: dict[int, Any]|None = None) -> Any:
         return self.get_data(room_reg(base_register, room_number), map)
 
+
+    def register_device(self) -> None:
+        device_registry.async_get(self.hass).async_get_or_create(
+            config_entry_id=self.config_entry.entry_id,
+            **self.get_device()
+        )
+
     def get_device(self) -> DeviceInfo:
         if self._device is None:
 
@@ -126,6 +134,8 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
                 model=f"{model} - {room_name}",
                 via_device=(DOMAIN, self.config_entry.entry_id),
             )
+
+            _LOGGER.debug(f"Created device info for room {room_number}: [ via_device: {self.config_entry.entry_id} ]")
 
         return self._room_devices[room_number]
 
