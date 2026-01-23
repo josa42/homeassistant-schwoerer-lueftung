@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import logging
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -22,7 +20,6 @@ from .modbus.registers import (
     REG_SHOCK_VENTILATION,
 )
 
-_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -56,16 +53,15 @@ class ShockVentilationSwitch(AbstractSwitch):
 
 
 class RoomAuxiliaryHeatingEnableSwitch(AbstractRoomSwitch):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(coordinator, room_number, REG_AUXILIARY_HEATING_ENABLED_ROOM_1)
+        super().__init__(coordinator,
+                         room_number,
+                         REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+                         enabled_by_default=False)
 
 class RoomTimeProgramHeatingEnableSwitch(AbstractRoomSwitch):
-    _attr_entity_registry_enabled_default = False
-
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(coordinator, room_number, REG_SCHEDULED_HEATING_ENABLED_1)
+        super().__init__(coordinator, room_number, REG_SCHEDULED_HEATING_ENABLED_1, enabled_by_default=False)
 
 class HeatPumpHeatingSwitch(AbstractSwitch):
     def __init__(self, coordinator: Coordinator) -> None:

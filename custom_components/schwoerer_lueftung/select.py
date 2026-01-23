@@ -8,8 +8,6 @@ from .abstract import AbstractSelect
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
-    AUXILIARY_HEATING_ENABLED,
-    AUXILIARY_HEATING_OFF,
     FAN_SPEED_AUTO,
     FAN_SPEED_LEVEL_1,
     FAN_SPEED_LEVEL_2,
@@ -17,10 +15,6 @@ from .modbus.registers import (
     FAN_SPEED_LEVEL_4,
     FAN_SPEED_LINEAR,
     FAN_SPEED_OFF,
-    HEAT_PUMP_COOLING_ENABLED,
-    HEAT_PUMP_COOLING_OFF,
-    HEAT_PUMP_HEATING_ENABLED,
-    HEAT_PUMP_HEATING_OFF,
     HEATING_COOLING_AUTO_DIGITAL,
     HEATING_COOLING_AUTO_OUTDOOR,
     HEATING_COOLING_COOLING,
@@ -69,28 +63,6 @@ HEATING_COOLING_MODES = {
     HEATING_COOLING_AUTO_OUTDOOR: "auto_outdoor_temp",
     HEATING_COOLING_AUTO_DIGITAL: "auto_digital_input",
 }
-
-# Heat pump heating enable mapping
-# Wärmepumpe Heizen: 0=Heizen Aus, 1=Heizen frei
-HEAT_PUMP_HEATING_OPTIONS = {
-    HEAT_PUMP_HEATING_OFF: "heating_off",
-    HEAT_PUMP_HEATING_ENABLED: "heating_enabled",
-}
-
-# Heat pump cooling enable mapping
-# Wärmepumpe Kühlen: 0=Kühlen Aus, 1=Kühlen frei
-HEAT_PUMP_COOLING_OPTIONS = {
-    HEAT_PUMP_COOLING_OFF: "cooling_off",
-    HEAT_PUMP_COOLING_ENABLED: "cooling_enabled",
-}
-
-# Auxiliary heating enable mapping
-# Zusatzheizung Haus: 0=Aus, 1=ZH Haus frei
-AUXILIARY_HEATING_OPTIONS = {
-    AUXILIARY_HEATING_OFF: "off",
-    AUXILIARY_HEATING_ENABLED: "enabled",
-}
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
