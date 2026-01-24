@@ -290,8 +290,8 @@
 | 516 | Kommunikationsfehler Sensor (Communication Error Sensor) |
 | 517 | Kommunikationsfehler Sensor-Adapter (Communication Error Sensor Adapter) |
 | 518 | Kommunikation Empfänger (Communication Receiver) |
-| 770 | Fehler Sensorelement T1-nach-Ewt (Sensor Error T1 After GHE) |
-| 771 | Fehler Sensorelement T2-nachVhr (Sensor Error T2 After Pre-Heater) |
+| 770 | Fehler Sensorelement T1-nach-EWT (Sensor Error T1 After GHE) |
+| 771 | Fehler Sensorelement T2-nach Vhr (Sensor Error T2 After Pre-Heater) |
 | 772 | Fehler Sensorelement T3-vorNhr (Sensor Error T3 Before After-Heater) |
 | 773 | Fehler Sensorelement T4-nachNhr (Sensor Error T4 After After-Heater) |
 | 774 | Fehler Sensorelement T5-Abluft (Sensor Error T5 Exhaust) |

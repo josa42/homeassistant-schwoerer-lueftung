@@ -13,9 +13,9 @@ from .coordinator import Coordinator
 from .modbus.registers import (
     ALARM_ACTIVE,
     FAN_OVERRIDE_ACTIVE,
-    PREHEATER_STATE_VHR1_2_ACTIVE,
-    PREHEATER_STATE_VHR1_ACTIVE,
-    PREHEATER_STATE_VHR2_ACTIVE,
+    PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
+    PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
+    PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE,
     REG_ALARM_DEVICE_FILTER_DIRTY,
     REG_ALARM_DOOR_OPEN,
     REG_ALARM_EMERGENCY_MODE,
@@ -29,8 +29,10 @@ from .modbus.registers import (
     REG_ALARM_UPSTREAM_FILTER_DIRTY,
     REG_ALARM_UTILITY_LOCK,
     REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
+    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_FAN_OVERRIDE,
     REG_NHR_STATE,
+    REG_OUTDOOR_DAMPER_STATE,
     REG_PREHEATER_STATE,
 )
 
@@ -73,10 +75,24 @@ async def async_setup_entry(
     device_type = entry.data.get("device_type", "wgt")
     if device_type == "wgt":
         for room in entry.data.get("rooms", []):
-            entities.append(RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"]))
+            entities.extend([
+                RoomAuxiliaryHeatingEnabledSensor(coordinator, room["number"]),
+                RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"])
+            ])
 
     async_add_entities(entities)
 
+class OutdoorDamperStateSensor(AbstractBinarySensor):
+    """
+    Outdoor Damper State Binary Sensor
+    (Aussenklappe Zustand)
+
+    Register: 131
+    Values:     0 = Closed
+                1 = Open
+    """
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE)
 
 class FanOverrideBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
@@ -90,7 +106,7 @@ class NhrStateBinarySensor(AbstractBinarySensor):
 class Preheater1BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
-            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_VHR1_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE}
+            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE, PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE}
         )
         self._attr_entity_registry_enabled_default = False
         self._attr_translation_key = "preheater_1"
@@ -99,7 +115,7 @@ class Preheater1BinarySensor(AbstractBinarySensor):
 class Preheater2BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
-            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_VHR2_ACTIVE, PREHEATER_STATE_VHR1_2_ACTIVE}
+            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE, PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE}
         )
         self._attr_entity_registry_enabled_default = False
         self._attr_translation_key = "preheater_2"
@@ -117,6 +133,23 @@ class AlarmBinarySensor(AbstractBinarySensor):
 
         self._attr_entity_registry_enabled_default = enabled_by_default
         self._attr_device_class = BinarySensorDeviceClass.PROBLEM
+
+class RoomAuxiliaryHeatingEnabledSensor(AbstarctBinaryRoomSensor):
+    """
+    Room Auxiliary Heating Enabled Sensor
+    (Zusatzheizung Freigabe Raum 1-17)
+
+    Register: 440-456
+    Values:     0 = Blocked
+                1 = Heating Enabled
+    """
+    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
+        super().__init__(
+            coordinator,
+            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+            room_number,
+            enabled_by_default=True
+        )
 
 class RoomAuxiliaryHeatingActiveBinarySensor(AbstarctBinaryRoomSensor):
     def __init__(

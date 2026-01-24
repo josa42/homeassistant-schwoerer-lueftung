@@ -29,11 +29,9 @@ class AbstractSensor(Entity, SensorEntity):
         register: int,
         **kwargs
     ) -> None:
-        # state_class = kwargs.pop('state_class', None) or SensorStateClass.MEASUREMENT
         super().__init__(
             coordinator,
             register,
-            # state_class=state_class,
             **kwargs
         )
 

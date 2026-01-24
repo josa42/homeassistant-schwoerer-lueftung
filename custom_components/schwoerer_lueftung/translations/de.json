@@ -86,8 +86,8 @@
         "name": "Status Wärmepumpe",
         "state": {
           "0": "Aus",
-          "5": "WP Heizen",
-          "49": "WP Kühlen"
+          "5": "Heizen",
+          "49": "Kühlen"
         }
       },
       "supply_air_fan_status": {
@@ -110,7 +110,7 @@
           "6": "Fehler"
         }
       },
-      "ewt_state": {
+      "ground_heat_exchanger_state": {
         "name": "EWT Zustand",
         "state": {
           "0": "EWT aus/geschlossen",
@@ -151,22 +151,22 @@
       "current_exhaust_air_rpm": {
         "name": "Aktuelle Drehzahl Abluft"
       },
-      "temp_t1_after_ewt": {
+      "temp_t1_after_ground_heat_exchanger": {
         "name": " nach EWT (T1)"
       },
-      "temp_t2_after_vhr": {
+      "temp_t2_after_preheating_coil": {
         "name": "Temperatur nach VHR (T2)"
       },
-      "temp_t3_before_ne": {
+      "temp_t3_before_reheater": {
         "name": "Temperatur vor NE (T3)"
       },
-      "temp_t4_after_ne": {
+      "temp_t4_after_reheater": {
         "name": "Temperatur nach NE (T4)"
       },
       "temp_t5_exhaust_air": {
         "name": "Ablufttemperatur (T5)"
       },
-      "temp_t6_in_wt": {
+      "temp_t6_in_heat_exchanger": {
         "name": "Temperatur im WT (T6)"
       },
       "temp_t7_evaporator": {
@@ -284,10 +284,10 @@
           "516": "Kommunikationsfehler Sensor",
           "517": "Kommunikationsfehler Sensor-Adapter",
           "518": "Kommunikation Empfänger",
-          "770": "Fehler Sensorelement T1-nach-Ewt",
-          "771": "Fehler Sensorelement T2-nachVhr",
-          "772": "Fehler Sensorelement T3-vorNhr",
-          "773": "Fehler Sensorelement T4-nachNhr",
+          "770": "Fehler Sensorelement T1-nach-EWT",
+          "771": "Fehler Sensorelement T2-nach Vhr",
+          "772": "Fehler Sensorelement T3-vor Nhr",
+          "773": "Fehler Sensorelement T4-nach Nhr",
           "774": "Fehler Sensorelement T5-Abluft",
           "775": "Fehler Sensorelement T6-imWT",
           "776": "Fehler Sensorelement T7-Verdampfer",
@@ -322,13 +322,13 @@
       "operating_hours_heat_pump_cooling": {
         "name": "Betriebsstunden WP kühlen"
       },
-      "operating_hours_vhr": {
+      "operating_hours_preheating_coil": {
         "name": "Betriebsstunden VHR"
       },
       "operating_hours_auxiliary_heating_house": {
         "name": "Betriebsstunden ZH Raum"
       },
-      "operating_hours_ewt": {
+      "operating_hours_ground_heat_exchanger": {
         "name": "Betriebsstunden EWT"
       },
       "auxiliary_heating_enabled": {

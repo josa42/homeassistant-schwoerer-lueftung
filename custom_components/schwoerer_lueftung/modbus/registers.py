@@ -29,8 +29,8 @@ REG_NHR_STATE = 116
 REG_SUPPLY_AIR_FAN_STATUS = 117
 # Status Gebläse Abluft (Exhaust Air Fan Status)
 REG_EXHAUST_AIR_FAN_STATUS = 118
-# EWT Zustand (EWT State)
-REG_EWT_STATE = 121
+# EWT Zustand (Ground Heat Exchanger State)
+REG_GROUND_HEAT_EXCHANGER_STATE = 121
 # Bypass Zustand (Bypass State)
 REG_BYPASS_STATE = 123
 # Aussenklappe Zustand (Outdoor Damper State)
@@ -52,17 +52,17 @@ REG_CURRENT_EXHAUST_AIR_RPM = 145
 
 # Temperature registers (all values /10 for actual °C)
 # T1 nach EWT (T1 after EWT)
-REG_TEMP_T1_AFTER_EWT = 200
+REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER = 200
 # T2 nach VHR (T2 after VHR)
-REG_TEMP_T2_AFTER_VHR = 201
+REG_TEMP_T2_AFTER_PREHEATING_COIL = 201
 # T3 vor NE (T3 before NE)
-REG_TEMP_T3_BEFORE_NE = 202
+REG_TEMP_T3_BEFORE_REHEATER = 202
 # T4 nach NE (T4 after NE)
-REG_TEMP_T4_AFTER_NE = 203
+REG_TEMP_T4_AFTER_REHEATER = 203
 # T5 Abluft (T5 exhaust air)
 REG_TEMP_T5_EXHAUST_AIR = 204
 # T6 im WT (T6 in WT)
-REG_TEMP_T6_IN_WT = 205
+REG_TEMP_T6_IN_HEAT_EXCHANGER = 205
 # T7 Verdampfer (T7 evaporator)
 REG_TEMP_T7_EVAPORATOR = 206
 # T8 Kondensator (T8 condenser)
@@ -120,9 +120,9 @@ REG_OPERATING_HOURS_FAN_LEVEL_3 = 803
 REG_OPERATING_HOURS_FAN_LEVEL_4 = 804
 REG_OPERATING_HOURS_HEAT_PUMP = 805
 REG_OPERATING_HOURS_HEAT_PUMP_COOLING = 806
-REG_OPERATING_HOURS_VHR = 809
+REG_OPERATING_HOURS_PREHEATING_COIL = 809
 REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE = 810
-REG_OPERATING_HOURS_EWT = 813
+REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER = 813
 
 # Operation mode values
 # Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
@@ -189,9 +189,9 @@ EXHAUST_AIR_FAN_STATUS_ERROR = 6
 
 # EWT state values
 # EWT Zustand: 0=EWT aus/geschlossen, 1=EWT im Heizbetrieb aktiv, 2=EWT im Kühlbetrieb aktiv
-EWT_STATE_OFF = 0
-EWT_STATE_HEATING = 1
-EWT_STATE_COOLING = 2
+GROUND_HEAT_EXCHANGER_STATE_OFF = 0
+GROUND_HEAT_EXCHANGER_STATE_HEATING = 1
+GROUND_HEAT_EXCHANGER_STATE_COOLING = 2
 
 # Bypass state values
 # Bypass Zustand: 0=Bypass geschlossen, 1=Bypass offen (Kühlen), 2=Bypass offen (Heizen)
@@ -206,9 +206,9 @@ OUTDOOR_DAMPER_STATE_OPEN = 1
 
 # Preheater state values
 # Vorheizregister Zustand: 0=Aus, 1=VHR 1 aktiv, 2=VHR 2 aktiv, 3=VHR 1 & 2 aktiv
-PREHEATER_STATE_VHR1_ACTIVE = 1
-PREHEATER_STATE_VHR2_ACTIVE = 2
-PREHEATER_STATE_VHR1_2_ACTIVE = 3
+PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE = 1
+PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE = 2
+PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE = 3
 
 # Time program fan level values
 # Luftstufe Zeitprogramm: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
@@ -363,7 +363,7 @@ REG_KEYS: dict[int, str] = {
     REG_SHOCK_VENTILATION_REMAINING: "shock_ventilation_remaining",
     REG_SUPPLY_AIR_FAN_STATUS: "supply_air_fan_status",
     REG_EXHAUST_AIR_FAN_STATUS: "exhaust_air_fan_status",
-    REG_EWT_STATE: "ewt_state",
+    REG_GROUND_HEAT_EXCHANGER_STATE: "ground_heat_exchanger_state",
     REG_BYPASS_STATE: "bypass_state",
     REG_OUTDOOR_DAMPER_STATE: "outdoor_damper_state",
     REG_PREHEATER_STATE: "preheater_state",
@@ -373,12 +373,12 @@ REG_KEYS: dict[int, str] = {
     REG_CURRENT_EXHAUST_AIR_FLOW: "current_exhaust_air_flow",
     REG_CURRENT_SUPPLY_AIR_RPM: "current_supply_air_rpm",
     REG_CURRENT_EXHAUST_AIR_RPM: "current_exhaust_air_rpm",
-    REG_TEMP_T1_AFTER_EWT: "temp_t1_after_ewt",
-    REG_TEMP_T2_AFTER_VHR: "temp_t2_after_vhr",
-    REG_TEMP_T3_BEFORE_NE: "temp_t3_before_ne",
-    REG_TEMP_T4_AFTER_NE: "temp_t4_after_ne",
+    REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER: "temp_t1_after_ground_heat_exchanger",
+    REG_TEMP_T2_AFTER_PREHEATING_COIL: "temp_t2_after_preheating_coil",
+    REG_TEMP_T3_BEFORE_REHEATER: "temp_t3_before_reheater",
+    REG_TEMP_T4_AFTER_REHEATER: "temp_t4_after_reheater",
     REG_TEMP_T5_EXHAUST_AIR: "temp_t5_exhaust_air",
-    REG_TEMP_T6_IN_WT: "temp_t6_in_wt",
+    REG_TEMP_T6_IN_HEAT_EXCHANGER: "temp_t6_in_heat_exchanger",
     REG_TEMP_T7_EVAPORATOR: "temp_t7_evaporator",
     REG_TEMP_T8_CONDENSER: "temp_t8_condenser",
     REG_TEMP_T10_OUTDOOR: "temp_t10_outdoor",
@@ -405,9 +405,9 @@ REG_KEYS: dict[int, str] = {
     REG_OPERATING_HOURS_FAN_LEVEL_4: "operating_hours_fan_level_4",
     REG_OPERATING_HOURS_HEAT_PUMP: "operating_hours_heat_pump",
     REG_OPERATING_HOURS_HEAT_PUMP_COOLING: "operating_hours_heat_pump_cooling",
-    REG_OPERATING_HOURS_VHR: "operating_hours_vhr",
+    REG_OPERATING_HOURS_PREHEATING_COIL: "operating_hours_preheating_coil",
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE: "operating_hours_auxiliary_heating_house",
-    REG_OPERATING_HOURS_EWT: "operating_hours_ewt",
+    REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER: "operating_hours_ground_heat_exchanger",
     # WGT-only registers
     REG_HEAT_PUMP_STATUS: "heat_pump_status",
     REG_NHR_STATE: "nhr_state",
@@ -522,12 +522,12 @@ REG_KEYS: dict[int, str] = {
 
 
 REG_TO_TRANSFORM: dict[int, Callable] = {
-    REG_TEMP_T1_AFTER_EWT: to_temperature,
-    REG_TEMP_T2_AFTER_VHR: to_temperature,
-    REG_TEMP_T3_BEFORE_NE: to_temperature,
-    REG_TEMP_T4_AFTER_NE: to_temperature,
+    REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER: to_temperature,
+    REG_TEMP_T2_AFTER_PREHEATING_COIL: to_temperature,
+    REG_TEMP_T3_BEFORE_REHEATER: to_temperature,
+    REG_TEMP_T4_AFTER_REHEATER: to_temperature,
     REG_TEMP_T5_EXHAUST_AIR: to_temperature,
-    REG_TEMP_T6_IN_WT: to_temperature,
+    REG_TEMP_T6_IN_HEAT_EXCHANGER: to_temperature,
     REG_TEMP_T7_EVAPORATOR: to_temperature,
     REG_TEMP_T8_CONDENSER: to_temperature,
     REG_TEMP_T10_OUTDOOR: to_temperature,

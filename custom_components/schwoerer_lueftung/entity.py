@@ -21,6 +21,7 @@ class Entity(CoordinatorEntity[Coordinator]):
         state_class: SensorStateClass|str|None = None,
         unit_of_measurement: str|None = None,
         enabled_by_default: bool = True,
+        precision: int|None = None,
     ) -> None:
         super().__init__(coordinator)
 
@@ -38,10 +39,12 @@ class Entity(CoordinatorEntity[Coordinator]):
             self._attr_state_class = state_class
         if unit_of_measurement is not None:
             self._attr_native_unit_of_measurement = unit_of_measurement
+        if precision is not None:
+            self._attr_suggested_display_precision = precision
 
         # if state_class is None:
         #     self._attr_state_class = SensorStateClass.MEASUREMENT
 
-        self._attr_entity_registry_enabled_default = enabled_by_default
+        self._attr_entity_registry_enabled_default = enabled_by_default or True
 
 

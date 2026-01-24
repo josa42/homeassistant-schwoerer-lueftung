@@ -27,11 +27,11 @@ from .modbus.registers import (
     REG_CURRENT_TEMPERATURE_1,
     REG_DEVICE_FILTER_REMAINING,
     REG_ERROR_MESSAGE,
-    REG_EWT_STATE,
+    REG_GROUND_HEAT_EXCHANGER_STATE,
     REG_EXHAUST_AIR_FAN_STATUS,
     REG_HEAT_PUMP_STATUS,
     REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE,
-    REG_OPERATING_HOURS_EWT,
+    REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER,
     REG_OPERATING_HOURS_FAN,
     REG_OPERATING_HOURS_FAN_LEVEL_1,
     REG_OPERATING_HOURS_FAN_LEVEL_2,
@@ -39,17 +39,17 @@ from .modbus.registers import (
     REG_OPERATING_HOURS_FAN_LEVEL_4,
     REG_OPERATING_HOURS_HEAT_PUMP,
     REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
-    REG_OPERATING_HOURS_VHR,
+    REG_OPERATING_HOURS_PREHEATING_COIL,
     REG_OUTDOOR_DAMPER_STATE,
     REG_SENSOR_FAN_LEVEL,
     REG_SHOCK_VENTILATION_REMAINING,
     REG_SUPPLY_AIR_FAN_STATUS,
-    REG_TEMP_T1_AFTER_EWT,
-    REG_TEMP_T2_AFTER_VHR,
-    REG_TEMP_T3_BEFORE_NE,
-    REG_TEMP_T4_AFTER_NE,
+    REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER,
+    REG_TEMP_T2_AFTER_PREHEATING_COIL,
+    REG_TEMP_T3_BEFORE_REHEATER,
+    REG_TEMP_T4_AFTER_REHEATER,
     REG_TEMP_T5_EXHAUST_AIR,
-    REG_TEMP_T6_IN_WT,
+    REG_TEMP_T6_IN_HEAT_EXCHANGER,
     REG_TEMP_T7_EVAPORATOR,
     REG_TEMP_T8_CONDENSER,
     REG_TEMP_T10_OUTDOOR,
@@ -77,16 +77,15 @@ async def async_setup_entry(
         SupplyAirFanStatusSensor(coordinator),
         ExhaustAirFanStatusSensor(coordinator),
         BypassStateSensor(coordinator),
-        OutdoorDamperStateSensor(coordinator),
         TimeProgramFanLevelSensor(coordinator),
         SensorFanLevelSensor(coordinator),
         CurrentSupplyAirFlowSensor(coordinator),
         CurrentExhaustAirFlowSensor(coordinator),
         CurrentSupplyAirRpmSensor(coordinator),
         CurrentExhaustAirRpmSensor(coordinator),
-        TemperatureT1AfterEwtSensor(coordinator),
+        TemperatureT1AfterGroundHeatExchangerSensor(coordinator),
         TemperatureT5ExhaustAirSensor(coordinator),
-        TemperatureT6InWtSensor(coordinator),
+        TemperatureT6InHeatExchangerSensor(coordinator),
         TemperatureT10OutdoorSensor(coordinator),
         DeviceFilterRemainingSensor(coordinator),
         UpstreamFilterRemainingSensor(coordinator),
@@ -102,18 +101,18 @@ async def async_setup_entry(
     if has_heating:
         entities.extend([
             HeatPumpStatusSensor(coordinator),
-            EwtStateSensor(coordinator),
-            TemperatureT2AfterVhrSensor(coordinator),
-            TemperatureT3BeforeNeSensor(coordinator),
-            TemperatureT4AfterNeSensor(coordinator),
+            GroundHeatExchangerStateSensor(coordinator),
+            TemperatureT2AfterPreheatingCoilSensor(coordinator),
+            TemperatureT3BeforeReheaterSensor(coordinator),
+            TemperatureT4AfterReheaterSensor(coordinator),
             TemperatureT7EvaporatorSensor(coordinator),
             TemperatureT8CondenserSensor(coordinator),
             # Add heating-related operating hours sensors only for WGT
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP),
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_HEAT_PUMP_COOLING,),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_VHR),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_PREHEATING_COIL),
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
-            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_EWT),
+            OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER),
         ])
         for room in rooms:
             _LOGGER.debug("::::Adding auxiliary heating sensor for room %d", room["number"])
@@ -124,20 +123,49 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
+
 class CurrentFanLevelSensor(AbstractSensor):
+    """
+    Sensor for current fan level
+    (Aktuelle Luftstufe)
+
+    Register: 102
+    Values:     0 = Off
+                1 = Level 1
+                2 = Level 2
+                3 = Level 3
+                4 = Level 4
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_CURRENT_FAN_LEVEL)
 
 class TimeProgramBaseLevelSensor(AbstractSensor):
+    """
+    Sensor for time program base level
+    (Zeitprogramm Basis Luftstufe)
+
+    Register: 110
+    Values:     0 = Off
+                1 = Level 1
+                2 = Level 2
+                3 = Level 3
+                4 = Level 4
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
             REG_TIME_PROGRAM_BASE_LEVEL,
-            state_class = SensorStateClass.MEASUREMENT,
             enabled_by_default = False
         )
 
 class ShockVentilationRemainingSensor(AbstractSensor):
+    """
+    Sensor for shock ventilation remaining time
+    (Stoßlüftung verbleibende Zeit)
+
+    Register: 112
+    Values:   0-60 (minutes)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -146,96 +174,248 @@ class ShockVentilationRemainingSensor(AbstractSensor):
             unit_of_measurement = UnitOfTime.MINUTES,
         )
 
-
 class HeatPumpStatusSensor(AbstractSensor):
+    """
+    Sensor for heat pump status
+    (Status Wärmepumpe)
+
+    Register: 114
+    Values:     0 = Off
+                5 = Heating
+               49 = Cooling
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_HEAT_PUMP_STATUS)
 
 class SupplyAirFanStatusSensor(AbstractSensor):
+    """Sensor for supply air fan status
+    (Status Gebläse Zuluft)
+
+    Register: 117
+    Values:     0 = Deactivated
+                1 = Startup Phase
+                2 = Active
+                3 = Standby
+                4 = Error
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_SUPPLY_AIR_FAN_STATUS, enabled_by_default=False)
 
 class ExhaustAirFanStatusSensor(AbstractSensor):
+    """
+    Sensor for exhaust air fan status"
+    (Status Gebläse Abluft)
+
+    Register: 118
+    Values:     0 = Deactivated
+                1 = Startup Phase
+                2 = Active
+                3 = Standby
+                4 = Error
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_EXHAUST_AIR_FAN_STATUS, enabled_by_default=False)
 
-class EwtStateSensor(AbstractSensor):
+class GroundHeatExchangerStateSensor(AbstractSensor):
+    """
+    Sensor for ground heat exchanger state
+    (Status Erdwärmetauscher/EWT ZUstand)
+
+    Register: 121
+    Values:     0 = Off/closed
+                1 = Ground heat exchanger active in heating mode
+                2 = Ground heat exchanger active in cooling mode
+    """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_EWT_STATE, enabled_by_default=False)
+        super().__init__(coordinator, REG_GROUND_HEAT_EXCHANGER_STATE, enabled_by_default=False)
 
 class BypassStateSensor(AbstractSensor):
+    """
+    Sensor for bypass state
+    (Bypass ZUstand)
+
+    Register: 123
+    Values:     0 = Closed
+                1 = Open (cooling mode)
+                2 = Open (heating mode)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_BYPASS_STATE, enabled_by_default=False)
 
-class OutdoorDamperStateSensor(AbstractSensor):
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE)
-
 class TimeProgramFanLevelSensor(AbstractSensor):
+    """
+    Sensor for time program fan level
+    (Zeitprogramm Luftstufe)
+
+    Register: 140
+    Values:     0 = Off
+                1 = Level 1
+                2 = Level 2
+                3 = Level 3
+                4 = Level 4
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_TIME_PROGRAM_FAN_LEVEL, enabled_by_default=False)
 
 class SensorFanLevelSensor(AbstractSensor):
+    """
+    Sensor for sensor fan level
+    (Luftstufe Sensoren)
+
+    Register: 140
+    Values:     0 = Off
+                1 = Level 1
+                2 = Level 2
+                3 = Level 3
+                4 = Level 4
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_SENSOR_FAN_LEVEL, enabled_by_default=False)
 
 class CurrentSupplyAirFlowSensor(AbstractSensor):
+    """
+    Sensor for current supply air flow
+    (Luftleistung aktuell Zuluft)
+
+    Register: 142
+    Values:   0-100 (%)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_FLOW, enabled_by_default=False)
+        super().__init__(
+            coordinator,
+            REG_CURRENT_SUPPLY_AIR_FLOW,
+            unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            enabled_by_default=False,
+        )
 
 class CurrentExhaustAirFlowSensor(AbstractSensor):
+    """
+    Sensor for current exhaust air flow
+    (Luftleistung aktuell Abluft)
+
+    Register: 143
+    Values:   0-100 (%)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_FLOW, enabled_by_default=False)
+        super().__init__(
+            coordinator,
+            REG_CURRENT_EXHAUST_AIR_FLOW,
+            unit_of_measurement="%",
+            state_class=SensorStateClass.MEASUREMENT,
+            enabled_by_default=False
+        )
 
 class CurrentSupplyAirRpmSensor(AbstractSensor):
+    """
+    Sensor for current supply air RPM
+    (Aktuelle Drehzahl Zuluft)
+
+    Register: 144
+    Values:   0-10000 (RPM)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_SUPPLY_AIR_RPM, enabled_by_default=False)
+        super().__init__(
+            coordinator,
+            REG_CURRENT_SUPPLY_AIR_RPM,
+            unit_of_measurement="rpm",
+            state_class=SensorStateClass.MEASUREMENT,
+            enabled_by_default=False
+        )
 
 class CurrentExhaustAirRpmSensor(AbstractSensor):
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_CURRENT_EXHAUST_AIR_RPM, enabled_by_default=False)
+    """
+    Sensor for current exhaust air RPM
+    (Aktuelle Drehzahl Abluft)
 
-class TemperatureT1AfterEwtSensor(AbstractSensor):
+    Register: 144
+    Values:   0-10000 (RPM)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T1_AFTER_EWT,
+            REG_CURRENT_EXHAUST_AIR_RPM,
+            unit_of_measurement="rpm",
+            state_class=SensorStateClass.MEASUREMENT,
+            enabled_by_default=False
+        )
+
+class TemperatureT1AfterGroundHeatExchangerSensor(AbstractSensor):
+    """
+    Sensor for temperature T1 after ground heat exchanger
+    (Temperatur T1 nach Erdwärmetauscher/EWT)
+
+    Register: 200
+    Values:   -50-100 (°C)
+    """
+    def __init__(self, coordinator: Coordinator) -> None:
+        super().__init__(
+            coordinator,
+            REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER,
             device_class=SensorDeviceClass.TEMPERATURE,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT2AfterVhrSensor(AbstractSensor):
+class TemperatureT2AfterPreheatingCoilSensor(AbstractSensor):
+    """
+    Sensor for temperature T2 after preheating coil
+    (Temperatur T2 nach Vorheizregister/VHR)
+
+    Register: 201
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T2_AFTER_VHR,
+            REG_TEMP_T2_AFTER_PREHEATING_COIL,
             device_class=SensorDeviceClass.TEMPERATURE,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT3BeforeNeSensor(AbstractSensor):
+class TemperatureT3BeforeReheaterSensor(AbstractSensor):
+    """
+    Sensor for temperature T3 before Reheater
+    (Temperatur T3 vor Nacherwärmung/NE)
+
+    Register: 202
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T3_BEFORE_NE,
+            REG_TEMP_T3_BEFORE_REHEATER,
             device_class=SensorDeviceClass.TEMPERATURE,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT4AfterNeSensor(AbstractSensor):
+class TemperatureT4AfterReheaterSensor(AbstractSensor):
+    """
+    Sensor for temperature T3 after Reheater
+    (Temperatur T3 nach Nacherwärmung/NE)
+
+    Register: 203
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T4_AFTER_NE,
+            REG_TEMP_T4_AFTER_REHEATER,
             device_class=SensorDeviceClass.TEMPERATURE,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
 class TemperatureT5ExhaustAirSensor(AbstractSensor):
+    """
+    Senso
+    (Temperatur T5 Abluft)
+
+    Register: 204
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -246,17 +426,31 @@ class TemperatureT5ExhaustAirSensor(AbstractSensor):
         )
 
 
-class TemperatureT6InWtSensor(AbstractSensor):
+class TemperatureT6InHeatExchangerSensor(AbstractSensor):
+    """
+    Sensor for temperature T6 in heat exchanger
+    (Temperatur T6 im Wärmetauscher/WT)
+
+    Register: 205
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T6_IN_WT,
+            REG_TEMP_T6_IN_HEAT_EXCHANGER,
             device_class=SensorDeviceClass.TEMPERATURE,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
 class TemperatureT7EvaporatorSensor(AbstractSensor):
+    """
+    Sensor for temperature T7 evaporator
+    (Temperatur T7 Verdampfer)
+
+    Register: 206
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -267,6 +461,13 @@ class TemperatureT7EvaporatorSensor(AbstractSensor):
         )
 
 class TemperatureT8CondenserSensor(AbstractSensor):
+    """
+    Sensor for temperature T8 condenser
+    (Temperatur T7 Kondensator)
+
+    Register: 207
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -277,6 +478,13 @@ class TemperatureT8CondenserSensor(AbstractSensor):
         )
 
 class TemperatureT10OutdoorSensor(AbstractSensor):
+    """
+    Sensor for temperature T10 outdoor
+    (Temperatur T10 Außen)
+
+    Register: 209
+    Values:   -50-100 (°C)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -286,6 +494,13 @@ class TemperatureT10OutdoorSensor(AbstractSensor):
         )
 
 class DeviceFilterRemainingSensor(AbstractSensor):
+    """
+    Sensor for device filter remaining time
+    (Restlaufzeit Gerätefilter)
+
+    Register: 265
+    Values:   0-255 (days)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -295,6 +510,13 @@ class DeviceFilterRemainingSensor(AbstractSensor):
         )
 
 class UpstreamFilterRemainingSensor(AbstractSensor):
+    """
+    Sensor for upstream filter remaining time
+    (Restlaufzeit Vorgelagerter Filter)
+
+    Register: 263
+    Values:   0-255 (days)
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -305,6 +527,13 @@ class UpstreamFilterRemainingSensor(AbstractSensor):
         )
 
 class ErrorMessageSensor(AbstractSensor):
+    """
+    Sensor for error message
+    (Fehlermeldung)
+
+    Register: 240
+    Values:     0 = No error
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_ERROR_MESSAGE)
 
