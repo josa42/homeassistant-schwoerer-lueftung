@@ -71,9 +71,6 @@ async def async_setup_entry(
             AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_AIR_COLD),
         ])
 
-    # Add room auxiliary heating active binary sensors ()
-    device_type = entry.data.get("device_type", "wgt")
-    if device_type == "wgt":
         for room in entry.data.get("rooms", []):
             entities.extend([
                 RoomAuxiliaryHeatingEnabledSensor(coordinator, room["number"]),

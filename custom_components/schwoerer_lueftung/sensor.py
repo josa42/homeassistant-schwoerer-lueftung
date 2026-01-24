@@ -114,10 +114,9 @@ async def async_setup_entry(
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE),
             OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER),
         ])
-        for room in rooms:
-            _LOGGER.debug("::::Adding auxiliary heating sensor for room %d", room["number"])
-            entities.append(RoomAuxiliaryHeatingSensor(coordinator, room["number"]))
-    else:
+    
+    # Add room temperature sensors for WRT devices only
+    if not has_heating:
         for room in rooms:
             entities.append(RoomTemperatureSensor(coordinator, room["number"]))
 
@@ -549,26 +548,6 @@ class OperatingHoursSensor(AbstractSensor):
         )
 
 ## Room Sensors
-
-# TODO should be a binary sensor
-class RoomAuxiliaryHeatingSensor(AbstarctRoomSensor):
-    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(
-            coordinator,
-            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
-            room_number,
-            enabled_by_default=True
-        )
-
-    @property
-    def native_value(self) -> str | None:
-        # TODO find a better solution for the value mapping
-        value = super().native_value
-        if value == 0:
-            return "Blocked"
-        elif value == 1:
-            return "Heating Enabled"
-        return None
 
 class RoomTemperatureSensor(AbstarctRoomSensor):
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
