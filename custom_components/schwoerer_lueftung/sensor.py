@@ -17,14 +17,13 @@ from .abstract import AbstarctRoomSensor, AbstractSensor
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_BYPASS_STATE,
     REG_CURRENT_EXHAUST_AIR_FLOW,
     REG_CURRENT_EXHAUST_AIR_RPM,
     REG_CURRENT_FAN_LEVEL,
     REG_CURRENT_SUPPLY_AIR_FLOW,
     REG_CURRENT_SUPPLY_AIR_RPM,
-    REG_CURRENT_TEMPERATURE_1,
+    REG_CURRENT_TEMPERATURE_ROOM_1,
     REG_DEVICE_FILTER_REMAINING,
     REG_ERROR_MESSAGE,
     REG_GROUND_HEAT_EXCHANGER_STATE,
@@ -40,7 +39,6 @@ from .modbus.registers import (
     REG_OPERATING_HOURS_HEAT_PUMP,
     REG_OPERATING_HOURS_HEAT_PUMP_COOLING,
     REG_OPERATING_HOURS_PREHEATING_COIL,
-    REG_OUTDOOR_DAMPER_STATE,
     REG_SENSOR_FAN_LEVEL,
     REG_SHOCK_VENTILATION_REMAINING,
     REG_SUPPLY_AIR_FAN_STATUS,
@@ -553,7 +551,7 @@ class RoomTemperatureSensor(AbstarctRoomSensor):
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
-            REG_CURRENT_TEMPERATURE_1,
+            REG_CURRENT_TEMPERATURE_ROOM_1,
             room_number,
             device_class = SensorDeviceClass.TEMPERATURE,
             state_class = SensorStateClass.MEASUREMENT,

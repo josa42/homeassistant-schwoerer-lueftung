@@ -128,10 +128,19 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         return self._device
 
+    def get_room(self, number: int) -> dict[str, Any]|None:
+        rooms = self.config_entry.data.get(CONF_ROOMS, [])
+        return next((room for room in rooms if room['number'] == number), None)
+
+    def get_room_name(self, number: int) -> str|None:
+        room = self.get_room(number)
+        if room is not None:
+            return room.get("name")
+        return f"Room {number}"
+
     def get_room_device(self, room_number: int):
         if room_number not in self._room_devices:
-            rooms = self.config_entry.data.get(CONF_ROOMS, [])
-            room_name = next((room["name"] for room in rooms if room['number'] == room_number), None)
+            room_name = self.get_room_name(room_number)
             model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
 
             self._room_devices[room_number] = DeviceInfo(
@@ -157,4 +166,3 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(f"Error communicating with device: {err}") from err
         finally:
             await self.hass.async_add_executor_job(self.client.disconnect)
-

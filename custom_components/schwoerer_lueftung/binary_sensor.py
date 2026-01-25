@@ -31,7 +31,7 @@ from .modbus.registers import (
     REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_FAN_OVERRIDE,
-    REG_NHR_STATE,
+    REG_REHEATER_STATE,
     REG_OUTDOOR_DAMPER_STATE,
     REG_PREHEATER_STATE,
 )
@@ -92,44 +92,62 @@ class OutdoorDamperStateSensor(AbstractBinarySensor):
         super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE)
 
 class FanOverrideBinarySensor(AbstractBinarySensor):
+    """
+    Fan Override Binary Sensor
+    (Luftstufen Überschreibung)
+
+    Register: 104
+    Values:     0 = Inactive
+                1 = Active
+    """
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_FAN_OVERRIDE, {FAN_OVERRIDE_ACTIVE})
 
 class NhrStateBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_NHR_STATE)
+        super().__init__(coordinator, REG_REHEATER_STATE)
         self._attr_entity_registry_enabled_default = False
 
 class Preheater1BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
-            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE, PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE}
+            coordinator,
+            REG_PREHEATER_STATE,
+            {
+                PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
+                PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
+            },
+            key="preheater_",
+            enabled_by_default=False,
         )
-        self._attr_entity_registry_enabled_default = False
-        self._attr_translation_key = "preheater_1"
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_preheater_1"
 
 class Preheater2BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
-            coordinator, REG_PREHEATER_STATE, {PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE, PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE}
+            coordinator,
+            REG_PREHEATER_STATE,
+            {
+                PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE,
+                PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
+            },
+            key="preheater_2",
+            enabled_by_default=False,
         )
-        self._attr_entity_registry_enabled_default = False
-        self._attr_translation_key = "preheater_2"
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_preheater_2"
 
 class AlarmBinarySensor(AbstractBinarySensor):
-
     def __init__(
         self,
         coordinator: Coordinator,
         register: int,
         enabled_by_default: bool = True,
     ) -> None:
-        super().__init__(coordinator, register, {ALARM_ACTIVE})
-
-        self._attr_entity_registry_enabled_default = enabled_by_default
-        self._attr_device_class = BinarySensorDeviceClass.PROBLEM
+        super().__init__(
+            coordinator,
+            register,
+            {ALARM_ACTIVE},
+            enabled_by_default=enabled_by_default,
+            device_class=BinarySensorDeviceClass.PROBLEM,
+        )
 
 class RoomAuxiliaryHeatingEnabledSensor(AbstarctBinaryRoomSensor):
     """

@@ -8,99 +8,85 @@ from .abstract import AbstractSelect
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
-    FAN_SPEED_AUTO,
-    FAN_SPEED_LEVEL_1,
-    FAN_SPEED_LEVEL_2,
-    FAN_SPEED_LEVEL_3,
-    FAN_SPEED_LEVEL_4,
-    FAN_SPEED_LINEAR,
-    FAN_SPEED_OFF,
-    HEATING_COOLING_AUTO_DIGITAL,
-    HEATING_COOLING_AUTO_OUTDOOR,
-    HEATING_COOLING_COOLING,
-    HEATING_COOLING_HEATING,
-    HEATING_COOLING_OFF,
-    OPERATION_MODE_MANUAL,
-    OPERATION_MODE_OFF,
-    OPERATION_MODE_SUMMER,
-    OPERATION_MODE_SUMMER_EXHAUST,
-    OPERATION_MODE_WINTER,
     REG_FAN_SPEED,
     REG_HEATING_COOLING_FUNCTION,
     REG_OPERATION_MODE,
 )
 
-  # TODO clean up unused mappings
-
-# Operation mode mapping
-# Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
-OPERATION_MODES = {
-    OPERATION_MODE_OFF: "off",
-    OPERATION_MODE_MANUAL: "manual",
-    OPERATION_MODE_WINTER: "winter",
-    OPERATION_MODE_SUMMER: "summer",
-    OPERATION_MODE_SUMMER_EXHAUST: "summer_exhaust",
-}
-
-# Fan speed mapping
-# Manuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4, 5=Automatik, 6=Linearbetrieb
-FAN_SPEEDS = {
-    FAN_SPEED_OFF: "0",
-    FAN_SPEED_LEVEL_1: "1",
-    FAN_SPEED_LEVEL_2: "2",
-    FAN_SPEED_LEVEL_3: "3",
-    FAN_SPEED_LEVEL_4: "4",
-    FAN_SPEED_AUTO: "automatic",
-    FAN_SPEED_LINEAR: "linear",
-}
-
-# Heating/Cooling function mapping
-# Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang
-HEATING_COOLING_MODES = {
-    HEATING_COOLING_OFF: "off",
-    HEATING_COOLING_HEATING: "heating",
-    HEATING_COOLING_COOLING: "cooling",
-    HEATING_COOLING_AUTO_OUTDOOR: "auto_outdoor_temp",
-    HEATING_COOLING_AUTO_DIGITAL: "auto_digital_input",
-}
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up WRG select entities from a config entry."""
     coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
     has_heating = coordinator.has_heating()
+
     entities = [
         OperationModeSelect(coordinator),
         FanSpeedSelect(coordinator),
     ]
 
-    # Add heating-related select entities only for WGT devices
     if has_heating:
         entities.append(HeatingCoolingFunctionSelect(coordinator))
 
     async_add_entities(entities)
 
 class OperationModeSelect(AbstractSelect):
+    """
+    Select entity for operation mode.
+    (Betriebsart; 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft)
+
+    Registers: 100
+    Value:     0-4
+    """
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_OPERATION_MODE, OPERATION_MODES)
-
+        super().__init__(coordinator, REG_OPERATION_MODE, {
+            0: "off",
+            1: "manual",
+            2: "winter",
+            3: "summer",
+            4: "summer_exhaust",
+        })
 
 class FanSpeedSelect(AbstractSelect):
+    """
+    Select entity for fan speed.
+    (Manuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4, 5=Automatik, 6=Linearbetrieb)
+
+    Registers: 101
+    Value:     0-6
+    """
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_FAN_SPEED, FAN_SPEEDS)
+        super().__init__(coordinator, REG_FAN_SPEED, {
+            0: "0",
+            1: "1",
+            2: "2",
+            3: "3",
+            4: "4",
+            5: "automatic",
+            6: "linear",
+        })
 
 class HeatingCoolingFunctionSelect(AbstractSelect):
+    """
+    Select entity for heating/cooling function.
+    (Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang)
+    """
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_HEATING_COOLING_FUNCTION, HEATING_COOLING_MODES)
+        super().__init__(coordinator, REG_HEATING_COOLING_FUNCTION, {
+            0: "off",
+            1: "heating",
+            2: "cooling",
+            3: "auto_outdoor_temp",
+            4: "auto_digital_input",
+        })

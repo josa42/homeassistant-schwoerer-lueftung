@@ -12,7 +12,6 @@ from homeassistant.components.switch import SwitchEntity
 
 from custom_components.schwoerer_lueftung.entity import Entity
 from custom_components.schwoerer_lueftung.modbus.registers import (
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_KEYS,
     room_reg,
 )
@@ -49,9 +48,7 @@ class AbstarctRoomSensor(AbstractSensor):
         register = room_reg(base_register, room_number)
         translation_key = kwargs.pop(
             'translation_key', None
-        ) or re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
-        if register == REG_AUXILIARY_HEATING_ENABLED_ROOM_1:
-            _LOGGER.warning("Register %d ==> %s", register, translation_key)
+        ) or re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or ''
 
         super().__init__(
             coordinator,
@@ -104,7 +101,7 @@ class AbstarctBinaryRoomSensor(AbstractBinarySensor):
             register,
             active_states,
             device=coordinator.get_room_device(room_number),
-            translation_key = re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
+            translation_key=re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
             **kwargs
         )
 

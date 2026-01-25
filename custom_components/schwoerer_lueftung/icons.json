@@ -4,7 +4,7 @@
       "fan_override": {
         "default": "mdi:fan-auto"
       },
-      "nhr_state": {
+      "reheater_state": {
         "default": "mdi:heating-coil"
       }
     },

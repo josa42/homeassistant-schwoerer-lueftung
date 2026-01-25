@@ -310,23 +310,6 @@
 
 ## Important Notes
 
-### Warranty Disclaimer
-
-This interface (physical port X29 on the main board) is **NOT** an officially approved interface by the manufacturer.
-
-- SchwörerHaus KG and BIC assume **NO warranty** for:
-  - Changes caused by software updates
-  - Changes caused by hardware modifications
-  - Downstream systems or components
-  
-- **Operator is responsible** for:
-  - Incorrect operation via this interface
-  - Any damage or issues caused by using this interface
-
-- **No support provided** by SchwörerHaus or BIC for this interface
-
-- **Use at your own risk**
-
 ### Temperature Values
 
 All temperature values are transmitted as **°C × 10**

@@ -152,7 +152,7 @@
         "name": "Aktuelle Drehzahl Abluft"
       },
       "temp_t1_after_ground_heat_exchanger": {
-        "name": " nach EWT (T1)"
+        "name": "Temperatur nach EWT (T1)"
       },
       "temp_t2_after_preheating_coil": {
         "name": "Temperatur nach VHR (T2)"
@@ -364,7 +364,7 @@
           "heating_enabled": "Heizen frei"
         }
       },
-      "current_temperature": {
+      "current_temperature_room": {
         "name": "Temperatur"
       },
       "auxiliary_heating_enabled_room": {
@@ -375,7 +375,7 @@
       "linear_fan_power": {
         "name": "Manuelle Lineare Luftleistung"
       },
-      "base_temperature": {
+      "base_temperature_room": {
         "name": "Grundtemperatur"
       }
     },
@@ -404,7 +404,7 @@
     },
     "climate": {
       "room_climate": {
-        "name": "{room_name} Klima"
+        "name": "Raumthermostat"
       }
     },
     "binary_sensor": {
@@ -447,10 +447,13 @@
       "auxiliary_heating_active_room": {
         "name": "Zusatzheizung aktiv"
       },
+      "auxiliary_heating_enabled_room": {
+        "name": "Zusatzheizung Freigabe"
+      },
       "fan_override": {
         "name": "Luftstufen Überschreibung"
       },
-      "nhr_state": {
+      "reheater_state": {
         "name": "NHR Zustand"
       },
       "preheater_1": {

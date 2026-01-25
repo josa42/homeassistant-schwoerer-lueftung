@@ -100,11 +100,14 @@
       "auxiliary_heating_active_room": {
         "name": "Auxiliary Heating Active"
       },
+      "auxiliary_heating_enabled_room": {
+        "name": "Auxiliary Heating Enabled"
+      },
       "fan_override": {
         "name": "Fan Override"
       },
-      "nhr_state": {
-        "name": "NHR State"
+      "reheater_state": {
+        "name": "Reheater State"
       },
       "preheater_1": {
         "name": "Preheater 1"
@@ -243,8 +246,8 @@
           "518": "Communication Receiver",
           "770": "Error Sensor Element T1 After EWT",
           "771": "Error Sensor Element T2 After VHR",
-          "772": "Error Sensor Element T3 Before NHR",
-          "773": "Error Sensor Element T4 After NHR",
+          "772": "Error Sensor Element T3 Before Reheater",
+          "773": "Error Sensor Element T4 After Reheater",
           "774": "Error Sensor Element T5 Exhaust Air",
           "775": "Error Sensor Element T6 In WT",
           "776": "Error Sensor Element T7 Evaporator",
@@ -288,7 +291,7 @@
       "operating_hours_ground_heat_exchanger": {
         "name": "Operating Hours EWT"
       },
-      "current_temperature": {
+      "current_temperature_room": {
         "name": "Temperature"
       },
       "auxiliary_heating_enabled_room": {
@@ -319,13 +322,13 @@
       "linear_fan_power": {
         "name": "Linear Fan Power"
       },
-      "base_temperature": {
+      "base_temperature_room": {
         "name": "Base Temperature"
       }
     },
     "climate": {
       "room_climate": {
-        "name": "{room_name} Climate"
+        "name": "Thermostat"
       }
     }
   }

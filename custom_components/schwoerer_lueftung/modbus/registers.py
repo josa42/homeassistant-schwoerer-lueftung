@@ -24,7 +24,7 @@ REG_SHOCK_VENTILATION_REMAINING = 112
 # Status Wärmepumpe (Heat Pump Status)
 REG_HEAT_PUMP_STATUS = 114
 # NHR Zustand (NHR State)
-REG_NHR_STATE = 116
+REG_REHEATER_STATE = 116
 # Status Gebläse Zuluft (Supply Air Fan Status)
 REG_SUPPLY_AIR_FAN_STATUS = 117
 # Status Gebläse Abluft (Exhaust Air Fan Status)
@@ -124,27 +124,6 @@ REG_OPERATING_HOURS_PREHEATING_COIL = 809
 REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE = 810
 REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER = 813
 
-# Operation mode values
-# Betriebsart: 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft
-OPERATION_MODE_OFF = 0
-OPERATION_MODE_MANUAL = 1
-OPERATION_MODE_WINTER = 2
-OPERATION_MODE_SUMMER = 3
-OPERATION_MODE_SUMMER_EXHAUST = 4
-
-# Fan speed values
-# Manuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4, 5=Automatik, 6=Linearbetrieb
-FAN_SPEED_OFF = 0
-FAN_SPEED_LEVEL_1 = 1
-FAN_SPEED_LEVEL_2 = 2
-FAN_SPEED_LEVEL_3 = 3
-FAN_SPEED_LEVEL_4 = 4
-FAN_SPEED_AUTO = 5
-FAN_SPEED_LINEAR = 6
-
-# Current fan level values
-# Aktuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-
 # Linear fan power range
 # Manuelle Lineare Luftleistung: 30-100%
 LINEAR_FAN_POWER_MIN = 30
@@ -167,9 +146,6 @@ SHOCK_VENTILATION_ACTIVE = 1
 HEAT_PUMP_STATUS_OFF = 0
 HEAT_PUMP_STATUS_HEATING = 5
 HEAT_PUMP_STATUS_COOLING = 49
-
-# NHR state values
-# NHR Zustand: 0=Inaktiv, 1=Aktiv
 
 # Supply air fan status values
 # Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
@@ -210,20 +186,6 @@ PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE = 1
 PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE = 2
 PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE = 3
 
-# Time program fan level values
-# Luftstufe Zeitprogramm: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-
-# Sensor fan level values
-# Luftstufe Sensoren: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4
-
-# Heating/Cooling function values
-# Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang
-HEATING_COOLING_OFF = 0
-HEATING_COOLING_HEATING = 1
-HEATING_COOLING_COOLING = 2
-HEATING_COOLING_AUTO_OUTDOOR = 3
-HEATING_COOLING_AUTO_DIGITAL = 4
-
 # Heat pump heating enable values
 # Wärmepumpe Heizen: 0=Heizen Aus, 1=Heizen frei
 HEAT_PUMP_HEATING_OFF = 0
@@ -243,59 +205,59 @@ AUXILIARY_HEATING_ENABLED = 1
 # All alarms: 0=inaktiv, 1=Meldung steht an
 ALARM_ACTIVE = 1
 
-REG_CURRENT_TEMPERATURE_1 = 360
-REG_CURRENT_TEMPERATURE_2 = 361
-REG_CURRENT_TEMPERATURE_3 = 362
-REG_CURRENT_TEMPERATURE_4 = 363
-REG_CURRENT_TEMPERATURE_5 = 364
-REG_CURRENT_TEMPERATURE_6 = 365
-REG_CURRENT_TEMPERATURE_7 = 366
-REG_CURRENT_TEMPERATURE_8 = 367
-REG_CURRENT_TEMPERATURE_9 = 368
-REG_CURRENT_TEMPERATURE_10 = 369
-REG_CURRENT_TEMPERATURE_11 = 370
-REG_CURRENT_TEMPERATURE_12 = 371
-REG_CURRENT_TEMPERATURE_13 = 372
-REG_CURRENT_TEMPERATURE_14 = 373
-REG_CURRENT_TEMPERATURE_15 = 374
-REG_CURRENT_TEMPERATURE_16 = 375
-REG_CURRENT_TEMPERATURE_17 = 376
+REG_CURRENT_TEMPERATURE_ROOM_1 = 360
+REG_CURRENT_TEMPERATURE_ROOM_2 = 361
+REG_CURRENT_TEMPERATURE_ROOM_3 = 362
+REG_CURRENT_TEMPERATURE_ROOM_4 = 363
+REG_CURRENT_TEMPERATURE_ROOM_5 = 364
+REG_CURRENT_TEMPERATURE_ROOM_6 = 365
+REG_CURRENT_TEMPERATURE_ROOM_7 = 366
+REG_CURRENT_TEMPERATURE_ROOM_8 = 367
+REG_CURRENT_TEMPERATURE_ROOM_9 = 368
+REG_CURRENT_TEMPERATURE_ROOM_10 = 369
+REG_CURRENT_TEMPERATURE_ROOM_11 = 370
+REG_CURRENT_TEMPERATURE_ROOM_12 = 371
+REG_CURRENT_TEMPERATURE_ROOM_13 = 372
+REG_CURRENT_TEMPERATURE_ROOM_14 = 373
+REG_CURRENT_TEMPERATURE_ROOM_15 = 374
+REG_CURRENT_TEMPERATURE_ROOM_16 = 375
+REG_CURRENT_TEMPERATURE_ROOM_17 = 376
 
-REG_TARGET_TEMPERATURE_1 = 400
-REG_TARGET_TEMPERATURE_2 = 401
-REG_TARGET_TEMPERATURE_3 = 402
-REG_TARGET_TEMPERATURE_4 = 403
-REG_TARGET_TEMPERATURE_5 = 404
-REG_TARGET_TEMPERATURE_6 = 405
-REG_TARGET_TEMPERATURE_7 = 406
-REG_TARGET_TEMPERATURE_8 = 407
-REG_TARGET_TEMPERATURE_9 = 408
-REG_TARGET_TEMPERATURE_10 = 409
-REG_TARGET_TEMPERATURE_11 = 410
-REG_TARGET_TEMPERATURE_12 = 411
-REG_TARGET_TEMPERATURE_13 = 412
-REG_TARGET_TEMPERATURE_14 = 413
-REG_TARGET_TEMPERATURE_15 = 414
-REG_TARGET_TEMPERATURE_16 = 415
-REG_TARGET_TEMPERATURE_17 = 416
+REG_TARGET_TEMPERATURE_ROOM_1 = 400
+REG_TARGET_TEMPERATURE_ROOM_2 = 401
+REG_TARGET_TEMPERATURE_ROOM_3 = 402
+REG_TARGET_TEMPERATURE_ROOM_4 = 403
+REG_TARGET_TEMPERATURE_ROOM_5 = 404
+REG_TARGET_TEMPERATURE_ROOM_6 = 405
+REG_TARGET_TEMPERATURE_ROOM_7 = 406
+REG_TARGET_TEMPERATURE_ROOM_8 = 407
+REG_TARGET_TEMPERATURE_ROOM_9 = 408
+REG_TARGET_TEMPERATURE_ROOM_10 = 409
+REG_TARGET_TEMPERATURE_ROOM_11 = 410
+REG_TARGET_TEMPERATURE_ROOM_12 = 411
+REG_TARGET_TEMPERATURE_ROOM_13 = 412
+REG_TARGET_TEMPERATURE_ROOM_14 = 413
+REG_TARGET_TEMPERATURE_ROOM_15 = 414
+REG_TARGET_TEMPERATURE_ROOM_16 = 415
+REG_TARGET_TEMPERATURE_ROOM_17 = 416
 
-REG_BASE_TEMPERATURE_1 = 420
-REG_BASE_TEMPERATURE_2 = 421
-REG_BASE_TEMPERATURE_3 = 422
-REG_BASE_TEMPERATURE_4 = 423
-REG_BASE_TEMPERATURE_5 = 424
-REG_BASE_TEMPERATURE_6 = 425
-REG_BASE_TEMPERATURE_7 = 426
-REG_BASE_TEMPERATURE_8 = 427
-REG_BASE_TEMPERATURE_9 = 428
-REG_BASE_TEMPERATURE_10 = 429
-REG_BASE_TEMPERATURE_11 = 430
-REG_BASE_TEMPERATURE_12 = 431
-REG_BASE_TEMPERATURE_13 = 432
-REG_BASE_TEMPERATURE_14 = 433
-REG_BASE_TEMPERATURE_15 = 434
-REG_BASE_TEMPERATURE_16 = 435
-REG_BASE_TEMPERATURE_17 = 436
+REG_BASE_TEMPERATURE_ROOM_1 = 420
+REG_BASE_TEMPERATURE_ROOM_2 = 421
+REG_BASE_TEMPERATURE_ROOM_3 = 422
+REG_BASE_TEMPERATURE_ROOM_4 = 423
+REG_BASE_TEMPERATURE_ROOM_5 = 424
+REG_BASE_TEMPERATURE_ROOM_6 = 425
+REG_BASE_TEMPERATURE_ROOM_7 = 426
+REG_BASE_TEMPERATURE_ROOM_8 = 427
+REG_BASE_TEMPERATURE_ROOM_9 = 428
+REG_BASE_TEMPERATURE_ROOM_10 = 429
+REG_BASE_TEMPERATURE_ROOM_11 = 430
+REG_BASE_TEMPERATURE_ROOM_12 = 431
+REG_BASE_TEMPERATURE_ROOM_13 = 432
+REG_BASE_TEMPERATURE_ROOM_14 = 433
+REG_BASE_TEMPERATURE_ROOM_15 = 434
+REG_BASE_TEMPERATURE_ROOM_16 = 435
+REG_BASE_TEMPERATURE_ROOM_17 = 436
 
 REG_AUXILIARY_HEATING_ENABLED_ROOM_1 = 440
 REG_AUXILIARY_HEATING_ENABLED_ROOM_2 = 441
@@ -410,62 +372,62 @@ REG_KEYS: dict[int, str] = {
     REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER: "operating_hours_ground_heat_exchanger",
     # WGT-only registers
     REG_HEAT_PUMP_STATUS: "heat_pump_status",
-    REG_NHR_STATE: "nhr_state",
+    REG_REHEATER_STATE: "reheater_state",
     REG_HEATING_COOLING_FUNCTION: "heating_cooling_function",
     REG_HEAT_PUMP_HEATING_ENABLED: "heat_pump_heating_enabled",
     REG_HEAT_PUMP_COOLING_ENABLED: "heat_pump_cooling_enabled",
     REG_AUXILIARY_HEATING_ENABLED: "auxiliary_heating_enabled",
-    REG_CURRENT_TEMPERATURE_1: "current_temperature_1",
-    REG_CURRENT_TEMPERATURE_2: "current_temperature_2",
-    REG_CURRENT_TEMPERATURE_3: "current_temperature_3",
-    REG_CURRENT_TEMPERATURE_4: "current_temperature_4",
-    REG_CURRENT_TEMPERATURE_5: "current_temperature_5",
-    REG_CURRENT_TEMPERATURE_6: "current_temperature_6",
-    REG_CURRENT_TEMPERATURE_7: "current_temperature_7",
-    REG_CURRENT_TEMPERATURE_8: "current_temperature_8",
-    REG_CURRENT_TEMPERATURE_9: "current_temperature_9",
-    REG_CURRENT_TEMPERATURE_10: "current_temperature_10",
-    REG_CURRENT_TEMPERATURE_11: "current_temperature_11",
-    REG_CURRENT_TEMPERATURE_12: "current_temperature_12",
-    REG_CURRENT_TEMPERATURE_13: "current_temperature_13",
-    REG_CURRENT_TEMPERATURE_14: "current_temperature_14",
-    REG_CURRENT_TEMPERATURE_15: "current_temperature_15",
-    REG_CURRENT_TEMPERATURE_16: "current_temperature_16",
-    REG_CURRENT_TEMPERATURE_17: "current_temperature_17",
-    REG_TARGET_TEMPERATURE_1: "target_temperature_1",
-    REG_TARGET_TEMPERATURE_2: "target_temperature_2",
-    REG_TARGET_TEMPERATURE_3: "target_temperature_3",
-    REG_TARGET_TEMPERATURE_4: "target_temperature_4",
-    REG_TARGET_TEMPERATURE_5: "target_temperature_5",
-    REG_TARGET_TEMPERATURE_6: "target_temperature_6",
-    REG_TARGET_TEMPERATURE_7: "target_temperature_7",
-    REG_TARGET_TEMPERATURE_8: "target_temperature_8",
-    REG_TARGET_TEMPERATURE_9: "target_temperature_9",
-    REG_TARGET_TEMPERATURE_10: "target_temperature_10",
-    REG_TARGET_TEMPERATURE_11: "target_temperature_11",
-    REG_TARGET_TEMPERATURE_12: "target_temperature_12",
-    REG_TARGET_TEMPERATURE_13: "target_temperature_13",
-    REG_TARGET_TEMPERATURE_14: "target_temperature_14",
-    REG_TARGET_TEMPERATURE_15: "target_temperature_15",
-    REG_TARGET_TEMPERATURE_16: "target_temperature_16",
-    REG_TARGET_TEMPERATURE_17: "target_temperature_17",
-    REG_BASE_TEMPERATURE_1: "base_temperature_1",
-    REG_BASE_TEMPERATURE_2: "base_temperature_2",
-    REG_BASE_TEMPERATURE_3: "base_temperature_3",
-    REG_BASE_TEMPERATURE_4: "base_temperature_4",
-    REG_BASE_TEMPERATURE_5: "base_temperature_5",
-    REG_BASE_TEMPERATURE_6: "base_temperature_6",
-    REG_BASE_TEMPERATURE_7: "base_temperature_7",
-    REG_BASE_TEMPERATURE_8: "base_temperature_8",
-    REG_BASE_TEMPERATURE_9: "base_temperature_9",
-    REG_BASE_TEMPERATURE_10: "base_temperature_10",
-    REG_BASE_TEMPERATURE_11: "base_temperature_11",
-    REG_BASE_TEMPERATURE_12: "base_temperature_12",
-    REG_BASE_TEMPERATURE_13: "base_temperature_13",
-    REG_BASE_TEMPERATURE_14: "base_temperature_14",
-    REG_BASE_TEMPERATURE_15: "base_temperature_15",
-    REG_BASE_TEMPERATURE_16: "base_temperature_16",
-    REG_BASE_TEMPERATURE_17: "base_temperature_17",
+    REG_CURRENT_TEMPERATURE_ROOM_1: "current_temperature_room_1",
+    REG_CURRENT_TEMPERATURE_ROOM_2: "current_temperature_room_2",
+    REG_CURRENT_TEMPERATURE_ROOM_3: "current_temperature_room_3",
+    REG_CURRENT_TEMPERATURE_ROOM_4: "current_temperature_room_4",
+    REG_CURRENT_TEMPERATURE_ROOM_5: "current_temperature_room_5",
+    REG_CURRENT_TEMPERATURE_ROOM_6: "current_temperature_room_6",
+    REG_CURRENT_TEMPERATURE_ROOM_7: "current_temperature_room_7",
+    REG_CURRENT_TEMPERATURE_ROOM_8: "current_temperature_room_8",
+    REG_CURRENT_TEMPERATURE_ROOM_9: "current_temperature_room_9",
+    REG_CURRENT_TEMPERATURE_ROOM_10: "current_temperature_room_10",
+    REG_CURRENT_TEMPERATURE_ROOM_11: "current_temperature_room_11",
+    REG_CURRENT_TEMPERATURE_ROOM_12: "current_temperature_room_12",
+    REG_CURRENT_TEMPERATURE_ROOM_13: "current_temperature_room_13",
+    REG_CURRENT_TEMPERATURE_ROOM_14: "current_temperature_room_14",
+    REG_CURRENT_TEMPERATURE_ROOM_15: "current_temperature_room_15",
+    REG_CURRENT_TEMPERATURE_ROOM_16: "current_temperature_room_16",
+    REG_CURRENT_TEMPERATURE_ROOM_17: "current_temperature_room_17",
+    REG_TARGET_TEMPERATURE_ROOM_1: "target_temperature_room_1",
+    REG_TARGET_TEMPERATURE_ROOM_2: "target_temperature_room_2",
+    REG_TARGET_TEMPERATURE_ROOM_3: "target_temperature_room_3",
+    REG_TARGET_TEMPERATURE_ROOM_4: "target_temperature_room_4",
+    REG_TARGET_TEMPERATURE_ROOM_5: "target_temperature_room_5",
+    REG_TARGET_TEMPERATURE_ROOM_6: "target_temperature_room_6",
+    REG_TARGET_TEMPERATURE_ROOM_7: "target_temperature_room_7",
+    REG_TARGET_TEMPERATURE_ROOM_8: "target_temperature_room_8",
+    REG_TARGET_TEMPERATURE_ROOM_9: "target_temperature_room_9",
+    REG_TARGET_TEMPERATURE_ROOM_10: "target_temperature_room_10",
+    REG_TARGET_TEMPERATURE_ROOM_11: "target_temperature_room_11",
+    REG_TARGET_TEMPERATURE_ROOM_12: "target_temperature_room_12",
+    REG_TARGET_TEMPERATURE_ROOM_13: "target_temperature_room_13",
+    REG_TARGET_TEMPERATURE_ROOM_14: "target_temperature_room_14",
+    REG_TARGET_TEMPERATURE_ROOM_15: "target_temperature_room_15",
+    REG_TARGET_TEMPERATURE_ROOM_16: "target_temperature_room_16",
+    REG_TARGET_TEMPERATURE_ROOM_17: "target_temperature_room_17",
+    REG_BASE_TEMPERATURE_ROOM_1: "base_temperature_room_1",
+    REG_BASE_TEMPERATURE_ROOM_2: "base_temperature_room_2",
+    REG_BASE_TEMPERATURE_ROOM_3: "base_temperature_room_3",
+    REG_BASE_TEMPERATURE_ROOM_4: "base_temperature_room_4",
+    REG_BASE_TEMPERATURE_ROOM_5: "base_temperature_room_5",
+    REG_BASE_TEMPERATURE_ROOM_6: "base_temperature_room_6",
+    REG_BASE_TEMPERATURE_ROOM_7: "base_temperature_room_7",
+    REG_BASE_TEMPERATURE_ROOM_8: "base_temperature_room_8",
+    REG_BASE_TEMPERATURE_ROOM_9: "base_temperature_room_9",
+    REG_BASE_TEMPERATURE_ROOM_10: "base_temperature_room_10",
+    REG_BASE_TEMPERATURE_ROOM_11: "base_temperature_room_11",
+    REG_BASE_TEMPERATURE_ROOM_12: "base_temperature_room_12",
+    REG_BASE_TEMPERATURE_ROOM_13: "base_temperature_room_13",
+    REG_BASE_TEMPERATURE_ROOM_14: "base_temperature_room_14",
+    REG_BASE_TEMPERATURE_ROOM_15: "base_temperature_room_15",
+    REG_BASE_TEMPERATURE_ROOM_16: "base_temperature_room_16",
+    REG_BASE_TEMPERATURE_ROOM_17: "base_temperature_room_17",
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1: "auxiliary_heating_enabled_room_1",
     REG_AUXILIARY_HEATING_ENABLED_ROOM_2: "auxiliary_heating_enabled_room_2",
     REG_AUXILIARY_HEATING_ENABLED_ROOM_3: "auxiliary_heating_enabled_room_3",
@@ -531,58 +493,58 @@ REG_TO_TRANSFORM: dict[int, Callable] = {
     REG_TEMP_T7_EVAPORATOR: to_temperature,
     REG_TEMP_T8_CONDENSER: to_temperature,
     REG_TEMP_T10_OUTDOOR: to_temperature,
-    REG_NHR_STATE: to_bool,
-    REG_CURRENT_TEMPERATURE_1: to_temperature,
-    REG_CURRENT_TEMPERATURE_2: to_temperature,
-    REG_CURRENT_TEMPERATURE_3: to_temperature,
-    REG_CURRENT_TEMPERATURE_4: to_temperature,
-    REG_CURRENT_TEMPERATURE_5: to_temperature,
-    REG_CURRENT_TEMPERATURE_6: to_temperature,
-    REG_CURRENT_TEMPERATURE_7: to_temperature,
-    REG_CURRENT_TEMPERATURE_8: to_temperature,
-    REG_CURRENT_TEMPERATURE_9: to_temperature,
-    REG_CURRENT_TEMPERATURE_10: to_temperature,
-    REG_CURRENT_TEMPERATURE_11: to_temperature,
-    REG_CURRENT_TEMPERATURE_12: to_temperature,
-    REG_CURRENT_TEMPERATURE_13: to_temperature,
-    REG_CURRENT_TEMPERATURE_14: to_temperature,
-    REG_CURRENT_TEMPERATURE_15: to_temperature,
-    REG_CURRENT_TEMPERATURE_16: to_temperature,
-    REG_CURRENT_TEMPERATURE_17: to_temperature,
-    REG_TARGET_TEMPERATURE_1: to_temperature,
-    REG_TARGET_TEMPERATURE_2: to_temperature,
-    REG_TARGET_TEMPERATURE_3: to_temperature,
-    REG_TARGET_TEMPERATURE_4: to_temperature,
-    REG_TARGET_TEMPERATURE_5: to_temperature,
-    REG_TARGET_TEMPERATURE_6: to_temperature,
-    REG_TARGET_TEMPERATURE_7: to_temperature,
-    REG_TARGET_TEMPERATURE_8: to_temperature,
-    REG_TARGET_TEMPERATURE_9: to_temperature,
-    REG_TARGET_TEMPERATURE_10: to_temperature,
-    REG_TARGET_TEMPERATURE_11: to_temperature,
-    REG_TARGET_TEMPERATURE_12: to_temperature,
-    REG_TARGET_TEMPERATURE_13: to_temperature,
-    REG_TARGET_TEMPERATURE_14: to_temperature,
-    REG_TARGET_TEMPERATURE_15: to_temperature,
-    REG_TARGET_TEMPERATURE_16: to_temperature,
-    REG_TARGET_TEMPERATURE_17: to_temperature,
-    REG_BASE_TEMPERATURE_1: to_temperature,
-    REG_BASE_TEMPERATURE_2: to_temperature,
-    REG_BASE_TEMPERATURE_3: to_temperature,
-    REG_BASE_TEMPERATURE_4: to_temperature,
-    REG_BASE_TEMPERATURE_5: to_temperature,
-    REG_BASE_TEMPERATURE_6: to_temperature,
-    REG_BASE_TEMPERATURE_7: to_temperature,
-    REG_BASE_TEMPERATURE_8: to_temperature,
-    REG_BASE_TEMPERATURE_9: to_temperature,
-    REG_BASE_TEMPERATURE_10: to_temperature,
-    REG_BASE_TEMPERATURE_11: to_temperature,
-    REG_BASE_TEMPERATURE_12: to_temperature,
-    REG_BASE_TEMPERATURE_13: to_temperature,
-    REG_BASE_TEMPERATURE_14: to_temperature,
-    REG_BASE_TEMPERATURE_15: to_temperature,
-    REG_BASE_TEMPERATURE_16: to_temperature,
-    REG_BASE_TEMPERATURE_17: to_temperature,
+    REG_REHEATER_STATE: to_bool,
+    REG_CURRENT_TEMPERATURE_ROOM_1: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_2: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_3: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_4: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_5: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_6: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_7: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_8: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_9: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_10: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_11: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_12: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_13: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_14: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_15: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_16: to_temperature,
+    REG_CURRENT_TEMPERATURE_ROOM_17: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_1: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_2: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_3: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_4: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_5: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_6: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_7: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_8: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_9: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_10: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_11: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_12: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_13: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_14: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_15: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_16: to_temperature,
+    REG_TARGET_TEMPERATURE_ROOM_17: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_1: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_2: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_3: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_4: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_5: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_6: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_7: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_8: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_9: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_10: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_11: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_12: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_13: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_14: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_15: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_16: to_temperature,
+    REG_BASE_TEMPERATURE_ROOM_17: to_temperature,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1: to_bool,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_2: to_bool,
     REG_AUXILIARY_HEATING_ENABLED_ROOM_3: to_bool,
@@ -607,3 +569,5 @@ def room_reg(base_reg: int, room_number: int) -> int:
     if room_number < 1 or room_number > 17:
         raise ValueError("Room number must be between 1 and 17")
     return base_reg + (room_number - 1)
+
+# def room_id()
