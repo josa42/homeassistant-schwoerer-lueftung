@@ -106,8 +106,7 @@ class FanOverrideBinarySensor(AbstractBinarySensor):
 
 class NhrStateBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_REHEATER_STATE)
-        self._attr_entity_registry_enabled_default = False
+        super().__init__(coordinator, REG_REHEATER_STATE, endabled_by_default=False)
 
 class Preheater1BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:

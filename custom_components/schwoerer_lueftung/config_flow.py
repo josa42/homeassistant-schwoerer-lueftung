@@ -109,6 +109,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
                     CONF_SLAVE_ID: DEFAULT_SLAVE_ID,
                     CONF_ROOMS: [],
+                    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[CONF_ENABLE_ALL_SENSORS_BY_DEFAULT],
                 }
 
                 # Get translations to use the correct room prefix
