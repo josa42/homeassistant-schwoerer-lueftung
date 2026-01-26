@@ -1,4 +1,4 @@
-.PHONY: help venv install test lint clean dev-up dev-down dev-logs dev-restart
+.PHONY: help venv install test lint clean dev-up dev-down dev-logs dev-restart sort-translations
 
 PYTHON := $(shell command -v python3 || command -v python)
 VENV := venv
@@ -21,6 +21,9 @@ help:
 	@echo "  make test     - Run tests"
 	@echo "  make lint     - Run linter"
 	@echo "  make clean    - Clean cache files"
+	@echo ""
+	@echo "Translations:"
+	@echo "  make sort-translations - Sort translation files alphabetically"
 
 venv:
 	@if [ ! -d "$(VENV)" ]; then \
@@ -90,3 +93,7 @@ dev-restart:
 	docker-compose restart
 	@sleep 2
 	docker-compose logs -f --tail=50
+
+sort-translations:
+	@echo "Sorting translation files..."
+	@$(PYTHON) scripts/sort_translations.py
