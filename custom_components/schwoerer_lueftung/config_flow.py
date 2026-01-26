@@ -27,6 +27,8 @@ from .const import (
     DEVICE_TYPE_WGT,
     DEVICE_TYPE_WRT,
     DOMAIN,
+    MODEL_WGT,
+    MODEL_WRT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -72,8 +74,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
         await hass.async_add_executor_job(client.disconnect)
 
-        # TODO better naem
-        return {"title": f"WRG {data[CONF_HOST]}"}
+        model = MODEL_WGT if data[CONF_DEVICE_TYPE] == DEVICE_TYPE_WGT else MODEL_WRT
+
+        return {"title": f"{model} {data[CONF_HOST]}"}
     except CannotConnect:
         raise
     except Exception as err:

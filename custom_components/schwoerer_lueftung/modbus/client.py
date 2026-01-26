@@ -12,8 +12,6 @@ from .registers import REG_KEYS, REG_TO_TRANSFORM
 _LOGGER = logging.getLogger(__name__)
 
 class ModbusClient:
-    """Modbus TCP client for WRG device."""
-
     _subscriptions: set[int] = set()
 
     def __init__(self, host: str, port: int, slave_id: int, device_type: str = "wgt") -> None:
