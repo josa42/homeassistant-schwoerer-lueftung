@@ -49,6 +49,7 @@ async def async_setup_entry(
     entities = []
     entities.extend([
         FanOverrideBinarySensor(coordinator),
+        OutdoorDamperStateSensor(coordinator),
         AlarmBinarySensor(coordinator, REG_ALARM_PRESSURE_SWITCH, enabled_by_default=False),
         AlarmBinarySensor(coordinator, REG_ALARM_UTILITY_LOCK, enabled_by_default=False),
         AlarmBinarySensor(coordinator, REG_ALARM_DOOR_OPEN),
@@ -89,7 +90,7 @@ class OutdoorDamperStateSensor(AbstractBinarySensor):
                 1 = Open
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE)
+        super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE, enabled_by_default=False)
 
 class FanOverrideBinarySensor(AbstractBinarySensor):
     """
@@ -117,7 +118,7 @@ class Preheater1BinarySensor(AbstractBinarySensor):
                 PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
                 PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
             },
-            key="preheater_",
+            key="preheater_1",
             enabled_by_default=False,
         )
 

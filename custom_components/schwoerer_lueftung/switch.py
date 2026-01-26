@@ -16,7 +16,7 @@ from .modbus.registers import (
     REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
     REG_HEAT_PUMP_COOLING_ENABLED,
     REG_HEAT_PUMP_HEATING_ENABLED,
-    REG_SCHEDULED_HEATING_ENABLED_1,
+    REG_SCHEDULED_HEATING_ENABLED_ROOM_1,
     REG_SHOCK_VENTILATION,
 )
 
@@ -114,5 +114,5 @@ class RoomTimeProgramHeatingEnableSwitch(AbstractRoomSwitch):
                  1: Enabled
     """
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(coordinator, room_number, REG_SCHEDULED_HEATING_ENABLED_1, enabled_by_default=False)
+        super().__init__(coordinator, room_number, REG_SCHEDULED_HEATING_ENABLED_ROOM_1, enabled_by_default=False)
 

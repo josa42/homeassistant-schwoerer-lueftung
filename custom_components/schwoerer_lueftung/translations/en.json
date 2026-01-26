@@ -130,9 +130,6 @@
       }
     },
     "sensor": {
-      "auxiliary_heating_enabled_room": {
-        "name": "Auxiliary Heating Enabled"
-      },
       "bypass_state": {
         "name": "Bypass State",
         "state": {
@@ -155,9 +152,6 @@
       },
       "current_supply_air_rpm": {
         "name": "Current Supply Air RPM"
-      },
-      "current_temperature_room": {
-        "name": "Temperature"
       },
       "device_filter_remaining": {
         "name": "Device Filter Remaining"
@@ -315,8 +309,8 @@
       "auxiliary_heating_enabled": {
         "name": "Auxiliary Heating Enable"
       },
-      "auxiliary_house_heating": {
-        "name": "Auxiliary House Heating"
+      "auxiliary_heating_enabled_room": {
+        "name": "Auxiliary Heating Enabled"
       },
       "heat_pump_cooling_enabled": {
         "name": "Heat Pump Cooling"
@@ -324,8 +318,8 @@
       "heat_pump_heating_enabled": {
         "name": "Heat Pump Heating"
       },
-      "scheduled_heating_enabled": {
-        "name": "Time Program Heating Enable"
+      "scheduled_heating_enabled_room": {
+        "name": "Scheduled Heating Enabled"
       },
       "shock_ventilation": {
         "name": "Shock Ventilation"

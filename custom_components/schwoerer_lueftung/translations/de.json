@@ -119,18 +119,6 @@
           "off": "Aus"
         }
       },
-      "manual_fan_level": {
-        "name": "Manuelle Luftstufe",
-        "state": {
-          "0": "Aus",
-          "1": "1",
-          "2": "2",
-          "3": "3",
-          "4": "4",
-          "automatic": "Automatik",
-          "linear": "Linearbetrieb"
-        }
-      },
       "operation_mode": {
         "name": "Betriebsart",
         "state": {
@@ -143,30 +131,6 @@
       }
     },
     "sensor": {
-      "auxiliary_heating_active_room": {
-        "name": "Zusatzheizung aktiv",
-        "state": {
-          "active": "Aktiv",
-          "inactive": "Inaktiv"
-        }
-      },
-      "auxiliary_heating_enabled": {
-        "name": "Zusatzheizung Freigabe",
-        "state": {
-          "heating_enabled": "Heizen frei",
-          "locked": "Gesperrt"
-        }
-      },
-      "auxiliary_heating_enabled_room": {
-        "name": "Zusatzheizung Freigabe"
-      },
-      "auxiliary_heating_release": {
-        "name": "Zusatzheizung Freigabe",
-        "state": {
-          "heating_enabled": "Heizen frei",
-          "locked": "Gesperrt"
-        }
-      },
       "bypass_state": {
         "name": "Bypass Zustand",
         "state": {
@@ -190,35 +154,8 @@
       "current_supply_air_rpm": {
         "name": "Aktuelle Drehzahl Zuluft"
       },
-      "current_temperature_room": {
-        "name": "Temperatur"
-      },
-      "device_filter_dirty_alarm": {
-        "name": "Gerätefilter verschmutzt",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
       "device_filter_remaining": {
         "name": "Restlaufzeit Gerätefilter"
-      },
-      "device_filter_remaining_days": {
-        "name": "Restlaufzeit Gerätefilter"
-      },
-      "door_open_alarm": {
-        "name": "Tür offen",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "emergency_operation_alarm": {
-        "name": "Notbetrieb aktiv",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
       },
       "error_message": {
         "name": "Fehlermeldung",
@@ -253,20 +190,6 @@
           "779": "Fehler Sensorelement T10-Außentemperatur"
         }
       },
-      "evu_lock_alarm": {
-        "name": "EVU Sperre Aktiv",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "evu_lock_external_alarm": {
-        "name": "EVU Sperre extern Aktiv",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
       "exhaust_air_fan_status": {
         "name": "Status Gebläse Abluft",
         "state": {
@@ -292,23 +215,6 @@
           "49": "Kühlen",
           "5": "Heizen"
         }
-      },
-      "heating_module_test_alarm": {
-        "name": "Heizmodul Testbetrieb aktiv",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "low_tariff_disabled_alarm": {
-        "name": "Niedertarif abgeschaltet",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "operating_hours_auxiliary_heating": {
-        "name": "Betriebsstunden ZH Raum"
       },
       "operating_hours_auxiliary_heating_house": {
         "name": "Betriebsstunden ZH Raum"
@@ -341,43 +247,16 @@
         "name": "Betriebsstunden VHR"
       },
       "outdoor_damper_state": {
-        "name": "Aussenklappe Zustand",
+        "name": "Außenklappe Zustand",
         "state": {
-          "0": "geschlossen",
-          "1": "offen"
-        }
-      },
-      "prefilter_dirty_alarm": {
-        "name": "Vorgelagerter Filter verschmutzt",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "prefilter_remaining_days": {
-        "name": "Restlaufzeit Vorgelagerter Filter"
-      },
-      "pressostat_triggered_alarm": {
-        "name": "Pressostat ausgelöst",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "pressure_monitor_alarm": {
-        "name": "Meldung Druckwächter Aktiv",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
+          "0": "Geschlossen",
+          "1": "Offen"
         }
       },
       "sensor_fan_level": {
         "name": "Luftstufe Sensoren"
       },
       "shock_ventilation_remaining": {
-        "name": "Restlaufzeit Stoßlüftung"
-      },
-      "shock_ventilation_remaining_time": {
         "name": "Restlaufzeit Stoßlüftung"
       },
       "supply_air_fan_status": {
@@ -388,20 +267,6 @@
           "2": "Aktiv",
           "5": "Standby",
           "6": "Fehler"
-        }
-      },
-      "supply_air_too_cold_alarm": {
-        "name": "Zuluft zu kalt",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
-        }
-      },
-      "supply_voltage_disabled_alarm": {
-        "name": "Versorgungsspannung abgeschaltet",
-        "state": {
-          "active": "Meldung steht an",
-          "inactive": "inaktiv"
         }
       },
       "temp_t10_outdoor": {
@@ -448,17 +313,14 @@
       "auxiliary_heating_enabled_room": {
         "name": "Zusatzheizung Freigabe"
       },
-      "auxiliary_house_heating": {
-        "name": "Zusatzheizung Haus"
-      },
       "heat_pump_cooling_enabled": {
         "name": "Wärmepumpe Kühlen"
       },
       "heat_pump_heating_enabled": {
         "name": "Wärmepumpe Heizen"
       },
-      "scheduled_heating_enabled": {
-        "name": "Freigabe Zeitprogramm Heizen"
+      "scheduled_heating_enabled_room": {
+        "name": "Zeitheizprogramm Freigabe"
       },
       "shock_ventilation": {
         "name": "Stoßlüftung"
