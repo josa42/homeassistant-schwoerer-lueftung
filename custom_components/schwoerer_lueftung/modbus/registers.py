@@ -141,39 +141,49 @@ FAN_OVERRIDE_ACTIVE = 1
 SHOCK_VENTILATION_INACTIVE = 0
 SHOCK_VENTILATION_ACTIVE = 1
 
-# Heat pump status values
+# Heat pump status enum mapping
 # Status Wärmepumpe: 0=Aus, 5=WP Heizen, 49=WP Kühlen
-HEAT_PUMP_STATUS_OFF = 0
-HEAT_PUMP_STATUS_HEATING = 5
-HEAT_PUMP_STATUS_COOLING = 49
+HEAT_PUMP_STATUS_MAP = {
+    0: "off",
+    5: "heating",
+    49: "cooling",
+}
 
-# Supply air fan status values
+# Supply air fan status enum mapping
 # Status Gebläse Zuluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
-SUPPLY_AIR_FAN_STATUS_DISABLED = 0
-SUPPLY_AIR_FAN_STATUS_STARTUP = 1
-SUPPLY_AIR_FAN_STATUS_ACTIVE = 2
-SUPPLY_AIR_FAN_STATUS_STANDBY = 5
-SUPPLY_AIR_FAN_STATUS_ERROR = 6
+SUPPLY_AIR_FAN_STATUS_MAP = {
+    0: "disabled",
+    1: "startup",
+    2: "active",
+    5: "standby",
+    6: "error",
+}
 
-# Exhaust air fan status values
+# Exhaust air fan status enum mapping
 # Status Gebläse Abluft: 0=Deaktiviert, 1=Anlaufphase, 2=Aktiv, 5=Standby, 6=Fehler
-EXHAUST_AIR_FAN_STATUS_DISABLED = 0
-EXHAUST_AIR_FAN_STATUS_STARTUP = 1
-EXHAUST_AIR_FAN_STATUS_ACTIVE = 2
-EXHAUST_AIR_FAN_STATUS_STANDBY = 5
-EXHAUST_AIR_FAN_STATUS_ERROR = 6
+EXHAUST_AIR_FAN_STATUS_MAP = {
+    0: "disabled",
+    1: "startup",
+    2: "active",
+    5: "standby",
+    6: "error",
+}
 
-# EWT state values
+# Ground heat exchanger state enum mapping
 # EWT Zustand: 0=EWT aus/geschlossen, 1=EWT im Heizbetrieb aktiv, 2=EWT im Kühlbetrieb aktiv
-GROUND_HEAT_EXCHANGER_STATE_OFF = 0
-GROUND_HEAT_EXCHANGER_STATE_HEATING = 1
-GROUND_HEAT_EXCHANGER_STATE_COOLING = 2
+GROUND_HEAT_EXCHANGER_STATE_MAP = {
+    0: "off",
+    1: "heating",
+    2: "cooling",
+}
 
-# Bypass state values
+# Bypass state enum mapping
 # Bypass Zustand: 0=Bypass geschlossen, 1=Bypass offen (Kühlen), 2=Bypass offen (Heizen)
-BYPASS_STATE_CLOSED = 0
-BYPASS_STATE_OPEN_COOLING = 1
-BYPASS_STATE_OPEN_HEATING = 2
+BYPASS_STATE_MAP = {
+    0: "closed",
+    1: "open_cooling",
+    2: "open_heating",
+}
 
 # Outdoor damper state values
 # Aussenklappe Zustand: 0=geschlossen, 1=offen

@@ -134,9 +134,9 @@
       "bypass_state": {
         "name": "Bypass Zustand",
         "state": {
-          "0": "Geschlossen",
-          "1": "Offen (Kühlen)",
-          "2": "Offen (Heizen)"
+          "closed": "Geschlossen",
+          "open_cooling": "Offen (Kühlen)",
+          "open_heating": "Offen (Heizen)"
         }
       },
       "current_exhaust_air_flow": {
@@ -193,27 +193,27 @@
       "exhaust_air_fan_status": {
         "name": "Status Gebläse Abluft",
         "state": {
-          "0": "Deaktiviert",
-          "1": "Anlaufphase",
-          "2": "Aktiv",
-          "5": "Standby",
-          "6": "Fehler"
+          "active": "Aktiv",
+          "disabled": "Deaktiviert",
+          "error": "Fehler",
+          "standby": "Standby",
+          "startup": "Anlaufphase"
         }
       },
       "ground_heat_exchanger_state": {
         "name": "EWT Zustand",
         "state": {
-          "0": "EWT aus/geschlossen",
-          "1": "EWT im Heizbetrieb aktiv",
-          "2": "EWT im Kühlbetrieb aktiv"
+          "cooling": "Im Kühlbetrieb aktiv",
+          "heating": "Im Heizbetrieb aktiv",
+          "off": "Aus/Geschlossen"
         }
       },
       "heat_pump_status": {
         "name": "Status Wärmepumpe",
         "state": {
-          "0": "Aus",
-          "49": "Kühlen",
-          "5": "Heizen"
+          "cooling": "Kühlen",
+          "heating": "Heizen",
+          "off": "Aus"
         }
       },
       "operating_hours_auxiliary_heating_house": {
@@ -262,11 +262,11 @@
       "supply_air_fan_status": {
         "name": "Status Gebläse Zuluft",
         "state": {
-          "0": "Deaktiviert",
-          "1": "Anlaufphase",
-          "2": "Aktiv",
-          "5": "Standby",
-          "6": "Fehler"
+          "active": "Aktiv",
+          "disabled": "Deaktiviert",
+          "error": "Fehler",
+          "standby": "Standby",
+          "startup": "Anlaufphase"
         }
       },
       "temp_t10_outdoor": {

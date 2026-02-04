@@ -13,10 +13,14 @@ from homeassistant.const import UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import AbstractRoomSensor, AbstractSensor
+from .abstract import AbstractEnumSensor, AbstractRoomSensor, AbstractSensor
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
+    BYPASS_STATE_MAP,
+    EXHAUST_AIR_FAN_STATUS_MAP,
+    GROUND_HEAT_EXCHANGER_STATE_MAP,
+    HEAT_PUMP_STATUS_MAP,
     REG_BYPASS_STATE,
     REG_CURRENT_EXHAUST_AIR_FLOW,
     REG_CURRENT_EXHAUST_AIR_RPM,
@@ -54,6 +58,7 @@ from .modbus.registers import (
     REG_TIME_PROGRAM_BASE_LEVEL,
     REG_TIME_PROGRAM_FAN_LEVEL,
     REG_UPSTREAM_FILTER_REMAINING,
+    SUPPLY_AIR_FAN_STATUS_MAP,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -171,7 +176,7 @@ class ShockVentilationRemainingSensor(AbstractSensor):
             unit_of_measurement = UnitOfTime.MINUTES,
         )
 
-class HeatPumpStatusSensor(AbstractSensor):
+class HeatPumpStatusSensor(AbstractEnumSensor):
     """
     Sensor for heat pump status
     (Status Wärmepumpe)
@@ -182,38 +187,38 @@ class HeatPumpStatusSensor(AbstractSensor):
                49 = Cooling
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_HEAT_PUMP_STATUS)
+        super().__init__(coordinator, REG_HEAT_PUMP_STATUS, HEAT_PUMP_STATUS_MAP)
 
-class SupplyAirFanStatusSensor(AbstractSensor):
+class SupplyAirFanStatusSensor(AbstractEnumSensor):
     """Sensor for supply air fan status
     (Status Gebläse Zuluft)
 
     Register: 117
-    Values:     0 = Deactivated
+    Values:     0 = Disabled
                 1 = Startup Phase
                 2 = Active
-                3 = Standby
-                4 = Error
+                5 = Standby
+                6 = Error
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_SUPPLY_AIR_FAN_STATUS, enabled_by_default=False)
+        super().__init__(coordinator, REG_SUPPLY_AIR_FAN_STATUS, SUPPLY_AIR_FAN_STATUS_MAP, enabled_by_default=False)
 
-class ExhaustAirFanStatusSensor(AbstractSensor):
+class ExhaustAirFanStatusSensor(AbstractEnumSensor):
     """
     Sensor for exhaust air fan status"
     (Status Gebläse Abluft)
 
     Register: 118
-    Values:     0 = Deactivated
+    Values:     0 = Disabled
                 1 = Startup Phase
                 2 = Active
-                3 = Standby
-                4 = Error
+                5 = Standby
+                6 = Error
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_EXHAUST_AIR_FAN_STATUS, enabled_by_default=False)
+        super().__init__(coordinator, REG_EXHAUST_AIR_FAN_STATUS, EXHAUST_AIR_FAN_STATUS_MAP, enabled_by_default=False)
 
-class GroundHeatExchangerStateSensor(AbstractSensor):
+class GroundHeatExchangerStateSensor(AbstractEnumSensor):
     """
     Sensor for ground heat exchanger state
     (Status Erdwärmetauscher/EWT ZUstand)
@@ -224,9 +229,14 @@ class GroundHeatExchangerStateSensor(AbstractSensor):
                 2 = Ground heat exchanger active in cooling mode
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_GROUND_HEAT_EXCHANGER_STATE, enabled_by_default=False)
+        super().__init__(
+            coordinator,
+            REG_GROUND_HEAT_EXCHANGER_STATE,
+            GROUND_HEAT_EXCHANGER_STATE_MAP,
+            enabled_by_default=False,
+        )
 
-class BypassStateSensor(AbstractSensor):
+class BypassStateSensor(AbstractEnumSensor):
     """
     Sensor for bypass state
     (Bypass ZUstand)
@@ -237,7 +247,7 @@ class BypassStateSensor(AbstractSensor):
                 2 = Open (heating mode)
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_BYPASS_STATE, enabled_by_default=False)
+        super().__init__(coordinator, REG_BYPASS_STATE, BYPASS_STATE_MAP, enabled_by_default=False)
 
 class TimeProgramFanLevelSensor(AbstractSensor):
     """

@@ -134,9 +134,9 @@
       "bypass_state": {
         "name": "Bypass State",
         "state": {
-          "0": "Closed",
-          "1": "Open (Cooling)",
-          "2": "Open (Heating)"
+          "closed": "Closed",
+          "open_cooling": "Open (Cooling)",
+          "open_heating": "Open (Heating)"
         }
       },
       "current_exhaust_air_flow": {
@@ -193,27 +193,27 @@
       "exhaust_air_fan_status": {
         "name": "Exhaust Air Fan Status",
         "state": {
-          "0": "Deactivated",
-          "1": "Startup",
-          "2": "Active",
-          "5": "Standby",
-          "6": "Error"
+          "active": "Active",
+          "disabled": "Disabled",
+          "error": "Error",
+          "standby": "Standby",
+          "startup": "Startup"
         }
       },
       "ground_heat_exchanger_state": {
         "name": "Ground Heat Exchanger State",
         "state": {
-          "0": "Closed",
-          "1": "Heating Active",
-          "2": "Cooling Active"
+          "cooling": "Cooling Active",
+          "heating": "Heating Active",
+          "off": "Off"
         }
       },
       "heat_pump_status": {
         "name": "Heat Pump Status",
         "state": {
-          "0": "Off",
-          "49": "Cooling",
-          "5": "Heating"
+          "cooling": "Cooling",
+          "heating": "Heating",
+          "off": "Off"
         }
       },
       "operating_hours_auxiliary_heating_house": {
@@ -262,11 +262,11 @@
       "supply_air_fan_status": {
         "name": "Supply Air Fan Status",
         "state": {
-          "0": "Deactivated",
-          "1": "Startup",
-          "2": "Active",
-          "5": "Standby",
-          "6": "Error"
+          "active": "Active",
+          "disabled": "Disabled",
+          "error": "Error",
+          "standby": "Standby",
+          "startup": "Startup"
         }
       },
       "temp_t10_outdoor": {

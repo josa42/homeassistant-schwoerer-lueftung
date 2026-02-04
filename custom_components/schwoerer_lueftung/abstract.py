@@ -34,6 +34,42 @@ class AbstractSensor(Entity, SensorEntity):
     def native_value(self) -> int | None:
         return self.coordinator.get_data(self._register)
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the raw numeric value as an attribute for debugging."""
+        return {
+            "raw_value": self.coordinator.get_data(self._register)
+        }
+
+class AbstractEnumSensor(Entity, SensorEntity):
+    """Sensor with enum device class that maps numeric values to string states."""
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        register: int,
+        options: dict[int, str],
+        **kwargs
+    ) -> None:
+        from homeassistant.components.sensor import SensorDeviceClass
+
+        super().__init__(
+            coordinator,
+            register,
+            device_class=SensorDeviceClass.ENUM,
+            **kwargs
+        )
+
+        self._options = options
+        self._attr_options = list(options.values())
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the state mapped to string identifier."""
+        raw_value = self.coordinator.get_data(self._register)
+        if raw_value is None:
+            return None
+        return self._options.get(raw_value)
+
 class AbstractRoomSensor(AbstractSensor):
     def __init__(
         self, coordinator: Coordinator,
