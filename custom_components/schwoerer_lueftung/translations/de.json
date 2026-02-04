@@ -134,9 +134,9 @@
       "bypass_state": {
         "name": "Bypass Zustand",
         "state": {
-          "0": "Bypass geschlossen",
-          "1": "Bypass offen (Kühlen)",
-          "2": "Bypass offen (Heizen)"
+          "0": "Geschlossen",
+          "1": "Offen (Kühlen)",
+          "2": "Offen (Heizen)"
         }
       },
       "current_exhaust_air_flow": {
