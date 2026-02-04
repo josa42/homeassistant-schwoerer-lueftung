@@ -7,7 +7,7 @@ from typing import Any
 
 from pymodbus.client import ModbusTcpClient
 
-from .registers import REG_KEYS, REG_TO_TRANSFORM
+from .registers import REG_KEYS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -104,16 +104,15 @@ class ModbusClient:
             for i, address in enumerate(registers):
                 try:
                     key = REG_KEYS.get(address)
-                    transform = REG_TO_TRANSFORM.get(address)
 
                     if key is None:
                         _LOGGER.error("Register %d not in REG_KEYS", address)
                         continue
 
-                    data[key] = transform(values[i]) if transform else values[i]
+                    data[key] = values[i]
 
                 except Exception as err:
-                    _LOGGER.error("Error transforming register %d value %s: %s", address, values[i], err)
+                    _LOGGER.error("Error processing register %d value %s: %s", address, values[i], err)
 
         return data
 

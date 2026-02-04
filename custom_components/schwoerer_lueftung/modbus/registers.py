@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Callable
-
 # Register addresses
 # Betriebsart (Operation Mode)
 REG_OPERATION_MODE = 100
@@ -488,9 +486,6 @@ REG_KEYS: dict[int, str] = {
     REG_SCHEDULED_HEATING_ENABLED_ROOM_16: "scheduled_heating_enabled_room_16",
     REG_SCHEDULED_HEATING_ENABLED_ROOM_17: "scheduled_heating_enabled_room_17",
 }
-
-
-REG_TO_TRANSFORM: dict[int, Callable] = {}
 
 def room_reg(base_reg: int, room_number: int) -> int:
     """Get the register address for a given room number."""
