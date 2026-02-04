@@ -9,11 +9,16 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import AbstractEnumSensor, AbstractRoomSensor, AbstractSensor
+from .abstract import (
+    AbstractEnumSensor,
+    AbstractRoomTemperatureSensor,
+    AbstractSensor,
+    AbstractTemperatureSensor,
+)
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
@@ -347,7 +352,7 @@ class CurrentExhaustAirRpmSensor(AbstractSensor):
             enabled_by_default=False
         )
 
-class TemperatureT1AfterGroundHeatExchangerSensor(AbstractSensor):
+class TemperatureT1AfterGroundHeatExchangerSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T1 after ground heat exchanger
     (Temperatur T1 nach Erdwärmetauscher/EWT)
@@ -359,12 +364,10 @@ class TemperatureT1AfterGroundHeatExchangerSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT2AfterPreheatingCoilSensor(AbstractSensor):
+class TemperatureT2AfterPreheatingCoilSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T2 after preheating coil
     (Temperatur T2 nach Vorheizregister/VHR)
@@ -376,12 +379,10 @@ class TemperatureT2AfterPreheatingCoilSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T2_AFTER_PREHEATING_COIL,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT3BeforeReheaterSensor(AbstractSensor):
+class TemperatureT3BeforeReheaterSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T3 before Reheater
     (Temperatur T3 vor Nacherwärmung/NE)
@@ -393,12 +394,10 @@ class TemperatureT3BeforeReheaterSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T3_BEFORE_REHEATER,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT4AfterReheaterSensor(AbstractSensor):
+class TemperatureT4AfterReheaterSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T3 after Reheater
     (Temperatur T3 nach Nacherwärmung/NE)
@@ -410,12 +409,10 @@ class TemperatureT4AfterReheaterSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T4_AFTER_REHEATER,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT5ExhaustAirSensor(AbstractSensor):
+class TemperatureT5ExhaustAirSensor(AbstractTemperatureSensor):
     """
     Senso
     (Temperatur T5 Abluft)
@@ -427,13 +424,11 @@ class TemperatureT5ExhaustAirSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T5_EXHAUST_AIR,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
 
-class TemperatureT6InHeatExchangerSensor(AbstractSensor):
+class TemperatureT6InHeatExchangerSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T6 in heat exchanger
     (Temperatur T6 im Wärmetauscher/WT)
@@ -445,12 +440,10 @@ class TemperatureT6InHeatExchangerSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T6_IN_HEAT_EXCHANGER,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT7EvaporatorSensor(AbstractSensor):
+class TemperatureT7EvaporatorSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T7 evaporator
     (Temperatur T7 Verdampfer)
@@ -462,12 +455,10 @@ class TemperatureT7EvaporatorSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T7_EVAPORATOR,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT8CondenserSensor(AbstractSensor):
+class TemperatureT8CondenserSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T8 condenser
     (Temperatur T7 Kondensator)
@@ -479,12 +470,10 @@ class TemperatureT8CondenserSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T8_CONDENSER,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
             enabled_by_default=False,
         )
 
-class TemperatureT10OutdoorSensor(AbstractSensor):
+class TemperatureT10OutdoorSensor(AbstractTemperatureSensor):
     """
     Sensor for temperature T10 outdoor
     (Temperatur T10 Außen)
@@ -496,8 +485,6 @@ class TemperatureT10OutdoorSensor(AbstractSensor):
         super().__init__(
             coordinator,
             REG_TEMP_T10_OUTDOOR,
-            device_class=SensorDeviceClass.TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
         )
 
 class DeviceFilterRemainingSensor(AbstractSensor):
@@ -557,14 +544,11 @@ class OperatingHoursSensor(AbstractSensor):
 
 ## Room Sensors
 
-class RoomTemperatureSensor(AbstractRoomSensor):
+class RoomTemperatureSensor(AbstractRoomTemperatureSensor):
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
             REG_CURRENT_TEMPERATURE_ROOM_1,
             room_number,
-            device_class = SensorDeviceClass.TEMPERATURE,
-            state_class = SensorStateClass.MEASUREMENT,
-            unit_of_measurement = UnitOfTemperature.CELSIUS,
         )
 

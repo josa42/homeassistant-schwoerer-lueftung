@@ -15,6 +15,7 @@ from .modbus.registers import (
     REG_BASE_TEMPERATURE_ROOM_1,
     REG_LINEAR_FAN_POWER,
 )
+from .modbus.transforms import to_temperature
 
 
 async def async_setup_entry(
@@ -68,10 +69,27 @@ class RoomBaseTemperatureNumber(AbstractRoomNumber):
             room_number,
             REG_BASE_TEMPERATURE_ROOM_1,
             device_class=TEMPERATURE,
-            enabled_by_default=False,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
+            enabled_by_default=False,
             min_value=10.0,
             max_value=30.0,
             step=0.1,
             mode=NumberMode.BOX,
+        )
+        
+        self._room_number = room_number
+        self._base_register = REG_BASE_TEMPERATURE_ROOM_1
+
+    @property
+    def native_value(self) -> float | None:
+        """Return temperature value with transformation applied."""
+        raw_value = self.coordinator.get_room_data(self._base_register, self._room_number)
+        return to_temperature(raw_value)
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Set temperature value by converting to raw register value."""
+        await self.coordinator.async_write_room_register(
+            self._base_register, 
+            self._room_number, 
+            int(value * 10)
         )

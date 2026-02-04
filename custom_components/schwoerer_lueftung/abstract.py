@@ -4,14 +4,20 @@ import re
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.components.number import NumberEntity
 from homeassistant.components.select import SelectEntity
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.const import UnitOfTemperature
 
 from custom_components.schwoerer_lueftung.entity import Entity
 from custom_components.schwoerer_lueftung.modbus.registers import (
     REG_KEYS,
     room_reg,
 )
+from custom_components.schwoerer_lueftung.modbus.transforms import to_temperature
 
 from .coordinator import Coordinator
 
@@ -41,7 +47,30 @@ class AbstractSensor(Entity, SensorEntity):
             "raw_value": self.coordinator.get_data(self._register)
         }
 
-class AbstractEnumSensor(Entity, SensorEntity):
+class AbstractTemperatureSensor(AbstractSensor):
+    """Sensor for temperature values that applies temperature transformation."""
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        register: int,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            coordinator,
+            register,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            **kwargs
+        )
+
+    @property
+    def native_value(self) -> float | None:
+        """Return temperature value with transformation applied."""
+        raw_value = self.coordinator.get_data(self._register)
+        return to_temperature(raw_value)
+
+class AbstractEnumSensor(AbstractSensor):
     """Sensor with enum device class that maps numeric values to string states."""
     def __init__(
         self,
@@ -50,8 +79,6 @@ class AbstractEnumSensor(Entity, SensorEntity):
         options: dict[int, str],
         **kwargs
     ) -> None:
-        from homeassistant.components.sensor import SensorDeviceClass
-
         super().__init__(
             coordinator,
             register,
@@ -89,6 +116,34 @@ class AbstractRoomSensor(AbstractSensor):
             translation_key=translation_key,
             **kwargs
         )
+
+class AbstractRoomTemperatureSensor(AbstractRoomSensor):
+    """Room temperature sensor that applies temperature transformation."""
+    def __init__(
+        self,
+        coordinator: Coordinator,
+        base_register: int,
+        room_number: int,
+        **kwargs
+    ) -> None:
+        super().__init__(
+            coordinator,
+            base_register,
+            room_number,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            unit_of_measurement=UnitOfTemperature.CELSIUS,
+            **kwargs
+        )
+        
+        self._room_number = room_number
+        self._base_register = base_register
+
+    @property
+    def native_value(self) -> float | None:
+        """Return temperature value with transformation applied."""
+        raw_value = self.coordinator.get_room_data(self._base_register, self._room_number)
+        return to_temperature(raw_value)
 
 class AbstractBinarySensor(Entity, BinarySensorEntity):
     def __init__(

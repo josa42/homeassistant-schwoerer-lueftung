@@ -20,6 +20,7 @@ from custom_components.schwoerer_lueftung.modbus.registers import (
     REG_TARGET_TEMPERATURE_ROOM_1,
     room_reg,
 )
+from custom_components.schwoerer_lueftung.modbus.transforms import to_temperature
 
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
@@ -73,11 +74,13 @@ class RoomClimate(Entity, ClimateEntity):
 
     @property
     def current_temperature(self) -> float | None:
-        return self.coordinator.get_room_data(REG_CURRENT_TEMPERATURE_ROOM_1, self._room_number)
+        raw_value = self.coordinator.get_room_data(REG_CURRENT_TEMPERATURE_ROOM_1, self._room_number)
+        return to_temperature(raw_value)
 
     @property
     def target_temperature(self) -> float | None:
-        return self.coordinator.get_room_data(REG_TARGET_TEMPERATURE_ROOM_1, self._room_number)
+        raw_value = self.coordinator.get_room_data(REG_TARGET_TEMPERATURE_ROOM_1, self._room_number)
+        return to_temperature(raw_value)
 
     @property
     def hvac_mode(self) -> HVACMode:
