@@ -11,8 +11,6 @@ from .abstract import AbstractBinaryRoomSensor, AbstractBinarySensor
 from .const import DOMAIN
 from .coordinator import Coordinator
 from .modbus.registers import (
-    ALARM_ACTIVE,
-    FAN_OVERRIDE_ACTIVE,
     PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
     PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
     PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE,
@@ -101,7 +99,7 @@ class FanOverrideBinarySensor(AbstractBinarySensor):
                 1 = Active
     """
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_FAN_OVERRIDE, {FAN_OVERRIDE_ACTIVE})
+        super().__init__(coordinator, REG_FAN_OVERRIDE)
 
 class NhrStateBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
@@ -143,7 +141,6 @@ class AlarmBinarySensor(AbstractBinarySensor):
         super().__init__(
             coordinator,
             register,
-            {ALARM_ACTIVE},
             enabled_by_default=enabled_by_default,
             device_class=BinarySensorDeviceClass.PROBLEM,
         )

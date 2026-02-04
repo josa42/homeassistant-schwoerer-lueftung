@@ -12,7 +12,3 @@ def to_temperature(value: int | None) -> float | None:
     except Exception as err:
         _LOGGER.error("Error converting temperature value: %s", err)
         return None
-
-def to_bool(value: int | None) -> bool | None:
-    """Convert register value to bool."""
-    return value == 1 if value is not None else None

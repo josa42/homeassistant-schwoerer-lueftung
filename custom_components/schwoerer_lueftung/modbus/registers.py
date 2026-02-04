@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Callable
 
-from .transforms import to_bool
-
 # Register addresses
 # Betriebsart (Operation Mode)
 REG_OPERATION_MODE = 100
@@ -492,27 +490,7 @@ REG_KEYS: dict[int, str] = {
 }
 
 
-
-REG_TO_TRANSFORM: dict[int, Callable] = {
-    REG_REHEATER_STATE: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_2: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_3: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_4: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_5: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_6: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_7: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_8: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_9: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_10: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_11: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_12: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_13: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_14: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_15: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_16: to_bool,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_17: to_bool,
-}
+REG_TO_TRANSFORM: dict[int, Callable] = {}
 
 def room_reg(base_reg: int, room_number: int) -> int:
     """Get the register address for a given room number."""

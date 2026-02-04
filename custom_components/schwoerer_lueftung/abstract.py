@@ -146,11 +146,12 @@ class AbstractRoomTemperatureSensor(AbstractRoomSensor):
         return to_temperature(raw_value)
 
 class AbstractBinarySensor(Entity, BinarySensorEntity):
+    """Binary sensor that handles transformation from raw register values to boolean state."""
     def __init__(
         self,
         coordinator: Coordinator,
         register: int,
-        active_states: set[int]|None = None,
+        active_states: set[int] = {1},
         **kwargs
     ) -> None:
         super().__init__(
@@ -165,13 +166,11 @@ class AbstractBinarySensor(Entity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         value = self.coordinator.get_data(self._register)
 
-        if self._active_states is None:
-            return value
+        if value is None:
+            return None
 
-        if value is not None:
-            return value in self._active_states
-
-        return None
+        # Check if value is in the set of active states
+        return value in self._active_states
 
 class AbstractBinaryRoomSensor(AbstractBinarySensor):
     def __init__(
@@ -179,7 +178,7 @@ class AbstractBinaryRoomSensor(AbstractBinarySensor):
         coordinator: Coordinator,
         base_register: int,
         room_number: int,
-        active_states: set[int]|None = None,
+        active_states: set[int] = {1},
         **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
