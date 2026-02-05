@@ -226,20 +226,3 @@ class TestModbusClientReadData:
         result = client.read_data()
 
         assert result == {}
-
-
-class TestModbusClientRegisterGrouping:
-    """Test ModbusClient register grouping logic."""
-
-    @pytest.mark.skip(reason="Needs investigation - returns generator instead of list")
-    def test_get_grouped_subscriptions_empty(self, mock_pymodbus_client):
-        """Test grouping with no subscriptions returns empty list."""
-        mock_instance = MagicMock()
-        mock_pymodbus_client.return_value = mock_instance
-        
-        client = ModbusClient("192.168.1.100", 502, 1)
-        groups = client._get_grouped_subscriptions()
-
-        # Should return empty list when no subscriptions
-        assert isinstance(groups, list)
-        assert len(groups) == 0

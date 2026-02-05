@@ -1,6 +1,5 @@
 """Tests for transformation functions."""
 
-import pytest
 
 from custom_components.schwoerer_lueftung.modbus.transforms import to_temperature
 
