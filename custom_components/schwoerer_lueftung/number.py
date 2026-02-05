@@ -1,3 +1,5 @@
+"""Number platform for Schwörer Lüftung."""
+
 from __future__ import annotations
 
 from homeassistant.components.number import NumberMode
@@ -36,6 +38,7 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
+
 class LinearFanPowerNumber(AbstractNumber):
     """
     Conrol for linear fan power setting.
@@ -44,6 +47,7 @@ class LinearFanPowerNumber(AbstractNumber):
     Register: 103
     Value:    30-100 (%)
     """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -55,6 +59,7 @@ class LinearFanPowerNumber(AbstractNumber):
             enabled_by_default=False,
         )
 
+
 class RoomBaseTemperatureNumber(AbstractRoomNumber):
     """
     Control for room base temperature setting.
@@ -63,6 +68,7 @@ class RoomBaseTemperatureNumber(AbstractRoomNumber):
     Register: 420-436
     Value:    10.0-30.0 (°C)
     """
+
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
@@ -76,20 +82,20 @@ class RoomBaseTemperatureNumber(AbstractRoomNumber):
             step=0.1,
             mode=NumberMode.BOX,
         )
-        
+
         self._room_number = room_number
         self._base_register = REG_BASE_TEMPERATURE_ROOM_1
 
     @property
     def native_value(self) -> float | None:
         """Return temperature value with transformation applied."""
-        raw_value = self.coordinator.get_room_data(self._base_register, self._room_number)
+        raw_value = self.coordinator.get_room_data(
+            self._base_register, self._room_number
+        )
         return to_temperature(raw_value)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set temperature value by converting to raw register value."""
         await self.coordinator.async_write_room_register(
-            self._base_register, 
-            self._room_number, 
-            int(value * 10)
+            self._base_register, self._room_number, int(value * 10)
         )

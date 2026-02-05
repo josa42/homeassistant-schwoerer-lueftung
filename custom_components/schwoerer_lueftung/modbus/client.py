@@ -1,4 +1,5 @@
 """Modbus TCP client for Schwörer Lüftung."""
+
 from __future__ import annotations
 
 import logging
@@ -11,12 +12,15 @@ from .registers import REG_KEYS
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class ModbusClient:
     _subscriptions: set[int] = set()
 
-    def __init__(self, host: str, port: int, slave_id: int, device_type: str = "wgt") -> None:
+    def __init__(
+        self, host: str, port: int, slave_id: int, device_type: str = "wgt"
+    ) -> None:
         """Initialize the Modbus client."""
-        self.hot = host
+        self.host = host
         self.port = port
         self.slave_id = slave_id
         self.device_type = device_type
@@ -55,7 +59,9 @@ class ModbusClient:
             if REG_KEYS.get(register) is not None:
                 self._subscriptions.add(register)
             else:
-                _LOGGER.error("Attempted to subscribe to unknown register: %s", register)
+                _LOGGER.error(
+                    "Attempted to subscribe to unknown register: %s", register
+                )
 
     ############################################################################
     # Read/Write operations
@@ -66,7 +72,12 @@ class ModbusClient:
             if result.isError():
                 _LOGGER.error("Error reading registers at %s: %s", address, result)
                 return None
-            _LOGGER.debug("Read registers at %d - %d: %s", address, address+count-1, result.registers)
+            _LOGGER.debug(
+                "Read registers at %d - %d: %s",
+                address,
+                address + count - 1,
+                result.registers,
+            )
             return result.registers
         except Exception as err:
             _LOGGER.error("Error reading registers at %s: %s", address, err)
@@ -112,7 +123,12 @@ class ModbusClient:
                     data[key] = values[i]
 
                 except Exception as err:
-                    _LOGGER.error("Error processing register %d value %s: %s", address, values[i], err)
+                    _LOGGER.error(
+                        "Error processing register %d value %s: %s",
+                        address,
+                        values[i],
+                        err,
+                    )
 
         return data
 
@@ -120,10 +136,12 @@ class ModbusClient:
         """Group consecutive register addresses together for efficient reading."""
         groups = []
 
-        for _, groupped_subscriptions in groupby(enumerate(sorted(self._subscriptions)), key=lambda x: x[0] - x[1]):
+        for _, groupped_subscriptions in groupby(
+            enumerate(sorted(self._subscriptions)), key=lambda x: x[0] - x[1]
+        ):
             group = [x for _, x in list(groupped_subscriptions)]
 
             # Split groups longer than 125
-            groups.extend(group[i:i + 125] for i in range(0, len(group), 125))
+            groups.extend(group[i : i + 125] for i in range(0, len(group), 125))
 
         return groups

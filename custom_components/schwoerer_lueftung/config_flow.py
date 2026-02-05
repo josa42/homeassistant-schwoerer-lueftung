@@ -1,4 +1,5 @@
 """Config flow for Schwörer Lüftung integration."""
+
 from __future__ import annotations
 
 import logging
@@ -37,10 +38,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
         vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
-        vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): vol.In({
-            DEVICE_TYPE_WGT: "WGT (mit Heizung)",
-            DEVICE_TYPE_WRT: "WRT (nur Lüftung)",
-        }),
+        vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): vol.In(
+            {
+                DEVICE_TYPE_WGT: "WGT (mit Heizung)",
+                DEVICE_TYPE_WRT: "WRT (nur Lüftung)",
+            }
+        ),
         vol.Required(CONF_ROOMS, default=1): NumberSelector(
             NumberSelectorConfig(
                 min=1,
@@ -112,7 +115,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
                     CONF_SLAVE_ID: DEFAULT_SLAVE_ID,
                     CONF_ROOMS: [],
-                    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[CONF_ENABLE_ALL_SENSORS_BY_DEFAULT],
+                    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[
+                        CONF_ENABLE_ALL_SENSORS_BY_DEFAULT
+                    ],
                 }
 
                 # Get translations to use the correct room prefix

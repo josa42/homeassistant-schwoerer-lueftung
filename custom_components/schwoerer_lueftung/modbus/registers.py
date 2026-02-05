@@ -487,10 +487,12 @@ REG_KEYS: dict[int, str] = {
     REG_SCHEDULED_HEATING_ENABLED_ROOM_17: "scheduled_heating_enabled_room_17",
 }
 
+
 def room_reg(base_reg: int, room_number: int) -> int:
     """Get the register address for a given room number."""
     if room_number < 1 or room_number > 17:
         raise ValueError("Room number must be between 1 and 17")
     return base_reg + (room_number - 1)
+
 
 # def room_id()

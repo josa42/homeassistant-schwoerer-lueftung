@@ -1,4 +1,5 @@
 """Tests for translation strings."""
+
 import json
 from pathlib import Path
 
@@ -150,10 +151,11 @@ class TestEntityKeyValidation:
                 actual_keys = set(entities.get(entity_type, {}).keys())
                 expected_keys = set(valid_keys)
 
-                assert actual_keys == expected_keys, \
-                    f"{lang}.json '{entity_type}' keys mismatch:\n" \
-                    f"  Missing: {sorted(expected_keys - actual_keys)}\n" \
+                assert actual_keys == expected_keys, (
+                    f"{lang}.json '{entity_type}' keys mismatch:\n"
+                    f"  Missing: {sorted(expected_keys - actual_keys)}\n"
                     f"  Extra: {sorted(actual_keys - expected_keys)}"
+                )
 
 
 class TestStateTranslations:
@@ -172,26 +174,30 @@ class TestStateTranslations:
             for entity_type, entity_keys in entities_with_states.items():
                 for entity_key, state_keys in entity_keys.items():
                     # Check entity exists in translation
-                    assert entity_type in lang_content.get("entity", {}), \
+                    assert entity_type in lang_content.get("entity", {}), (
                         f"{lang}.json missing entity type '{entity_type}'"
+                    )
 
-                    assert entity_key in lang_content["entity"].get(entity_type, {}), \
+                    assert entity_key in lang_content["entity"].get(entity_type, {}), (
                         f"{lang}.json missing entity '{entity_type}.{entity_key}'"
+                    )
 
                     # Check state translations exist
                     lang_entity = lang_content["entity"][entity_type][entity_key]
-                    assert "state" in lang_entity, \
+                    assert "state" in lang_entity, (
                         f"{lang}.json missing 'state' for '{entity_type}.{entity_key}'"
+                    )
 
                     # Check all state keys are present
                     lang_state_keys = set(lang_entity["state"].keys())
                     missing_states = state_keys - lang_state_keys
                     extra_states = lang_state_keys - state_keys
 
-                    assert not missing_states and not extra_states, \
-                        f"{lang}.json state mismatch for '{entity_type}.{entity_key}':\n" \
-                        f"  Missing states: {sorted(missing_states)}\n" \
+                    assert not missing_states and not extra_states, (
+                        f"{lang}.json state mismatch for '{entity_type}.{entity_key}':\n"
+                        f"  Missing states: {sorted(missing_states)}\n"
                         f"  Extra states: {sorted(extra_states)}"
+                    )
 
     def _get_entities_with_states(self, content):
         """Extract all entities that have state translations."""
@@ -202,6 +208,8 @@ class TestStateTranslations:
                 if isinstance(entity_data, dict) and "state" in entity_data:
                     if entity_type not in entities_with_states:
                         entities_with_states[entity_type] = {}
-                    entities_with_states[entity_type][entity_key] = set(entity_data["state"].keys())
+                    entities_with_states[entity_type][entity_key] = set(
+                        entity_data["state"].keys()
+                    )
 
         return entities_with_states

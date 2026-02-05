@@ -1,3 +1,5 @@
+"""Select platform for Schwörer Lüftung."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -32,6 +34,7 @@ async def async_setup_entry(
 
     async_add_entities(entities)
 
+
 class OperationModeSelect(AbstractSelect):
     """
     Select entity for operation mode.
@@ -40,17 +43,23 @@ class OperationModeSelect(AbstractSelect):
     Registers: 100
     Value:     0-4
     """
+
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_OPERATION_MODE, {
-            0: "off",
-            1: "manual",
-            2: "winter",
-            3: "summer",
-            4: "summer_exhaust",
-        })
+        super().__init__(
+            coordinator,
+            REG_OPERATION_MODE,
+            {
+                0: "off",
+                1: "manual",
+                2: "winter",
+                3: "summer",
+                4: "summer_exhaust",
+            },
+        )
+
 
 class FanSpeedSelect(AbstractSelect):
     """
@@ -60,33 +69,44 @@ class FanSpeedSelect(AbstractSelect):
     Registers: 101
     Value:     0-6
     """
+
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_FAN_SPEED, {
-            0: "0",
-            1: "1",
-            2: "2",
-            3: "3",
-            4: "4",
-            5: "automatic",
-            6: "linear",
-        })
+        super().__init__(
+            coordinator,
+            REG_FAN_SPEED,
+            {
+                0: "0",
+                1: "1",
+                2: "2",
+                3: "3",
+                4: "4",
+                5: "automatic",
+                6: "linear",
+            },
+        )
+
 
 class HeatingCoolingFunctionSelect(AbstractSelect):
     """
     Select entity for heating/cooling function.
     (Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang)
     """
+
     def __init__(
         self,
         coordinator: Coordinator,
     ) -> None:
-        super().__init__(coordinator, REG_HEATING_COOLING_FUNCTION, {
-            0: "off",
-            1: "heating",
-            2: "cooling",
-            3: "auto_outdoor_temp",
-            4: "auto_digital_input",
-        })
+        super().__init__(
+            coordinator,
+            REG_HEATING_COOLING_FUNCTION,
+            {
+                0: "off",
+                1: "heating",
+                2: "cooling",
+                3: "auto_outdoor_temp",
+                4: "auto_digital_input",
+            },
+        )

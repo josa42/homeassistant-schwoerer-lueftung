@@ -17,6 +17,7 @@ PLATFORMS: list[Platform] = [
     Platform.SWITCH,
 ]
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = Coordinator(hass, entry)
     try:
@@ -34,6 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await coordinator.async_request_refresh()
 
     return True
+
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS.copy()):

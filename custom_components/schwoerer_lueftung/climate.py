@@ -38,9 +38,7 @@ async def async_setup_entry(
     if coordinator.has_heating():
         rooms: list[dict[str, Any]] = entry.data.get(CONF_ROOMS, [])
 
-        entities = [
-            RoomClimate(coordinator, room["number"]) for room in rooms
-        ]
+        entities = [RoomClimate(coordinator, room["number"]) for room in rooms]
 
         async_add_entities(entities)
 
@@ -53,9 +51,8 @@ class RoomClimate(Entity, ClimateEntity):
         - 360-376: Current Temperature Room 1-9 (read-only)
         - 400-416: Target Temperature Room 1-9
     """
-    def __init__(
-        self, coordinator: Coordinator, room_number: int
-    ) -> None:
+
+    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
             translation_key="room_climate",
@@ -63,7 +60,9 @@ class RoomClimate(Entity, ClimateEntity):
         )
 
         self._room_number = room_number
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_room_climate_{room_number}"
+        self._attr_unique_id = (
+            f"{coordinator.config_entry.entry_id}_room_climate_{room_number}"
+        )
         self._attr_translation_key = "room_climate"
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
         self._attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
@@ -74,31 +73,44 @@ class RoomClimate(Entity, ClimateEntity):
 
     @property
     def current_temperature(self) -> float | None:
-        raw_value = self.coordinator.get_room_data(REG_CURRENT_TEMPERATURE_ROOM_1, self._room_number)
+        raw_value = self.coordinator.get_room_data(
+            REG_CURRENT_TEMPERATURE_ROOM_1, self._room_number
+        )
         return to_temperature(raw_value)
 
     @property
     def target_temperature(self) -> float | None:
-        raw_value = self.coordinator.get_room_data(REG_TARGET_TEMPERATURE_ROOM_1, self._room_number)
+        raw_value = self.coordinator.get_room_data(
+            REG_TARGET_TEMPERATURE_ROOM_1, self._room_number
+        )
         return to_temperature(raw_value)
 
     @property
     def hvac_mode(self) -> HVACMode:
-        return self.coordinator.get_room_data(REG_AUXILIARY_HEATING_ENABLED_ROOM_1, self._room_number, {
-            1: HVACMode.HEAT,
-            0: HVACMode.FAN_ONLY,
-        })
+        return self.coordinator.get_room_data(
+            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+            self._room_number,
+            {
+                1: HVACMode.HEAT,
+                0: HVACMode.FAN_ONLY,
+            },
+        )
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         if (temperature := kwargs.get(ATTR_TEMPERATURE)) is not None:
             # Clamp temperature to valid range
-            temperature = max(self._attr_min_temp, min(self._attr_max_temp, temperature))
+            temperature = max(
+                self._attr_min_temp, min(self._attr_max_temp, temperature)
+            )
 
             await self.coordinator.async_write_register(
-                room_reg(REG_TARGET_TEMPERATURE_ROOM_1, self._room_number), int(temperature * 10)
+                room_reg(REG_TARGET_TEMPERATURE_ROOM_1, self._room_number),
+                int(temperature * 10),
             )
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         await self.coordinator.async_write_room_register(
-            REG_AUXILIARY_HEATING_ENABLED_ROOM_1, self._room_number, 1 if hvac_mode == HVACMode.HEAT else 0
+            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
+            self._room_number,
+            1 if hvac_mode == HVACMode.HEAT else 0,
         )

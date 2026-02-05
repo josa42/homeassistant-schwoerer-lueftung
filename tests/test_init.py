@@ -1,4 +1,5 @@
 """Test the Schwörer Lüftung integration initialisation."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest

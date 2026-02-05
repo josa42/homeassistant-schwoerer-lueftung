@@ -23,18 +23,10 @@ from .coordinator import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class AbstractSensor(Entity, SensorEntity):
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            coordinator,
-            register,
-            **kwargs
-        )
+    def __init__(self, coordinator: Coordinator, register: int, **kwargs) -> None:
+        super().__init__(coordinator, register, **kwargs)
 
     @property
     def native_value(self) -> int | None:
@@ -43,25 +35,20 @@ class AbstractSensor(Entity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict:
         """Return the raw numeric value as an attribute for debugging."""
-        return {
-            "raw_value": self.coordinator.get_data(self._register)
-        }
+        return {"raw_value": self.coordinator.get_data(self._register)}
+
 
 class AbstractTemperatureSensor(AbstractSensor):
     """Sensor for temperature values that applies temperature transformation."""
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        **kwargs
-    ) -> None:
+
+    def __init__(self, coordinator: Coordinator, register: int, **kwargs) -> None:
         super().__init__(
             coordinator,
             register,
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
-            **kwargs
+            **kwargs,
         )
 
     @property
@@ -70,20 +57,15 @@ class AbstractTemperatureSensor(AbstractSensor):
         raw_value = self.coordinator.get_data(self._register)
         return to_temperature(raw_value)
 
+
 class AbstractEnumSensor(AbstractSensor):
     """Sensor with enum device class that maps numeric values to string states."""
+
     def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        options: dict[int, str],
-        **kwargs
+        self, coordinator: Coordinator, register: int, options: dict[int, str], **kwargs
     ) -> None:
         super().__init__(
-            coordinator,
-            register,
-            device_class=SensorDeviceClass.ENUM,
-            **kwargs
+            coordinator, register, device_class=SensorDeviceClass.ENUM, **kwargs
         )
 
         self._options = options
@@ -97,34 +79,32 @@ class AbstractEnumSensor(AbstractSensor):
             return None
         return self._options.get(raw_value)
 
+
 class AbstractRoomSensor(AbstractSensor):
     def __init__(
-        self, coordinator: Coordinator,
-        base_register: int,
-        room_number: int,
-        **kwargs
+        self, coordinator: Coordinator, base_register: int, room_number: int, **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
-        translation_key = kwargs.pop(
-            'translation_key', None
-        ) or re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or ''
+        translation_key = (
+            kwargs.pop("translation_key", None)
+            or re.sub(r"_\d+$", "", REG_KEYS.get(register) or "")
+            or ""
+        )
 
         super().__init__(
             coordinator,
             room_reg(base_register, room_number),
             device=coordinator.get_room_device(room_number),
             translation_key=translation_key,
-            **kwargs
+            **kwargs,
         )
+
 
 class AbstractRoomTemperatureSensor(AbstractRoomSensor):
     """Room temperature sensor that applies temperature transformation."""
+
     def __init__(
-        self,
-        coordinator: Coordinator,
-        base_register: int,
-        room_number: int,
-        **kwargs
+        self, coordinator: Coordinator, base_register: int, room_number: int, **kwargs
     ) -> None:
         super().__init__(
             coordinator,
@@ -133,32 +113,32 @@ class AbstractRoomTemperatureSensor(AbstractRoomSensor):
             device_class=SensorDeviceClass.TEMPERATURE,
             state_class=SensorStateClass.MEASUREMENT,
             unit_of_measurement=UnitOfTemperature.CELSIUS,
-            **kwargs
+            **kwargs,
         )
-        
+
         self._room_number = room_number
         self._base_register = base_register
 
     @property
     def native_value(self) -> float | None:
         """Return temperature value with transformation applied."""
-        raw_value = self.coordinator.get_room_data(self._base_register, self._room_number)
+        raw_value = self.coordinator.get_room_data(
+            self._base_register, self._room_number
+        )
         return to_temperature(raw_value)
+
 
 class AbstractBinarySensor(Entity, BinarySensorEntity):
     """Binary sensor that handles transformation from raw register values to boolean state."""
+
     def __init__(
         self,
         coordinator: Coordinator,
         register: int,
         active_states: set[int] = {1},
-        **kwargs
+        **kwargs,
     ) -> None:
-        super().__init__(
-            coordinator,
-            register,
-            **kwargs
-        )
+        super().__init__(coordinator, register, **kwargs)
 
         self._active_states = active_states
 
@@ -172,6 +152,7 @@ class AbstractBinarySensor(Entity, BinarySensorEntity):
         # Check if value is in the set of active states
         return value in self._active_states
 
+
 class AbstractBinaryRoomSensor(AbstractBinarySensor):
     def __init__(
         self,
@@ -179,7 +160,7 @@ class AbstractBinaryRoomSensor(AbstractBinarySensor):
         base_register: int,
         room_number: int,
         active_states: set[int] = {1},
-        **kwargs
+        **kwargs,
     ) -> None:
         register = room_reg(base_register, room_number)
         super().__init__(
@@ -187,23 +168,19 @@ class AbstractBinaryRoomSensor(AbstractBinarySensor):
             register,
             active_states,
             device=coordinator.get_room_device(room_number),
-            translation_key=re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
-            **kwargs
+            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
+            **kwargs,
         )
+
 
 class AbstractSelect(Entity, SelectEntity):
     def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        options: dict[int, str],
-        **kwargs
+        self, coordinator: Coordinator, register: int, options: dict[int, str], **kwargs
     ) -> None:
         super().__init__(coordinator, register, **kwargs)
 
         self._options = options
         self._attr_options = list(options.values())
-
 
     @property
     def current_option(self) -> str | None:
@@ -221,13 +198,9 @@ class AbstractSelect(Entity, SelectEntity):
 
         await self.coordinator.async_write_register(self._register, value)
 
+
 class AbstractNumber(Entity, NumberEntity):
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        **kwargs
-    ) -> None:
+    def __init__(self, coordinator: Coordinator, register: int, **kwargs) -> None:
         super().__init__(coordinator, register, **kwargs)
 
     @property
@@ -237,30 +210,23 @@ class AbstractNumber(Entity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         await self.coordinator.async_write_register(self._register, int(value))
 
+
 class AbstractRoomNumber(AbstractNumber):
     def __init__(
-        self,
-        coordinator: Coordinator,
-        room_number: int,
-        base_register: int,
-        **kwargs
+        self, coordinator: Coordinator, room_number: int, base_register: int, **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
         super().__init__(
             coordinator,
             register,
             device=coordinator.get_room_device(room_number),
-            translation_key = re.sub(r'_\d+$', '', REG_KEYS.get(register) or '') or '',
+            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
 
+
 class AbstractSwitch(Entity, SwitchEntity):
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        **kwargs
-    ) -> None:
+    def __init__(self, coordinator: Coordinator, register: int, **kwargs) -> None:
         super().__init__(coordinator, register, **kwargs)
 
     @property
@@ -274,20 +240,16 @@ class AbstractSwitch(Entity, SwitchEntity):
     async def async_turn_off(self) -> None:
         await self.coordinator.async_write_register(self._register, 0)
 
+
 class AbstractRoomSwitch(AbstractSwitch):
     def __init__(
-        self,
-        coordinator: Coordinator,
-        room_number: int,
-        base_register: int,
-        **kwargs
+        self, coordinator: Coordinator, room_number: int, base_register: int, **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
         super().__init__(
             coordinator,
             register,
             device=coordinator.get_room_device(room_number),
-            translation_key = re.sub(r'_\d+$', '',  REG_KEYS.get(register) or '') or '',
-            **kwargs
+            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
+            **kwargs,
         )
-

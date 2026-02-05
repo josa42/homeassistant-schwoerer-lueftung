@@ -54,71 +54,79 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     def get_device_type(self) -> str:
         return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT)
 
-
     async def async_write_register(self, register: int, value: int) -> None:
         try:
-          if not await self.hass.async_add_executor_job(self.client.connect):
-              raise UpdateFailed("Failed to connect to device")
+            if not await self.hass.async_add_executor_job(self.client.connect):
+                raise UpdateFailed("Failed to connect to device")
 
-          success = await self.hass.async_add_executor_job(
-              self.client.write_register, register, int(value)
-          )
+            success = await self.hass.async_add_executor_job(
+                self.client.write_register, register, int(value)
+            )
 
-          if success:
-              await self.async_request_refresh()
+            if success:
+                await self.async_request_refresh()
 
         except Exception as err:
             raise UpdateFailed(f"Error communicating with device: {err}") from err
         finally:
             await self.hass.async_add_executor_job(self.client.disconnect)
 
-    async def async_write_room_register(self, base_register: int, roomt_number: int, value: int) -> None:
+    async def async_write_room_register(
+        self, base_register: int, roomt_number: int, value: int
+    ) -> None:
         await self.async_write_register(room_reg(base_register, roomt_number), value)
 
-    def get_data(self, register: int|None, map: dict[int, Any]|None = None) -> Any:
+    def get_data(self, register: int | None, map: dict[int, str] | None = None) -> Any:
         if self.data is None or register is None:
             return None
 
         try:
-          key = REG_KEYS.get(register)
-          if key is None:
-            return None
+            key = REG_KEYS.get(register)
+            if key is None:
+                return None
 
-          if not self.client.is_subscribed(register):
-            self.client.subscribe(register)
+            if not self.client.is_subscribed(register):
+                self.client.subscribe(register)
 
-          value = self.data.get(key)
+            value = self.data.get(key)
 
-          if map is not None and value is not None:
-              return map[value]
+            if map is not None and value is not None:
+                return map[value]
 
-          return value
+            return value
 
         except Exception as err:
-          _LOGGER.error(f"Error getting data for register {register}: {err}")
-          return None
+            _LOGGER.error(f"Error getting data for register {register}: {err}")
+            return None
 
-    def get_room_data(self, base_register: int, room_number: int, map: dict[int, Any]|None = None) -> Any:
+    def get_room_data(
+        self, base_register: int, room_number: int, map: dict[int, str] | None = None
+    ) -> Any:
         return self.get_data(room_reg(base_register, room_number), map)
 
-
     def register_device(self) -> None:
+        """Register the main device in the device registry."""
         device_registry.async_get(self.hass).async_get_or_create(
-            config_entry_id=self.config_entry.entry_id,
-            **self.get_device()
+            config_entry_id=self.config_entry.entry_id, **self.get_device()
         )
 
     def get_device_identifier(self) -> tuple[str, str]:
-        return (DOMAIN, f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}")
+        return (
+            DOMAIN,
+            f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}",
+        )
 
-    def get_room_device_identifier(self, room_number) -> tuple[str, str]:
-        return (DOMAIN,
-                f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}#{room_number}")
+    def get_room_device_identifier(self, room_number: int) -> tuple[str, str]:
+        return (
+            DOMAIN,
+            f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}#{room_number}",
+        )
 
     def get_device(self) -> DeviceInfo:
         if self._device is None:
-
-            model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
+            model = (
+                MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
+            )
             self._device = DeviceInfo(
                 identifiers={self.get_device_identifier()},
                 name=model,
@@ -128,20 +136,22 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         return self._device
 
-    def get_room(self, number: int) -> dict[str, Any]|None:
+    def get_room(self, number: int) -> dict[str, Any] | None:
         rooms = self.config_entry.data.get(CONF_ROOMS, [])
-        return next((room for room in rooms if room['number'] == number), None)
+        return next((room for room in rooms if room["number"] == number), None)
 
-    def get_room_name(self, number: int) -> str|None:
+    def get_room_name(self, number: int) -> str | None:
         room = self.get_room(number)
         if room is not None:
             return room.get("name")
         return f"Room {number}"
 
-    def get_room_device(self, room_number: int):
+    def get_room_device(self, room_number: int) -> DeviceInfo:
         if room_number not in self._room_devices:
             room_name = self.get_room_name(room_number)
-            model=MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
+            model = (
+                MODEL_WGT if self.get_device_type() == DEVICE_TYPE_WGT else MODEL_WRT
+            )
 
             self._room_devices[room_number] = DeviceInfo(
                 identifiers={self.get_room_device_identifier(room_number)},
@@ -151,7 +161,9 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
                 via_device=self.get_device_identifier(),
             )
 
-            _LOGGER.debug(f"Created device info for room {room_number}: [ via_device: {self.config_entry.entry_id} ]")
+            _LOGGER.debug(
+                f"Created device info for room {room_number}: [ via_device: {self.config_entry.entry_id} ]"
+            )
 
         return self._room_devices[room_number]
 

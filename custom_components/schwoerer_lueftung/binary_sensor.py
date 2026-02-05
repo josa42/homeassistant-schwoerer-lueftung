@@ -44,38 +44,59 @@ async def async_setup_entry(
     has_heating = coordinator.has_heating()
 
     entities = []
-    entities.extend([
-        FanOverrideBinarySensor(coordinator),
-        OutdoorDamperStateSensor(coordinator),
-        AlarmBinarySensor(coordinator, REG_ALARM_PRESSURE_SWITCH, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_UTILITY_LOCK, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_DOOR_OPEN),
-        AlarmBinarySensor(coordinator, REG_ALARM_DEVICE_FILTER_DIRTY),
-        AlarmBinarySensor(coordinator, REG_ALARM_UPSTREAM_FILTER_DIRTY),
-        AlarmBinarySensor(coordinator, REG_ALARM_OFF_PEAK_DISABLED, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_VOLTAGE_OFF, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_PRESSOSTAT_TRIGGERED, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_EXTERNAL_UTILITY_LOCK, enabled_by_default=False),
-        AlarmBinarySensor(coordinator, REG_ALARM_EMERGENCY_MODE),
-    ])
+    entities.extend(
+        [
+            FanOverrideBinarySensor(coordinator),
+            OutdoorDamperStateSensor(coordinator),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_PRESSURE_SWITCH, enabled_by_default=False
+            ),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_UTILITY_LOCK, enabled_by_default=False
+            ),
+            AlarmBinarySensor(coordinator, REG_ALARM_DOOR_OPEN),
+            AlarmBinarySensor(coordinator, REG_ALARM_DEVICE_FILTER_DIRTY),
+            AlarmBinarySensor(coordinator, REG_ALARM_UPSTREAM_FILTER_DIRTY),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_OFF_PEAK_DISABLED, enabled_by_default=False
+            ),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_SUPPLY_VOLTAGE_OFF, enabled_by_default=False
+            ),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_PRESSOSTAT_TRIGGERED, enabled_by_default=False
+            ),
+            AlarmBinarySensor(
+                coordinator, REG_ALARM_EXTERNAL_UTILITY_LOCK, enabled_by_default=False
+            ),
+            AlarmBinarySensor(coordinator, REG_ALARM_EMERGENCY_MODE),
+        ]
+    )
 
     # Add heating-related binary sensors only for WGT devices
     if has_heating:
-        entities.extend([
-            NhrStateBinarySensor(coordinator),
-            Preheater1BinarySensor(coordinator),
-            Preheater2BinarySensor(coordinator),
-            AlarmBinarySensor(coordinator, REG_ALARM_HEATING_MODULE_TEST, enabled_by_default=False),
-            AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_AIR_COLD),
-        ])
+        entities.extend(
+            [
+                NhrStateBinarySensor(coordinator),
+                Preheater1BinarySensor(coordinator),
+                Preheater2BinarySensor(coordinator),
+                AlarmBinarySensor(
+                    coordinator, REG_ALARM_HEATING_MODULE_TEST, enabled_by_default=False
+                ),
+                AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_AIR_COLD),
+            ]
+        )
 
         for room in entry.data.get("rooms", []):
-            entities.extend([
-                RoomAuxiliaryHeatingEnabledSensor(coordinator, room["number"]),
-                RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"])
-            ])
+            entities.extend(
+                [
+                    RoomAuxiliaryHeatingEnabledSensor(coordinator, room["number"]),
+                    RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"]),
+                ]
+            )
 
     async_add_entities(entities)
+
 
 class OutdoorDamperStateSensor(AbstractBinarySensor):
     """
@@ -86,8 +107,12 @@ class OutdoorDamperStateSensor(AbstractBinarySensor):
     Values:     0 = Closed
                 1 = Open
     """
+
     def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_OUTDOOR_DAMPER_STATE, enabled_by_default=False)
+        super().__init__(
+            coordinator, REG_OUTDOOR_DAMPER_STATE, enabled_by_default=False
+        )
+
 
 class FanOverrideBinarySensor(AbstractBinarySensor):
     """
@@ -98,12 +123,15 @@ class FanOverrideBinarySensor(AbstractBinarySensor):
     Values:     0 = Inactive
                 1 = Active
     """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_FAN_OVERRIDE)
+
 
 class NhrStateBinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_REHEATER_STATE, endabled_by_default=False)
+
 
 class Preheater1BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
@@ -118,6 +146,7 @@ class Preheater1BinarySensor(AbstractBinarySensor):
             enabled_by_default=False,
         )
 
+
 class Preheater2BinarySensor(AbstractBinarySensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
@@ -130,6 +159,7 @@ class Preheater2BinarySensor(AbstractBinarySensor):
             key="preheater_2",
             enabled_by_default=False,
         )
+
 
 class AlarmBinarySensor(AbstractBinarySensor):
     def __init__(
@@ -145,6 +175,7 @@ class AlarmBinarySensor(AbstractBinarySensor):
             device_class=BinarySensorDeviceClass.PROBLEM,
         )
 
+
 class RoomAuxiliaryHeatingEnabledSensor(AbstractBinaryRoomSensor):
     """
     Room Auxiliary Heating Enabled Sensor
@@ -154,13 +185,15 @@ class RoomAuxiliaryHeatingEnabledSensor(AbstractBinaryRoomSensor):
     Values:     0 = Blocked
                 1 = Heating Enabled
     """
+
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
             REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
             room_number,
-            enabled_by_default=True
+            enabled_by_default=True,
         )
+
 
 class RoomAuxiliaryHeatingActiveBinarySensor(AbstractBinaryRoomSensor):
     def __init__(
@@ -172,5 +205,5 @@ class RoomAuxiliaryHeatingActiveBinarySensor(AbstractBinaryRoomSensor):
             coordinator,
             REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
             room_number,
-            device_class=BinarySensorDeviceClass.HEAT
+            device_class=BinarySensorDeviceClass.HEAT,
         )

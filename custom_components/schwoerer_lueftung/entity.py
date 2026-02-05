@@ -1,4 +1,5 @@
 """Base entity for Schwörer Lüftung."""
+
 from __future__ import annotations
 
 from homeassistant.components.number import NumberMode
@@ -19,19 +20,19 @@ class Entity(CoordinatorEntity[Coordinator]):
         self,
         coordinator: Coordinator,
         register: int = 0,
-        device: DeviceInfo|None = None,
-        translation_key: str|None = None,
-        device_class: SensorDeviceClass|None = None,
-        state_class: SensorStateClass|str|None = None,
-        unit_of_measurement: str|None = None,
+        device: DeviceInfo | None = None,
+        translation_key: str | None = None,
+        device_class: SensorDeviceClass | None = None,
+        state_class: SensorStateClass | str | None = None,
+        unit_of_measurement: str | None = None,
         enabled_by_default: bool = True,
-        precision: int|None = None,
-        min_value: float|None = None,
-        max_value: float|None = None,
-        step: float|None = None,
-        mode: NumberMode|None = None,
-        unique_id: str|None = None,
-        key: str|None = None,
+        precision: int | None = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        step: float | None = None,
+        mode: NumberMode | None = None,
+        unique_id: str | None = None,
+        key: str | None = None,
     ) -> None:
         super().__init__(coordinator)
 
@@ -41,9 +42,15 @@ class Entity(CoordinatorEntity[Coordinator]):
         entry = coordinator.config_entry
 
         self._attr_has_entity_name = True
-        self._attr_device_info = device if device is not None else coordinator.get_device()
-        self._attr_unique_id = unique_id if unique_id is not None else f"{entry.entry_id}_{key}"
-        self._attr_translation_key = translation_key if translation_key is not None else key
+        self._attr_device_info = (
+            device if device is not None else coordinator.get_device()
+        )
+        self._attr_unique_id = (
+            unique_id if unique_id is not None else f"{entry.entry_id}_{key}"
+        )
+        self._attr_translation_key = (
+            translation_key if translation_key is not None else key
+        )
         self._register = register
 
         if device_class is not None:
@@ -63,8 +70,7 @@ class Entity(CoordinatorEntity[Coordinator]):
         if mode is not None:
             self._attr_mode = mode
 
-        self._attr_entity_registry_enabled_default = enabled_by_default or entry.data.get(
-            CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, False
+        self._attr_entity_registry_enabled_default = (
+            enabled_by_default
+            or entry.data.get(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, False)
         )
-
-
