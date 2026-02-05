@@ -16,14 +16,10 @@ _LOGGER = logging.getLogger(__name__)
 class ModbusClient:
     _subscriptions: set[int] = set()
 
-    def __init__(
-        self, host: str, port: int, slave_id: int, device_type: str = "wgt"
-    ) -> None:
+    def __init__(self, host: str, port: int) -> None:
         """Initialize the Modbus client."""
         self.host = host
         self.port = port
-        self.slave_id = slave_id
-        self.device_type = device_type
         self._client = ModbusTcpClient(
             host=host,
             port=port,

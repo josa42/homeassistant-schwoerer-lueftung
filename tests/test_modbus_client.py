@@ -19,19 +19,10 @@ class TestModbusClientInit:
 
     def test_init_with_defaults(self, mock_pymodbus_client):
         """Test initialization with default parameters."""
-        client = ModbusClient("192.168.1.100", 502, 1)
-        
+        client = ModbusClient("192.168.1.100", 502)
+
         assert client.host == "192.168.1.100"
         assert client.port == 502
-        assert client.slave_id == 1
-        assert client.device_type == "wgt"
-
-    def test_init_with_wrt_device(self, mock_pymodbus_client):
-        """Test initialization with WRT device type."""
-        client = ModbusClient("192.168.1.100", 502, 1, device_type="wrt")
-        
-        assert client.device_type == "wrt"
-
 
 class TestModbusClientConnection:
     """Test ModbusClient connection management."""
@@ -42,7 +33,7 @@ class TestModbusClientConnection:
         mock_instance.connect.return_value = True
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.connect()
 
         assert result is True
@@ -54,7 +45,7 @@ class TestModbusClientConnection:
         mock_instance.connect.return_value = False
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.connect()
 
         assert result is False
@@ -65,8 +56,8 @@ class TestModbusClientConnection:
         mock_instance.connect.side_effect = Exception("Connection error")
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
-        
+        client = ModbusClient("192.168.1.100", 502)
+
         with pytest.raises(Exception):
             client.connect()
 
@@ -75,7 +66,7 @@ class TestModbusClientConnection:
         mock_instance = MagicMock()
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         client.disconnect()
 
         mock_instance.close.assert_called_once()
@@ -86,7 +77,7 @@ class TestModbusClientConnection:
         mock_instance.is_socket_open.return_value = True
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         assert client.is_connected() is True
 
     def test_is_connected_false(self, mock_pymodbus_client):
@@ -95,7 +86,7 @@ class TestModbusClientConnection:
         mock_instance.is_socket_open.return_value = False
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         assert client.is_connected() is False
 
 
@@ -104,14 +95,14 @@ class TestModbusClientSubscription:
 
     def test_subscribe_single_register(self, mock_pymodbus_client):
         """Test subscribing to a single register."""
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         client.subscribe(100)
 
         assert client.is_subscribed(100) is True
 
     def test_subscribe_multiple_registers(self, mock_pymodbus_client):
         """Test subscribing to multiple registers."""
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         client.subscribe(100)
         client.subscribe(101)
         client.subscribe(102)
@@ -124,8 +115,8 @@ class TestModbusClientSubscription:
         """Test is_subscribed returns False for unsubscribed register."""
         mock_instance = MagicMock()
         mock_pymodbus_client.return_value = mock_instance
-        
-        client = ModbusClient("192.168.1.100", 502, 1)
+
+        client = ModbusClient("192.168.1.100", 502)
         assert client.is_subscribed(999) is False
 
 
@@ -141,7 +132,7 @@ class TestModbusClientRead:
         mock_instance.read_holding_registers.return_value = mock_response
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.read_registers(100, 3)
 
         assert result == [100, 200, 300]
@@ -155,7 +146,7 @@ class TestModbusClientRead:
         mock_instance.read_holding_registers.return_value = mock_response
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.read_registers(100, 3)
 
         assert result is None
@@ -166,7 +157,7 @@ class TestModbusClientRead:
         mock_instance.read_holding_registers.side_effect = Exception("Read error")
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.read_registers(100, 3)
 
         assert result is None
@@ -183,7 +174,7 @@ class TestModbusClientWrite:
         mock_instance.write_registers.return_value = mock_response
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.write_register(100, 250)
 
         assert result is True
@@ -197,7 +188,7 @@ class TestModbusClientWrite:
         mock_instance.write_registers.return_value = mock_response
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.write_register(100, 250)
 
         assert result is False
@@ -208,7 +199,7 @@ class TestModbusClientWrite:
         mock_instance.write_registers.side_effect = Exception("Write error")
         mock_pymodbus_client.return_value = mock_instance
 
-        client = ModbusClient("192.168.1.100", 502, 1)
+        client = ModbusClient("192.168.1.100", 502)
         result = client.write_register(100, 250)
 
         assert result is False
@@ -221,8 +212,8 @@ class TestModbusClientReadData:
         """Test read_data with no subscriptions."""
         mock_instance = MagicMock()
         mock_pymodbus_client.return_value = mock_instance
-        
-        client = ModbusClient("192.168.1.100", 502, 1)
+
+        client = ModbusClient("192.168.1.100", 502)
         result = client.read_data()
 
         assert result == {}
