@@ -22,9 +22,9 @@ from custom_components.schwoerer_lueftung.modbus.registers import (
 )
 from custom_components.schwoerer_lueftung.modbus.transforms import to_temperature
 
+from .abstract import Entity
 from .const import CONF_ROOMS, DOMAIN
 from .coordinator import Coordinator
-from .entity import Entity
 
 
 async def async_setup_entry(
