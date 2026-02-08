@@ -7,7 +7,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import translation
@@ -21,10 +21,8 @@ from .const import (
     CONF_DEVICE_TYPE,
     CONF_ENABLE_ALL_SENSORS_BY_DEFAULT,
     CONF_ROOMS,
-    CONF_SLAVE_ID,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PORT,
-    DEFAULT_SLAVE_ID,
     DEVICE_TYPE_WGT,
     DEVICE_TYPE_WRT,
     DOMAIN,
@@ -37,7 +35,6 @@ _LOGGER = logging.getLogger(__name__)
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
-        vol.Optional(CONF_PORT, default=DEFAULT_PORT): int,
         vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): vol.In(
             {
                 DEVICE_TYPE_WGT: "WGT (mit Heizung)",
@@ -66,8 +63,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     client = ModbusClient(
         data[CONF_HOST],
-        data[CONF_PORT],
-        DEFAULT_SLAVE_ID,
+        DEFAULT_PORT,
     )
 
     try:
@@ -111,9 +107,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Store configuration with default slave ID
                 data = {
                     CONF_HOST: user_input[CONF_HOST],
-                    CONF_PORT: user_input[CONF_PORT],
                     CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
-                    CONF_SLAVE_ID: DEFAULT_SLAVE_ID,
                     CONF_ROOMS: [],
                     CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[
                         CONF_ENABLE_ALL_SENSORS_BY_DEFAULT

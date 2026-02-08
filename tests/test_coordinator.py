@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -11,7 +11,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.schwoerer_lueftung.const import (
     CONF_DEVICE_TYPE,
     CONF_ROOMS,
-    CONF_SLAVE_ID,
     DEVICE_TYPE_WGT,
     DEVICE_TYPE_WRT,
     DOMAIN,
@@ -43,8 +42,6 @@ def config_entry_wgt():
         domain=DOMAIN,
         data={
             CONF_HOST: "192.168.1.100",
-            CONF_PORT: 502,
-            CONF_SLAVE_ID: 1,
             CONF_DEVICE_TYPE: DEVICE_TYPE_WGT,
             CONF_ROOMS: [
                 {"number": 1, "name": "Living Room"},
@@ -61,8 +58,6 @@ def config_entry_wrt():
         domain=DOMAIN,
         data={
             CONF_HOST: "192.168.1.100",
-            CONF_PORT: 502,
-            CONF_SLAVE_ID: 1,
             CONF_DEVICE_TYPE: DEVICE_TYPE_WRT,
         },
     )

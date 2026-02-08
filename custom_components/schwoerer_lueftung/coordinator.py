@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PORT
+from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -14,7 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .const import (
     CONF_DEVICE_TYPE,
     CONF_ROOMS,
-    CONF_SLAVE_ID,
+    DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DEVICE_TYPE_WGT,
     DOMAIN,
@@ -36,9 +36,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.config_entry = entry
         self.client = ModbusClient(
             host=entry.data[CONF_HOST],
-            port=entry.data[CONF_PORT],
-            slave_id=entry.data[CONF_SLAVE_ID],
-            device_type=entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT),
+            port=DEFAULT_PORT,
         )
 
         super().__init__(
@@ -113,13 +111,13 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     def get_device_identifier(self) -> tuple[str, str]:
         return (
             DOMAIN,
-            f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}",
+            f"{self.config_entry.data[CONF_HOST]}:{DEFAULT_PORT}",
         )
 
     def get_room_device_identifier(self, room_number: int) -> tuple[str, str]:
         return (
             DOMAIN,
-            f"{self.config_entry.data[CONF_HOST]}:{self.config_entry.data[CONF_PORT]}#{room_number}",
+            f"{self.config_entry.data[CONF_HOST]}:{DEFAULT_PORT}#{room_number}",
         )
 
     def get_device(self) -> DeviceInfo:
