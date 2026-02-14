@@ -1,16 +1,187 @@
 {
   "entity": {
     "binary_sensor": {
+      "alarm_device_filter_dirty": {
+        "default": "mdi:air-filter"
+      },
+      "alarm_door_open": {
+        "default": "mdi:door-open"
+      },
+      "alarm_emergency_mode": {
+        "default": "mdi:alert-circle"
+      },
+      "alarm_external_utility_lock": {
+        "default": "mdi:lock"
+      },
+      "alarm_heating_module_test": {
+        "default": "mdi:thermometer-alert"
+      },
+      "alarm_off_peak_disabled": {
+        "default": "mdi:power-plug-off"
+      },
+      "alarm_pressostat_triggered": {
+        "default": "mdi:gauge-empty"
+      },
+      "alarm_pressure_switch": {
+        "default": "mdi:gauge"
+      },
+      "alarm_supply_air_cold": {
+        "default": "mdi:snowflake-alert"
+      },
+      "alarm_supply_voltage_off": {
+        "default": "mdi:flash-off"
+      },
+      "alarm_upstream_filter_dirty": {
+        "default": "mdi:air-filter"
+      },
+      "alarm_utility_lock": {
+        "default": "mdi:lock"
+      },
+      "auxiliary_heating_active_room": {
+        "default": "mdi:radiator"
+      },
+      "auxiliary_heating_enabled_room": {
+        "default": "mdi:radiator"
+      },
       "fan_override": {
         "default": "mdi:fan-auto"
+      },
+      "outdoor_damper_state": {
+        "default": "mdi:valve"
+      },
+      "preheater_1": {
+        "default": "mdi:heating-coil"
+      },
+      "preheater_2": {
+        "default": "mdi:heating-coil"
       },
       "reheater_state": {
         "default": "mdi:heating-coil"
       }
     },
+    "climate": {
+      "climate_room": {
+        "default": "mdi:thermostat"
+      }
+    },
+    "number": {
+      "base_temperature_room": {
+        "default": "mdi:thermometer"
+      },
+      "linear_fan_power": {
+        "default": "mdi:fan"
+      }
+    },
+    "select": {
+      "fan_speed": {
+        "default": "mdi:fan"
+      },
+      "heating_cooling_function": {
+        "default": "mdi:heat-pump"
+      },
+      "operation_mode": {
+        "default": "mdi:cog"
+      }
+    },
     "sensor": {
+      "bypass_state": {
+        "default": "mdi:valve"
+      },
+      "current_exhaust_air_flow": {
+        "default": "mdi:percent"
+      },
+      "current_exhaust_air_rpm": {
+        "default": "mdi:fan"
+      },
       "current_fan_level": {
         "default": "mdi:fan"
+      },
+      "current_supply_air_flow": {
+        "default": "mdi:percent"
+      },
+      "current_supply_air_rpm": {
+        "default": "mdi:fan"
+      },
+      "device_filter_remaining": {
+        "default": "mdi:air-filter"
+      },
+      "error_message": {
+        "default": "mdi:alert-circle"
+      },
+      "exhaust_air_fan_status": {
+        "default": "mdi:fan"
+      },
+      "ground_heat_exchanger_state": {
+        "default": "mdi:heat-pump-outline"
+      },
+      "heat_pump_status": {
+        "default": "mdi:heat-pump"
+      },
+      "operating_hours_auxiliary_heating_house": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_fan": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_fan_level_1": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_fan_level_2": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_fan_level_3": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_fan_level_4": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_ground_heat_exchanger": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_heat_pump": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_heat_pump_cooling": {
+        "default": "mdi:counter"
+      },
+      "operating_hours_preheating_coil": {
+        "default": "mdi:counter"
+      },
+      "sensor_fan_level": {
+        "default": "mdi:fan"
+      },
+      "shock_ventilation_remaining": {
+        "default": "mdi:timer"
+      },
+      "supply_air_fan_status": {
+        "default": "mdi:fan"
+      },
+      "temperature_t10_outdoor": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t1_after_ground_heat_exchanger": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t2_after_preheating_coil": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t3_before_reheater": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t4_after_reheater": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t5_exhaust_air": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t6_in_heat_exchanger": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t7_evaporator": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t8_condenser": {
+        "default": "mdi:thermometer"
       },
       "time_program_base_level": {
         "default": "mdi:fan-clock"
@@ -18,8 +189,28 @@
       "time_program_fan_level": {
         "default": "mdi:fan-clock"
       },
-      "sensor_fan_level": {
-        "default": "mdi:fan"
+      "upstream_filter_remaining": {
+        "default": "mdi:air-filter"
+      }
+    },
+    "switch": {
+      "auxiliary_heating_enabled": {
+        "default": "mdi:radiator"
+      },
+      "auxiliary_heating_enabled_room": {
+        "default": "mdi:radiator"
+      },
+      "heat_pump_cooling_enabled": {
+        "default": "mdi:snowflake"
+      },
+      "heat_pump_heating_enabled": {
+        "default": "mdi:fire"
+      },
+      "scheduled_heating_enabled_room": {
+        "default": "mdi:calendar-clock"
+      },
+      "shock_ventilation": {
+        "default": "mdi:fan-plus"
       }
     }
   },

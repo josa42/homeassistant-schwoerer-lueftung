@@ -29,6 +29,7 @@ VALID_ENTITY_KEYS = {
         "auxiliary_heating_active_room",
         "auxiliary_heating_enabled_room",
         "fan_override",
+        "outdoor_damper_state",
         "preheater_1",
         "preheater_2",
         "reheater_state",
@@ -70,7 +71,6 @@ VALID_ENTITY_KEYS = {
         "operating_hours_heat_pump",
         "operating_hours_heat_pump_cooling",
         "operating_hours_preheating_coil",
-        "outdoor_damper_state",
         "sensor_fan_level",
         "shock_ventilation_remaining",
         "supply_air_fan_status",
@@ -124,7 +124,12 @@ class TestTranslationSorting:
         """Recursively check if dictionary keys are sorted."""
         if isinstance(obj, dict):
             keys = list(obj.keys())
-            sorted_keys = sorted(keys)
+            
+            # Check if all keys are numeric strings - if so, sort numerically
+            if all(k.lstrip('-').isdigit() for k in keys):
+                sorted_keys = sorted(keys, key=lambda x: int(x))
+            else:
+                sorted_keys = sorted(keys)
 
             if keys != sorted_keys:
                 path_str = ".".join(path) if path else "root"

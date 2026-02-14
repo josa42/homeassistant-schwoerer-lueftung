@@ -67,6 +67,13 @@
       "fan_override": {
         "name": "Fan Override"
       },
+      "outdoor_damper_state": {
+        "name": "Outdoor Damper State",
+        "state": {
+          "off": "Closed",
+          "on": "Open"
+        }
+      },
       "preheater_1": {
         "name": "Preheater 1"
       },
@@ -131,7 +138,7 @@
     },
     "sensor": {
       "bypass_state": {
-        "name": "Bypass State",
+        "name": "Bypass",
         "state": {
           "closed": "Closed",
           "open_cooling": "Open (Cooling)",
@@ -160,12 +167,6 @@
         "name": "Error Message",
         "state": {
           "0": "No Error",
-          "1025": "Error Parameter Memory",
-          "1026": "Error System Bus",
-          "1281": "Heat Pump High Pressure",
-          "1282": "Heat Pump Low Pressure",
-          "1283": "Maximum Defrost Time Exceeded",
-          "1284": "Heat Pump Low Pressure in Cooling Mode",
           "257": "Supply Air Fan Speed Missing",
           "258": "Exhaust Air Fan Speed Missing",
           "259": "Supply Air Fan Minimum Speed Not Reached",
@@ -186,7 +187,13 @@
           "775": "Error Sensor Element T6 In WT",
           "776": "Error Sensor Element T7 Evaporator",
           "777": "Error Sensor Element T8 Condenser",
-          "779": "Error Sensor Element T10 Outdoor Temperature"
+          "779": "Error Sensor Element T10 Outdoor Temperature",
+          "1025": "Error Parameter Memory",
+          "1026": "Error System Bus",
+          "1281": "Heat Pump High Pressure",
+          "1282": "Heat Pump Low Pressure",
+          "1283": "Maximum Defrost Time Exceeded",
+          "1284": "Heat Pump Low Pressure in Cooling Mode"
         }
       },
       "exhaust_air_fan_status": {
@@ -244,13 +251,6 @@
       },
       "operating_hours_preheating_coil": {
         "name": "Operating Hours VHR"
-      },
-      "outdoor_damper_state": {
-        "name": "Outdoor Damper State",
-        "state": {
-          "0": "Closed",
-          "1": "Open"
-        }
       },
       "sensor_fan_level": {
         "name": "Sensor Fan Level"

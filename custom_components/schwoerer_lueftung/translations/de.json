@@ -30,13 +30,13 @@
         "name": "Tür offen"
       },
       "alarm_emergency_mode": {
-        "name": "Notbetrieb aktiv"
+        "name": "Notbetrieb"
       },
       "alarm_external_utility_lock": {
-        "name": "EVU Sperre extern Aktiv"
+        "name": "EVU Sperre extern"
       },
       "alarm_heating_module_test": {
-        "name": "Heizmodul Testbetrieb aktiv"
+        "name": "Heizmodul Testbetrieb"
       },
       "alarm_off_peak_disabled": {
         "name": "Niedertarif abgeschaltet"
@@ -45,7 +45,7 @@
         "name": "Pressostat ausgelöst"
       },
       "alarm_pressure_switch": {
-        "name": "Meldung Druckwächter Aktiv"
+        "name": "Meldung Druckwächter"
       },
       "alarm_supply_air_cold": {
         "name": "Zuluft zu kalt"
@@ -57,7 +57,7 @@
         "name": "Vorgelagerter Filter verschmutzt"
       },
       "alarm_utility_lock": {
-        "name": "EVU Sperre Aktiv"
+        "name": "EVU Sperre"
       },
       "auxiliary_heating_active_room": {
         "name": "Zusatzheizung aktiv"
@@ -67,6 +67,13 @@
       },
       "fan_override": {
         "name": "Luftstufen Überschreibung"
+      },
+      "outdoor_damper_state": {
+        "name": "Außenklappe Zustand",
+        "state": {
+          "off": "Geschlossen",
+          "on": "Offen"
+        }
       },
       "preheater_1": {
         "name": "Vorheizregister 1"
@@ -132,7 +139,7 @@
     },
     "sensor": {
       "bypass_state": {
-        "name": "Bypass Zustand",
+        "name": "Bypass",
         "state": {
           "closed": "Geschlossen",
           "open_cooling": "Offen (Kühlen)",
@@ -161,12 +168,6 @@
         "name": "Fehlermeldung",
         "state": {
           "0": "Kein Fehler",
-          "1025": "Fehler Parameterspeicher",
-          "1026": "Fehler System-Bus",
-          "1281": "Wärmepumpe Hochdruck",
-          "1282": "Wärmepumpe Niederdruck",
-          "1283": "Maximale Abtauzeit überschritten",
-          "1284": "Wärmepumpe Niederdruck im Kühlbetrieb",
           "257": "Drehzahl Zuluft fehlt",
           "258": "Drehzahl Abluft fehlt",
           "259": "Ventilator Zuluft Mindestdrehzahl nicht erreicht",
@@ -187,7 +188,13 @@
           "775": "Fehler Sensorelement T6-imWT",
           "776": "Fehler Sensorelement T7-Verdampfer",
           "777": "Fehler Sensorelement T8-Kondensator",
-          "779": "Fehler Sensorelement T10-Außentemperatur"
+          "779": "Fehler Sensorelement T10-Außentemperatur",
+          "1025": "Fehler Parameterspeicher",
+          "1026": "Fehler System-Bus",
+          "1281": "Wärmepumpe Hochdruck",
+          "1282": "Wärmepumpe Niederdruck",
+          "1283": "Maximale Abtauzeit überschritten",
+          "1284": "Wärmepumpe Niederdruck im Kühlbetrieb"
         }
       },
       "exhaust_air_fan_status": {
@@ -245,13 +252,6 @@
       },
       "operating_hours_preheating_coil": {
         "name": "Betriebsstunden VHR"
-      },
-      "outdoor_damper_state": {
-        "name": "Außenklappe Zustand",
-        "state": {
-          "0": "Geschlossen",
-          "1": "Offen"
-        }
       },
       "sensor_fan_level": {
         "name": "Luftstufe Sensoren"
