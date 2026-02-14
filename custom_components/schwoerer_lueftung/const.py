@@ -7,6 +7,7 @@ CONF_HOST = "host"
 CONF_ROOMS = "rooms"
 CONF_DEVICE_TYPE = "device_type"
 CONF_ENABLE_ALL_SENSORS_BY_DEFAULT = "enable_all_sensors_by_default"
+CONF_HAS_GROUND_HEAT_EXCHANGER = "has_ground_heat_exchanger"
 
 # Device types
 DEVICE_TYPE_WGT = "wgt"  # With heating

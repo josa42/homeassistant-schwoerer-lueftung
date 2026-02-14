@@ -12,6 +12,7 @@
         "data": {
           "device_type": "Gerätetyp",
           "enable_all_sensors_by_default": "Alle Sensoren standardmäßig aktivieren",
+          "has_ground_heat_exchanger": "Hat Erdwärmetauscher (EWT)",
           "host": "IP-Adresse",
           "port": "Port",
           "rooms": "Anzahl der Räume"
@@ -324,6 +325,14 @@
       },
       "shock_ventilation": {
         "name": "Stoßlüftung"
+      }
+    }
+  },
+  "selector": {
+    "device_type": {
+      "options": {
+        "wgt": "WGT (mit Heizung)",
+        "wrt": "WRT (nur Lüftung)"
       }
     }
   }

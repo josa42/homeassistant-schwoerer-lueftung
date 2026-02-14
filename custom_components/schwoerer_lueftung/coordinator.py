@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import (
     CONF_DEVICE_TYPE,
+    CONF_HAS_GROUND_HEAT_EXCHANGER,
     CONF_ROOMS,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
@@ -48,6 +49,9 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     def has_heating(self) -> bool:
         return self.get_device_type() == DEVICE_TYPE_WGT
+
+    def has_ground_heat_exchanger(self) -> bool:
+        return self.config_entry.data.get(CONF_HAS_GROUND_HEAT_EXCHANGER, False)
 
     def get_device_type(self) -> str:
         return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT)

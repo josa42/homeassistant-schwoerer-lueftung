@@ -93,7 +93,6 @@ async def async_setup_entry(
         CurrentExhaustAirFlowSensor(coordinator),
         CurrentSupplyAirRpmSensor(coordinator),
         CurrentExhaustAirRpmSensor(coordinator),
-        TemperatureT1AfterGroundHeatExchangerSensor(coordinator),
         TemperatureT5ExhaustAirSensor(coordinator),
         TemperatureT6InHeatExchangerSensor(coordinator),
         TemperatureT10OutdoorSensor(coordinator),
@@ -107,12 +106,24 @@ async def async_setup_entry(
         OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_3),
         OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_FAN_LEVEL_4),
     ]
+
+    # Add ground heat exchanger sensors if enabled
+    if coordinator.has_ground_heat_exchanger():
+        entities.extend(
+            [
+                TemperatureT1AfterGroundHeatExchangerSensor(coordinator),
+                GroundHeatExchangerStateSensor(coordinator),
+                OperatingHoursSensor(
+                    coordinator, REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER
+                ),
+            ]
+        )
+
     # Add heating-related sensors only for WGT devices
     if has_heating:
         entities.extend(
             [
                 HeatPumpStatusSensor(coordinator),
-                GroundHeatExchangerStateSensor(coordinator),
                 TemperatureT2AfterPreheatingCoilSensor(coordinator),
                 TemperatureT3BeforeReheaterSensor(coordinator),
                 TemperatureT4AfterReheaterSensor(coordinator),
@@ -127,9 +138,6 @@ async def async_setup_entry(
                 OperatingHoursSensor(coordinator, REG_OPERATING_HOURS_PREHEATING_COIL),
                 OperatingHoursSensor(
                     coordinator, REG_OPERATING_HOURS_AUXILIARY_HEATING_HOUSE
-                ),
-                OperatingHoursSensor(
-                    coordinator, REG_OPERATING_HOURS_GROUND_HEAT_EXCHANGER
                 ),
             ]
         )

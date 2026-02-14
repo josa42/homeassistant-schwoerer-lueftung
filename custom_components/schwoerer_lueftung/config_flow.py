@@ -15,11 +15,16 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
+    SelectOptionDict,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
 )
 
 from .const import (
     CONF_DEVICE_TYPE,
     CONF_ENABLE_ALL_SENSORS_BY_DEFAULT,
+    CONF_HAS_GROUND_HEAT_EXCHANGER,
     CONF_ROOMS,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PORT,
@@ -31,27 +36,6 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-STEP_USER_DATA_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_HOST): str,
-        vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): vol.In(
-            {
-                DEVICE_TYPE_WGT: "WGT (mit Heizung)",
-                DEVICE_TYPE_WRT: "WRT (nur Lüftung)",
-            }
-        ),
-        vol.Required(CONF_ROOMS, default=1): NumberSelector(
-            NumberSelectorConfig(
-                min=1,
-                max=17,
-                step=1,
-                mode=NumberSelectorMode.BOX,
-            )
-        ),
-        vol.Required(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, default=False): bool,
-    }
-)
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -86,6 +70,43 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
+    async def _get_schema(self) -> vol.Schema:
+        """Build schema with translated device type options."""
+        translations = await translation.async_get_translations(
+            self.hass, self.hass.config.language, "selector", {DOMAIN}
+        )
+
+        wgt_key = f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WGT}"
+        wrt_key = f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WRT}"
+
+        wgt_label = translations.get(wgt_key, "WGT (with heating)")
+        wrt_label = translations.get(wrt_key, "WRT (ventilation only)")
+
+        return vol.Schema(
+            {
+                vol.Required(CONF_HOST): str,
+                vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): SelectSelector(
+                    SelectSelectorConfig(
+                        options=[
+                            SelectOptionDict(value=DEVICE_TYPE_WGT, label=wgt_label),
+                            SelectOptionDict(value=DEVICE_TYPE_WRT, label=wrt_label),
+                        ],
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+                vol.Required(CONF_HAS_GROUND_HEAT_EXCHANGER, default=False): bool,
+                vol.Required(CONF_ROOMS, default=1): NumberSelector(
+                    NumberSelectorConfig(
+                        min=1,
+                        max=17,
+                        step=1,
+                        mode=NumberSelectorMode.BOX,
+                    )
+                ),
+                vol.Required(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, default=False): bool,
+            }
+        )
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         """Handle the initial step."""
         errors: dict[str, str] = {}
@@ -109,6 +130,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_HOST: user_input[CONF_HOST],
                     CONF_DEVICE_TYPE: user_input[CONF_DEVICE_TYPE],
                     CONF_ROOMS: [],
+                    CONF_HAS_GROUND_HEAT_EXCHANGER: user_input[
+                        CONF_HAS_GROUND_HEAT_EXCHANGER
+                    ],
                     CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[
                         CONF_ENABLE_ALL_SENSORS_BY_DEFAULT
                     ],
@@ -126,8 +150,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                 return self.async_create_entry(title=info["title"], data=data)
 
+        schema = await self._get_schema()
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="user", data_schema=schema, errors=errors
         )
 
 

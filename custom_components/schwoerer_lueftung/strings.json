@@ -12,6 +12,7 @@
         "data": {
           "device_type": "Device Type",
           "enable_all_sensors_by_default": "Enable all sensors by default",
+          "has_ground_heat_exchanger": "Has ground heat exchanger (EWT)",
           "host": "IP Address",
           "port": "Port",
           "rooms": "Number of Rooms"
@@ -324,6 +325,14 @@
       },
       "shock_ventilation": {
         "name": "Shock Ventilation"
+      }
+    }
+  },
+  "selector": {
+    "device_type": {
+      "options": {
+        "wgt": "WGT (with heating)",
+        "wrt": "WRT (ventilation only)"
       }
     }
   }
