@@ -61,7 +61,11 @@
         "name": "EVU Sperre"
       },
       "auxiliary_heating_active_room": {
-        "name": "Zusatzheizung aktiv"
+        "name": "Zusatzheizung",
+        "state": {
+          "off": "Inaktiv",
+          "on": "Aktiv"
+        }
       },
       "auxiliary_heating_enabled_room": {
         "name": "Zusatzheizung Freigabe"

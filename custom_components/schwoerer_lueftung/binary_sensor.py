@@ -191,7 +191,7 @@ class RoomAuxiliaryHeatingEnabledSensor(AbstractBinaryRoomSensor):
             coordinator,
             REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
             room_number,
-            enabled_by_default=True,
+            enabled_by_default=False,
         )
 
 

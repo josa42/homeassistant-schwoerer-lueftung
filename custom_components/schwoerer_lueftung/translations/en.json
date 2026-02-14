@@ -61,7 +61,11 @@
         "name": "Utility Lock Alarm"
       },
       "auxiliary_heating_active_room": {
-        "name": "Auxiliary Heating Active"
+        "name": "Auxiliary Heating Active",
+        "state": {
+          "off": "Inactive",
+          "on": "Active"
+        }
       },
       "auxiliary_heating_enabled_room": {
         "name": "Auxiliary Heating Enabled"
