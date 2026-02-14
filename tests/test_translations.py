@@ -34,7 +34,7 @@ VALID_ENTITY_KEYS = {
         "reheater_state",
     ],
     "climate": [
-        "room_climate",
+        "climate_room",
     ],
     "device": [
         "room",

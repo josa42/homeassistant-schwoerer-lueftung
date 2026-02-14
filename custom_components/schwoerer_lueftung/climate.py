@@ -55,15 +55,14 @@ class RoomClimate(Entity, ClimateEntity):
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,
-            translation_key="room_climate",
+            entity_type="climate_room",
             device=coordinator.get_room_device(room_number),
         )
 
         self._room_number = room_number
         self._attr_unique_id = (
-            f"{coordinator.config_entry.entry_id}_room_climate_{room_number}"
+            f"{coordinator.config_entry.entry_id}_room_{room_number}_climate"
         )
-        self._attr_translation_key = "room_climate"
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
         self._attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
         self._attr_hvac_modes = [HVACMode.FAN_ONLY, HVACMode.HEAT]

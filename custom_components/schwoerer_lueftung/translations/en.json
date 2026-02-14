@@ -78,7 +78,7 @@
       }
     },
     "climate": {
-      "room_climate": {
+      "climate_room": {
         "name": "Thermostat"
       }
     },

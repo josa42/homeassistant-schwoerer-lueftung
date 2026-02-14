@@ -36,7 +36,7 @@ class Entity(CoordinatorEntity[Coordinator]):
         coordinator: Coordinator,
         register: int = 0,
         device: DeviceInfo | None = None,
-        translation_key: str | None = None,
+        entity_type: str | None = None,
         device_class: SensorDeviceClass | None = None,
         state_class: SensorStateClass | str | None = None,
         unit_of_measurement: str | None = None,
@@ -63,9 +63,10 @@ class Entity(CoordinatorEntity[Coordinator]):
         self._attr_unique_id = (
             unique_id if unique_id is not None else f"{entry.entry_id}_{key}"
         )
-        self._attr_translation_key = (
-            translation_key if translation_key is not None else key
+        self._entity_type = (
+            entity_type if entity_type is not None else key
         )
+        self._attr_translation_key = self._entity_type
         self._register = register
 
         if device_class is not None:
@@ -102,7 +103,10 @@ class AbstractSensor(Entity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict:
         """Return the raw numeric value as an attribute for debugging."""
-        return {"raw_value": self.coordinator.get_data(self._register)}
+        return {
+            "raw_value": self.coordinator.get_data(self._register),
+            "entity_type": self._entity_type,
+        }
 
 
 class AbstractTemperatureSensor(AbstractSensor):
@@ -152,8 +156,8 @@ class AbstractRoomSensor(AbstractSensor):
         self, coordinator: Coordinator, base_register: int, room_number: int, **kwargs
     ) -> None:
         register = room_reg(base_register, room_number)
-        translation_key = (
-            kwargs.pop("translation_key", None)
+        entity_type = (
+            kwargs.pop("entity_type", None)
             or re.sub(r"_\d+$", "", REG_KEYS.get(register) or "")
             or ""
         )
@@ -162,7 +166,7 @@ class AbstractRoomSensor(AbstractSensor):
             coordinator,
             room_reg(base_register, room_number),
             device=coordinator.get_room_device(room_number),
-            translation_key=translation_key,
+            entity_type=entity_type,
             **kwargs,
         )
 
@@ -219,6 +223,11 @@ class AbstractBinarySensor(Entity, BinarySensorEntity):
         # Check if value is in the set of active states
         return value in self._active_states
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type as an attribute."""
+        return {"entity_type": self._entity_type}
+
 
 class AbstractBinaryRoomSensor(AbstractBinarySensor):
     def __init__(
@@ -235,7 +244,7 @@ class AbstractBinaryRoomSensor(AbstractBinarySensor):
             register,
             active_states,
             device=coordinator.get_room_device(room_number),
-            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
+            entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
 
@@ -265,6 +274,11 @@ class AbstractSelect(Entity, SelectEntity):
 
         await self.coordinator.async_write_register(self._register, value)
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type as an attribute."""
+        return {"entity_type": self._entity_type}
+
 
 class AbstractNumber(Entity, NumberEntity):
     def __init__(self, coordinator: Coordinator, register: int, **kwargs) -> None:
@@ -277,6 +291,11 @@ class AbstractNumber(Entity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         await self.coordinator.async_write_register(self._register, int(value))
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type as an attribute."""
+        return {"entity_type": self._entity_type}
+
 
 class AbstractRoomNumber(AbstractNumber):
     def __init__(
@@ -287,7 +306,7 @@ class AbstractRoomNumber(AbstractNumber):
             coordinator,
             register,
             device=coordinator.get_room_device(room_number),
-            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
+            entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
 
@@ -307,6 +326,11 @@ class AbstractSwitch(Entity, SwitchEntity):
     async def async_turn_off(self) -> None:
         await self.coordinator.async_write_register(self._register, 0)
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type as an attribute."""
+        return {"entity_type": self._entity_type}
+
 
 class AbstractRoomSwitch(AbstractSwitch):
     def __init__(
@@ -317,6 +341,6 @@ class AbstractRoomSwitch(AbstractSwitch):
             coordinator,
             register,
             device=coordinator.get_room_device(room_number),
-            translation_key=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
+            entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
