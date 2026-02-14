@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   schedule:
     - cron: "0 0 * * *"
 
@@ -56,7 +56,6 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-          ignore: brands integration_manifest
 
       - name: Hassfest validation
         uses: home-assistant/actions/hassfest@master
