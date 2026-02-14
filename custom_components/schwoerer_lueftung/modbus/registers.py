@@ -48,23 +48,23 @@ REG_CURRENT_EXHAUST_AIR_RPM = 145
 
 # Temperature registers (all values /10 for actual °C)
 # T1 nach EWT (T1 after EWT)
-REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER = 200
+REG_TEMPERATURE_T1_AFTER_GROUND_HEAT_EXCHANGER = 200
 # T2 nach VHR (T2 after VHR)
-REG_TEMP_T2_AFTER_PREHEATING_COIL = 201
+REG_TEMPERATURE_T2_AFTER_PREHEATING_COIL = 201
 # T3 vor NE (T3 before NE)
-REG_TEMP_T3_BEFORE_REHEATER = 202
+REG_TEMPERATURE_T3_BEFORE_REHEATER = 202
 # T4 nach NE (T4 after NE)
-REG_TEMP_T4_AFTER_REHEATER = 203
+REG_TEMPERATURE_T4_AFTER_REHEATER = 203
 # T5 Abluft (T5 exhaust air)
-REG_TEMP_T5_EXHAUST_AIR = 204
+REG_TEMPERATURE_T5_EXHAUST_AIR = 204
 # T6 im WT (T6 in WT)
-REG_TEMP_T6_IN_HEAT_EXCHANGER = 205
+REG_TEMPERATURE_T6_IN_HEAT_EXCHANGER = 205
 # T7 Verdampfer (T7 evaporator)
-REG_TEMP_T7_EVAPORATOR = 206
+REG_TEMPERATURE_T7_EVAPORATOR = 206
 # T8 Kondensator (T8 condenser)
-REG_TEMP_T8_CONDENSER = 207
+REG_TEMPERATURE_T8_CONDENSER = 207
 # T10 Aussen (T10 outdoor)
-REG_TEMP_T10_OUTDOOR = 209
+REG_TEMPERATURE_T10_OUTDOOR = 209
 
 # Heiz-Kühlfunktion (Heating/Cooling Function)
 REG_HEATING_COOLING_FUNCTION = 230
@@ -341,15 +341,15 @@ REG_KEYS: dict[int, str] = {
     REG_CURRENT_EXHAUST_AIR_FLOW: "current_exhaust_air_flow",
     REG_CURRENT_SUPPLY_AIR_RPM: "current_supply_air_rpm",
     REG_CURRENT_EXHAUST_AIR_RPM: "current_exhaust_air_rpm",
-    REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER: "temp_t1_after_ground_heat_exchanger",
-    REG_TEMP_T2_AFTER_PREHEATING_COIL: "temp_t2_after_preheating_coil",
-    REG_TEMP_T3_BEFORE_REHEATER: "temp_t3_before_reheater",
-    REG_TEMP_T4_AFTER_REHEATER: "temp_t4_after_reheater",
-    REG_TEMP_T5_EXHAUST_AIR: "temp_t5_exhaust_air",
-    REG_TEMP_T6_IN_HEAT_EXCHANGER: "temp_t6_in_heat_exchanger",
-    REG_TEMP_T7_EVAPORATOR: "temp_t7_evaporator",
-    REG_TEMP_T8_CONDENSER: "temp_t8_condenser",
-    REG_TEMP_T10_OUTDOOR: "temp_t10_outdoor",
+    REG_TEMPERATURE_T1_AFTER_GROUND_HEAT_EXCHANGER: "temperature_t1_after_ground_heat_exchanger",
+    REG_TEMPERATURE_T2_AFTER_PREHEATING_COIL: "temperature_t2_after_preheating_coil",
+    REG_TEMPERATURE_T3_BEFORE_REHEATER: "temperature_t3_before_reheater",
+    REG_TEMPERATURE_T4_AFTER_REHEATER: "temperature_t4_after_reheater",
+    REG_TEMPERATURE_T5_EXHAUST_AIR: "temperature_t5_exhaust_air",
+    REG_TEMPERATURE_T6_IN_HEAT_EXCHANGER: "temperature_t6_in_heat_exchanger",
+    REG_TEMPERATURE_T7_EVAPORATOR: "temperature_t7_evaporator",
+    REG_TEMPERATURE_T8_CONDENSER: "temperature_t8_condenser",
+    REG_TEMPERATURE_T10_OUTDOOR: "temperature_t10_outdoor",
     # Read alarms
     REG_ALARM_PRESSURE_SWITCH: "alarm_pressure_switch",
     REG_ALARM_UTILITY_LOCK: "alarm_utility_lock",

@@ -52,15 +52,15 @@ from .modbus.registers import (
     REG_SENSOR_FAN_LEVEL,
     REG_SHOCK_VENTILATION_REMAINING,
     REG_SUPPLY_AIR_FAN_STATUS,
-    REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER,
-    REG_TEMP_T2_AFTER_PREHEATING_COIL,
-    REG_TEMP_T3_BEFORE_REHEATER,
-    REG_TEMP_T4_AFTER_REHEATER,
-    REG_TEMP_T5_EXHAUST_AIR,
-    REG_TEMP_T6_IN_HEAT_EXCHANGER,
-    REG_TEMP_T7_EVAPORATOR,
-    REG_TEMP_T8_CONDENSER,
-    REG_TEMP_T10_OUTDOOR,
+    REG_TEMPERATURE_T1_AFTER_GROUND_HEAT_EXCHANGER,
+    REG_TEMPERATURE_T2_AFTER_PREHEATING_COIL,
+    REG_TEMPERATURE_T3_BEFORE_REHEATER,
+    REG_TEMPERATURE_T4_AFTER_REHEATER,
+    REG_TEMPERATURE_T5_EXHAUST_AIR,
+    REG_TEMPERATURE_T6_IN_HEAT_EXCHANGER,
+    REG_TEMPERATURE_T7_EVAPORATOR,
+    REG_TEMPERATURE_T8_CONDENSER,
+    REG_TEMPERATURE_T10_OUTDOOR,
     REG_TIME_PROGRAM_BASE_LEVEL,
     REG_TIME_PROGRAM_FAN_LEVEL,
     REG_UPSTREAM_FILTER_REMAINING,
@@ -415,7 +415,7 @@ class TemperatureT1AfterGroundHeatExchangerSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T1_AFTER_GROUND_HEAT_EXCHANGER,
+            REG_TEMPERATURE_T1_AFTER_GROUND_HEAT_EXCHANGER,
             enabled_by_default=False,
         )
 
@@ -432,7 +432,7 @@ class TemperatureT2AfterPreheatingCoilSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T2_AFTER_PREHEATING_COIL,
+            REG_TEMPERATURE_T2_AFTER_PREHEATING_COIL,
             enabled_by_default=False,
         )
 
@@ -449,7 +449,7 @@ class TemperatureT3BeforeReheaterSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T3_BEFORE_REHEATER,
+            REG_TEMPERATURE_T3_BEFORE_REHEATER,
             enabled_by_default=False,
         )
 
@@ -466,7 +466,7 @@ class TemperatureT4AfterReheaterSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T4_AFTER_REHEATER,
+            REG_TEMPERATURE_T4_AFTER_REHEATER,
             enabled_by_default=False,
         )
 
@@ -483,7 +483,7 @@ class TemperatureT5ExhaustAirSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T5_EXHAUST_AIR,
+            REG_TEMPERATURE_T5_EXHAUST_AIR,
             enabled_by_default=False,
         )
 
@@ -500,7 +500,7 @@ class TemperatureT6InHeatExchangerSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T6_IN_HEAT_EXCHANGER,
+            REG_TEMPERATURE_T6_IN_HEAT_EXCHANGER,
             enabled_by_default=False,
         )
 
@@ -517,7 +517,7 @@ class TemperatureT7EvaporatorSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T7_EVAPORATOR,
+            REG_TEMPERATURE_T7_EVAPORATOR,
             enabled_by_default=False,
         )
 
@@ -534,7 +534,7 @@ class TemperatureT8CondenserSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T8_CONDENSER,
+            REG_TEMPERATURE_T8_CONDENSER,
             enabled_by_default=False,
         )
 
@@ -551,7 +551,7 @@ class TemperatureT10OutdoorSensor(AbstractTemperatureSensor):
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
-            REG_TEMP_T10_OUTDOOR,
+            REG_TEMPERATURE_T10_OUTDOOR,
         )
 
 

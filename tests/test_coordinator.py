@@ -29,7 +29,7 @@ def mock_modbus_client():
         client_instance.is_subscribed.return_value = False
         client_instance.read_data.return_value = {
             "current_fan_level": 2,
-            "temp_t10_outdoor": 220,
+            "temperature_t10_outdoor": 220,
         }
         mock.return_value = client_instance
         yield mock, client_instance

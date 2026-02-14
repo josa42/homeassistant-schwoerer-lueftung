@@ -269,31 +269,31 @@
           "startup": "Anlaufphase"
         }
       },
-      "temp_t10_outdoor": {
+      "temperature_t10_outdoor": {
         "name": "Außentemperartur (T10)"
       },
-      "temp_t1_after_ground_heat_exchanger": {
+      "temperature_t1_after_ground_heat_exchanger": {
         "name": "Temperatur nach EWT (T1)"
       },
-      "temp_t2_after_preheating_coil": {
+      "temperature_t2_after_preheating_coil": {
         "name": "Temperatur nach VHR (T2)"
       },
-      "temp_t3_before_reheater": {
+      "temperature_t3_before_reheater": {
         "name": "Temperatur vor NE (T3)"
       },
-      "temp_t4_after_reheater": {
+      "temperature_t4_after_reheater": {
         "name": "Temperatur nach NE (T4)"
       },
-      "temp_t5_exhaust_air": {
+      "temperature_t5_exhaust_air": {
         "name": "Ablufttemperatur (T5)"
       },
-      "temp_t6_in_heat_exchanger": {
+      "temperature_t6_in_heat_exchanger": {
         "name": "Temperatur im WT (T6)"
       },
-      "temp_t7_evaporator": {
+      "temperature_t7_evaporator": {
         "name": "Temperatur im Verdampfer (T7)"
       },
-      "temp_t8_condenser": {
+      "temperature_t8_condenser": {
         "name": "Temperatur im Kondensator (T8)"
       },
       "time_program_base_level": {
