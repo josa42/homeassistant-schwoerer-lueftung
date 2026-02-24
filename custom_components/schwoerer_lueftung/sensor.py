@@ -323,7 +323,7 @@ class SensorFanLevelSensor(AbstractSensor):
     Sensor for sensor fan level
     (Luftstufe Sensoren)
 
-    Register: 140
+    Register: 141
     Values:     0 = Off
                 1 = Level 1
                 2 = Level 2
