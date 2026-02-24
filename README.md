@@ -27,6 +27,8 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 
 ## Installation
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josa42&repository=homeassistant-schwoerer-lueftung)
+
 ### Requirements
 - Home Assistant **2026.1.0** or newer
 - Schwörer ventilation system with Modbus TCP connectivity
