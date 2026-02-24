@@ -6,8 +6,7 @@
 
 A Home Assistant integration for [Schwörer](https://www.bauinfocenter.de/lueftung) ventilation and heating systems through Modbus TCP.
 
-> [!WARNING]
-> This integration is currently under active development. While functional, some features may change in future releases.
+<br><br>
 
 ## Supported Devices
 
@@ -180,6 +179,8 @@ logger:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+<br><br>
 
 ## Disclaimer
 
