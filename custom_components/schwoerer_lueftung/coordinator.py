@@ -31,9 +31,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     _device: DeviceInfo | None = None
-    _room_devices: dict[int, DeviceInfo] = {}
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        self._room_devices: dict[int, DeviceInfo] = {}
         self.config_entry = entry
         self.client = ModbusClient(
             host=entry.data[CONF_HOST],
