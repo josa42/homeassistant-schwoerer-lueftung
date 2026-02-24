@@ -71,12 +71,13 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 
 #### Configuration Options
 
-| Option                   | Description                                                   | Default  |
-|--------------------------|---------------------------------------------------------------|----------|
-| **Host**                 | IP address of your Schwörer system                            | Required |
-| **Device Type**          | WGT (with heating) or WRT (ventilation only)                  | WGT      |
-| **Number of Rooms**      | Rooms with climate control (1-17)                             | 1        |
-| **Enable All Sensors**   | Enable all sensors by default (otherwise some are disabled)   | Off      |
+| Option                        | Description                                                   | Default  |
+|-------------------------------|---------------------------------------------------------------|----------|
+| **Host**                      | IP address of your Schwörer system                            | Required |
+| **Device Type**               | WGT (with heating) or WRT (ventilation only)                  | WGT      |
+| **Number of Rooms**           | Rooms with climate control (1-17)                             | 1        |
+| **Has ground heat exchanger** | Enable if your system has a ground heat exchanger (EWT)       | Off      |
+| **Enable All Sensors**        | Enable all sensors by default (otherwise some are disabled)   | Off      |
 
 > [!TIP]
 > Set "Enable All Sensors" to ON if you want access to detailed diagnostic information like operating hours and additional temperature sensors. These can be disabled individually later.
@@ -91,7 +92,7 @@ The integration creates various entity types depending on your device model:
 
 System-wide controls and monitoring:
 
-![Config](./docs/assets/controls-v1.png)
+![Config](./docs/assets/controls-v2.png)
 
 <br><br>
 
