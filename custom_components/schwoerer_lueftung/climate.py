@@ -46,10 +46,12 @@ async def async_setup_entry(
 class RoomClimate(Entity, ClimateEntity):
     """
     Climate entity for controlling room temperature and HVAC mode.
+    (Raumklima)
 
     Registers:
-        - 360-376: Current Temperature Room 1-9 (read-only)
-        - 400-416: Target Temperature Room 1-9
+        - 360-376: Current Temperature Room 1-17 (read-only, value / 10 = °C)
+        - 400-416: Target Temperature Room 1-17 (value / 10 = °C)
+        - 440-456: Auxiliary Heating Enabled Room 1-17 (0=Off, 1=On)
     """
 
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:

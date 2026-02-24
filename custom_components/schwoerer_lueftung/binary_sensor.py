@@ -129,11 +129,30 @@ class FanOverrideBinarySensor(AbstractBinarySensor):
 
 
 class NhrStateBinarySensor(AbstractBinarySensor):
+    """
+    Reheater State Binary Sensor
+    (Nachheizregister Zustand)
+
+    Register: 116
+    Values:     0 = Inactive
+                1 = Active
+    """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_REHEATER_STATE, enabled_by_default=False)
 
 
 class Preheater1BinarySensor(AbstractBinarySensor):
+    """
+    Preheater Coil 1 State Binary Sensor
+    (Vorheizregister Stufe 1 Zustand)
+
+    Register: 133
+    Values:     0 = Inactive
+                1 = Coil 1 Active
+                3 = Coil 1 and 2 Active
+    """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -148,6 +167,16 @@ class Preheater1BinarySensor(AbstractBinarySensor):
 
 
 class Preheater2BinarySensor(AbstractBinarySensor):
+    """
+    Preheater Coil 2 State Binary Sensor
+    (Vorheizregister Stufe 2 Zustand)
+
+    Register: 133
+    Values:     0 = Inactive
+                2 = Coil 2 Active
+                3 = Coil 1 and 2 Active
+    """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(
             coordinator,
@@ -162,6 +191,15 @@ class Preheater2BinarySensor(AbstractBinarySensor):
 
 
 class AlarmBinarySensor(AbstractBinarySensor):
+    """
+    Generic Alarm Binary Sensor
+    (Störung/Alarm)
+
+    Various registers for different alarm types.
+    Values:     0 = No Alarm
+                1 = Alarm Active
+    """
+
     def __init__(
         self,
         coordinator: Coordinator,
@@ -196,6 +234,15 @@ class RoomAuxiliaryHeatingEnabledSensor(AbstractBinaryRoomSensor):
 
 
 class RoomAuxiliaryHeatingActiveBinarySensor(AbstractBinaryRoomSensor):
+    """
+    Room Auxiliary Heating Active Sensor
+    (Zusatzheizung Aktiv Raum 1-17)
+
+    Register: 460-476
+    Values:     0 = Inactive
+                1 = Heating Active
+    """
+
     def __init__(
         self,
         coordinator: Coordinator,

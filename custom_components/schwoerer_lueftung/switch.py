@@ -99,6 +99,15 @@ class HeatPumpCoolingSwitch(AbstractSwitch):
 
 
 class AuxiliaryHeatingSwitch(AbstractSwitch):
+    """
+    Switch for enabling/disabling auxiliary heating for the whole system.
+    (Zusatzheizung Freigabe)
+
+    Register: 234
+    Value:      0: Disabled
+                1: Enabled
+    """
+
     def __init__(self, coordinator: Coordinator) -> None:
         super().__init__(coordinator, REG_AUXILIARY_HEATING_ENABLED)
 

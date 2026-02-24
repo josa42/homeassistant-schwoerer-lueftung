@@ -614,6 +614,15 @@ class ErrorMessageSensor(AbstractSensor):
 
 
 class OperatingHoursSensor(AbstractSensor):
+    """
+    Generic Operating Hours Sensor
+    (Betriebsstunden)
+
+    Various registers for different component operating hours.
+    Register: 800-813
+    Value:    Hours (integer)
+    """
+
     def __init__(self, coordinator: Coordinator, register: int) -> None:
         super().__init__(
             coordinator,
@@ -629,6 +638,14 @@ class OperatingHoursSensor(AbstractSensor):
 
 
 class RoomTemperatureSensor(AbstractRoomTemperatureSensor):
+    """
+    Room Current Temperature Sensor
+    (Aktuelle Raumtemperatur)
+
+    Register: 360-376
+    Value:    Temperature (value / 10 = °C)
+    """
+
     def __init__(self, coordinator: Coordinator, room_number: int) -> None:
         super().__init__(
             coordinator,

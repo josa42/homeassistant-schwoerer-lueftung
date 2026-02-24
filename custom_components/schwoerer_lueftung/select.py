@@ -93,6 +93,9 @@ class HeatingCoolingFunctionSelect(AbstractSelect):
     """
     Select entity for heating/cooling function.
     (Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang)
+
+    Register: 230
+    Value:     0-4
     """
 
     def __init__(
