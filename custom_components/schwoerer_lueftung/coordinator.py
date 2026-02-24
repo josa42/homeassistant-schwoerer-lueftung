@@ -93,7 +93,7 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
             value = self.data.get(key)
 
             if map is not None and value is not None:
-                return map[value]
+                return map.get(value)
 
             return value
 
