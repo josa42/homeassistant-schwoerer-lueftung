@@ -169,6 +169,15 @@ class AbstractRoomSensor(AbstractSensor):
             entity_type=entity_type,
             **kwargs,
         )
+        self._room_number = room_number
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type and room number as attributes."""
+        return {
+            "entity_type": self._entity_type,
+            "room_number": self._room_number,
+        }
 
 
 class AbstractRoomTemperatureSensor(AbstractRoomSensor):
@@ -247,6 +256,15 @@ class AbstractBinaryRoomSensor(AbstractBinarySensor):
             entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
+        self._room_number = room_number
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type and room number as attributes."""
+        return {
+            "entity_type": self._entity_type,
+            "room_number": self._room_number,
+        }
 
 
 class AbstractSelect(Entity, SelectEntity):
@@ -309,6 +327,15 @@ class AbstractRoomNumber(AbstractNumber):
             entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
+        self._room_number = room_number
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type and room number as attributes."""
+        return {
+            "entity_type": self._entity_type,
+            "room_number": self._room_number,
+        }
 
 
 class AbstractSwitch(Entity, SwitchEntity):
@@ -344,3 +371,12 @@ class AbstractRoomSwitch(AbstractSwitch):
             entity_type=re.sub(r"_\d+$", "", REG_KEYS.get(register) or "") or "",
             **kwargs,
         )
+        self._room_number = room_number
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the sensor type and room number as attributes."""
+        return {
+            "entity_type": self._entity_type,
+            "room_number": self._room_number,
+        }
