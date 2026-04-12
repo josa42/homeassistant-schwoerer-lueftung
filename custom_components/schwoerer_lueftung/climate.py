@@ -97,6 +97,11 @@ class RoomClimate(Entity, ClimateEntity):
             },
         )
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the entity type as an attribute."""
+        return {"entity_type": self._entity_type}
+
     async def async_set_temperature(self, **kwargs: Any) -> None:
         if (temperature := kwargs.get(ATTR_TEMPERATURE)) is not None:
             # Clamp temperature to valid range
