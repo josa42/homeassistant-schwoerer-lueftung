@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from modbus_connection import ModbusConnectionError, ModbusTcpParams
 from modbus_connection.mock import MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -67,3 +69,34 @@ async def test_setup_retries_when_the_device_is_unreachable(
     await hass.async_block_till_done()
 
     assert wgt_entry.state is ConfigEntryState.SETUP_RETRY
+
+
+async def test_room_devices_hang_off_the_main_device(
+    hass: HomeAssistant,
+    mock_modbus,
+    wgt_entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Rooms link to the unit by device id, not by the deprecated identifier."""
+    wgt_entry.add_to_hass(hass)
+
+    assert await hass.config_entries.async_setup(wgt_entry.entry_id)
+    await hass.async_block_till_done()
+
+    registry = dr.async_get(hass)
+    devices = dr.async_entries_for_config_entry(registry, wgt_entry.entry_id)
+    main = next(d for d in devices if d.via_device_id is None)
+    rooms = [d for d in devices if d is not main]
+
+    assert len(rooms) == 2
+    assert {d.via_device_id for d in rooms} == {main.id}
+
+    # The registry resolves the deprecated `via_device` to the same link, so
+    # the device info itself is what pins which of the two we pass.
+    room_info = wgt_entry.runtime_data.get_room_device(1)
+    assert room_info["via_device_id"] == main.id
+    assert "via_device" not in room_info
+
+    # Passing the identifier tuple makes Home Assistant log a deprecation
+    # warning naming this integration, which is the visible symptom.
+    assert "deprecated `via_device`" not in caplog.text

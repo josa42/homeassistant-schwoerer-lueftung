@@ -43,6 +43,7 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
     """
 
     _device: DeviceInfo | None = None
+    _device_id: str | None = None
 
     def __init__(
         self,
@@ -87,10 +88,29 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
     ############################################################################
     # Device registry
 
-    def register_device(self) -> None:
-        """Register the main device in the device registry."""
-        device_registry.async_get(self.hass).async_get_or_create(
+    def register_device(self) -> str:
+        """Register the main device and return its device registry id.
+
+        Room devices hang off the main one by that id. The identifier tuple
+        cannot serve: it is not unique across config entries, which is why
+        `via_device` is deprecated in 2026.9 for removal in 2027.8.
+        """
+        entry = device_registry.async_get(self.hass).async_get_or_create(
             config_entry_id=self.config_entry.entry_id, **self.get_device()
+        )
+        self._device_id = entry.id
+        return self._device_id
+
+    def get_device_id(self) -> str:
+        """The main device's registry id, registering it if setup has not.
+
+        Setup registers the device before the platforms are forwarded, so the
+        id is normally cached by the time a room device is built. Registering
+        is idempotent, so asking again costs nothing and keeps the link from
+        depending on that order.
+        """
+        return (
+            self._device_id if self._device_id is not None else self.register_device()
         )
 
     def get_device_identifier(self) -> tuple[str, str]:
@@ -141,7 +161,7 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
                 name=f"{model} - {room_name}",
                 manufacturer=MANUFACTURER,
                 model=f"{model} - {room_name}",
-                via_device=self.get_device_identifier(),
+                via_device_id=self.get_device_id(),
             )
 
         return self._room_devices[room_number]
