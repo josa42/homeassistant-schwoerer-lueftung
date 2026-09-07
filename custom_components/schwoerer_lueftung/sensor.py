@@ -286,10 +286,3 @@ class SchwoererSensor(SchwoererEntity, SensorEntity):
             return value.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
 
         return value
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        attributes = super().extra_state_attributes
-        if self._room_number is None:
-            attributes["raw_value"] = self._value
-        return attributes

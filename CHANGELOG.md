@@ -17,6 +17,10 @@ upgrade and no reconfiguration is needed.
   so another integration talking to the same unit no longer competes with it.
   The device serves one Modbus session at a time, which is what made that
   competition hurt.
+- **The `raw_value` state attribute is gone from sensors.** It held the
+  undecoded register word, which the diagnostics download now carries for every
+  register at once. Anything reading `state_attr(..., 'raw_value')` needs the
+  sensor's own state instead. `entity_type` and `room_number` are unchanged.
 - **The "enable all sensors by default" setup question is gone.** Home Assistant
   applied it only when an entity was first registered, so the answer given
   during setup could never be changed afterwards. Enabling entities in bulk on
@@ -41,10 +45,6 @@ upgrade and no reconfiguration is needed.
   entity exists, enabling one costs no Modbus traffic. T9, the device clock and
   the per-room auxiliary heating binary sensor stay off. Existing installs keep
   whatever the entity registry holds.
-- **`raw_value` on temperature sensors is the decoded value.** 1.x exposed the
-  undecoded register word (`215`); it is now `21.5`. Every other sensor is
-  unscaled, so its `raw_value` is unchanged. The undecoded map moved to the
-  diagnostics download.
 - **Writes are range-checked before they reach the device.** Room setpoints and
   linear fan power are validated locally, where 1.x let the device reject them.
   The climate entity still clamps rather than raises, so a thermostat card

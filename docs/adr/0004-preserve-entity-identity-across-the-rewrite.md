@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-07
+- Superseded in part by: [0005](0005-drop-the-raw-value-state-attribute.md),
+  the `raw_value` state attribute only
 
 ## Context
 

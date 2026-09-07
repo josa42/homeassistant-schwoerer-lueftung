@@ -133,6 +133,8 @@ async def test_values_and_attributes(
     assert outdoor is not None
     assert float(outdoor.state) == 7.8
     assert outdoor.attributes["entity_type"] == "temperature_t10_outdoor"
+    # Dropped in 2.0: the diagnostics download carries the undecoded map.
+    assert "raw_value" not in outdoor.attributes
 
     heat_pump = _by_unique_id(hass, wgt_entry, "heat_pump_status")
     assert heat_pump is not None
