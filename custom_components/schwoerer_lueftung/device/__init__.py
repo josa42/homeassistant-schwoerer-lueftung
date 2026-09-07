@@ -157,6 +157,12 @@ class SchwoererDevice:
         for name in self._names:
             subsystem = self._subsystem(name)
             assert subsystem is not None
-            for space, values in (await subsystem.async_read_raw(notify=False)).items():
+            try:
+                read = await subsystem.async_read_raw(notify=False)
+            except ModbusError:
+                # A dump is most wanted precisely when something is refusing to
+                # answer, so a failing sub-system must not cost us the rest.
+                continue
+            for space, values in read.items():
                 raw.setdefault(space, {}).update(values)
         return raw

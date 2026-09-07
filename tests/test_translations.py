@@ -124,9 +124,9 @@ class TestTranslationSorting:
         """Recursively check if dictionary keys are sorted."""
         if isinstance(obj, dict):
             keys = list(obj.keys())
-            
+
             # Check if all keys are numeric strings - if so, sort numerically
-            if all(k.lstrip('-').isdigit() for k in keys):
+            if all(k.lstrip("-").isdigit() for k in keys):
                 sorted_keys = sorted(keys, key=lambda x: int(x))
             else:
                 sorted_keys = sorted(keys)

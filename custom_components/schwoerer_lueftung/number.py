@@ -2,100 +2,94 @@
 
 from __future__ import annotations
 
-from homeassistant.components.number import NumberMode
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import TEMPERATURE, UnitOfTemperature
+from dataclasses import dataclass
+
+from homeassistant.components.number import (
+    NumberDeviceClass,
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
+from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import AbstractNumber, AbstractRoomNumber
-from .const import DOMAIN
-from .coordinator import Coordinator
-from .modbus.registers import (
+from .const import CONF_ROOMS
+from .coordinator import SchwoererConfigEntry
+from .device.components import (
     LINEAR_FAN_POWER_MAX,
     LINEAR_FAN_POWER_MIN,
-    REG_BASE_TEMPERATURE_ROOM_1,
-    REG_LINEAR_FAN_POWER,
+    ROOM_TEMPERATURE_MAX,
+    ROOM_TEMPERATURE_MIN,
 )
-from .modbus.transforms import to_temperature
+from .entity import ROOMS, SchwoererEntity, SchwoererEntityDescription
+
+
+@dataclass(frozen=True, kw_only=True)
+class SchwoererNumberEntityDescription(
+    SchwoererEntityDescription, NumberEntityDescription
+):
+    """Describe a number over a writable device field."""
+
+
+COMMON_NUMBERS: tuple[SchwoererNumberEntityDescription, ...] = (
+    SchwoererNumberEntityDescription(
+        key="linear_fan_power",
+        subsystem="ventilation",
+        native_min_value=LINEAR_FAN_POWER_MIN,
+        native_max_value=LINEAR_FAN_POWER_MAX,
+        native_step=1,
+        native_unit_of_measurement="%",
+        entity_registry_enabled_default=False,
+    ),
+)
+
+ROOM_NUMBERS: tuple[SchwoererNumberEntityDescription, ...] = (
+    SchwoererNumberEntityDescription(
+        key="base_temperature",
+        subsystem=ROOMS,
+        device_class=NumberDeviceClass.TEMPERATURE,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=ROOM_TEMPERATURE_MIN,
+        native_max_value=ROOM_TEMPERATURE_MAX,
+        native_step=0.1,
+        mode=NumberMode.BOX,
+        entity_registry_enabled_default=False,
+    ),
+)
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: SchwoererConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
+    coordinator = entry.runtime_data
 
-    entities = []
-    entities.append(LinearFanPowerNumber(coordinator))
+    entities = [
+        SchwoererNumber(coordinator, description) for description in COMMON_NUMBERS
+    ]
 
-    # Add base temperature numbers for each configured room (WGT only)
     if coordinator.has_heating():
-        rooms = entry.data.get("rooms", [])
-        for room in rooms:
-            entities.append(RoomBaseTemperatureNumber(coordinator, room["number"]))
+        entities.extend(
+            SchwoererNumber(coordinator, description, room["number"])
+            for room in entry.data.get(CONF_ROOMS, [])
+            for description in ROOM_NUMBERS
+        )
 
     async_add_entities(entities)
 
 
-class LinearFanPowerNumber(AbstractNumber):
-    """
-    Conrol for linear fan power setting.
-    (Manuelle Lineare Luftleistung)
+class SchwoererNumber(SchwoererEntity, NumberEntity):
+    """A number over a writable device field."""
 
-    Register: 103
-    Value:    30-100 (%)
-    """
-
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(
-            coordinator,
-            REG_LINEAR_FAN_POWER,
-            min_value=LINEAR_FAN_POWER_MIN,
-            max_value=LINEAR_FAN_POWER_MAX,
-            step=1,
-            unit_of_measurement="%",
-            enabled_by_default=False,
-        )
-
-
-class RoomBaseTemperatureNumber(AbstractRoomNumber):
-    """
-    Control for room base temperature setting.
-    (Grundtemperatur Raum)
-
-    Register: 420-436
-    Value:    10.0-30.0 (°C)
-    """
-
-    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(
-            coordinator,
-            room_number,
-            REG_BASE_TEMPERATURE_ROOM_1,
-            device_class=TEMPERATURE,
-            unit_of_measurement=UnitOfTemperature.CELSIUS,
-            enabled_by_default=False,
-            min_value=10.0,
-            max_value=30.0,
-            step=0.1,
-            mode=NumberMode.BOX,
-        )
-
-        self._room_number = room_number
-        self._base_register = REG_BASE_TEMPERATURE_ROOM_1
+    entity_description: SchwoererNumberEntityDescription
 
     @property
     def native_value(self) -> float | None:
-        """Return temperature value with transformation applied."""
-        raw_value = self.coordinator.get_room_data(
-            self._base_register, self._room_number
-        )
-        return to_temperature(raw_value)
+        return self._value
 
     async def async_set_native_value(self, value: float) -> None:
-        """Set temperature value by converting to raw register value."""
-        await self.coordinator.async_write_room_register(
-            self._base_register, self._room_number, int(value * 10)
-        )
+        # The field takes the value in its own unit and encodes it; its
+        # validator vets the range before anything reaches the wire.
+        await self._async_write(value)

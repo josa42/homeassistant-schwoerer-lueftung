@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from modbus_connection import ModbusError
 
 from .const import (
     CONF_DEVICE_TYPE,
@@ -23,29 +24,44 @@ from .const import (
     MODEL_WGT,
     MODEL_WRT,
 )
-from .modbus.client import ModbusClient
-from .modbus.registers import REG_KEYS, room_reg
+from .device import SchwoererDevice, UpdateReport
+
+if TYPE_CHECKING:
+    from modbus_connection.model import Component
 
 _LOGGER = logging.getLogger(__name__)
 
+type SchwoererConfigEntry = ConfigEntry[Coordinator]
 
-class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
+
+class Coordinator(DataUpdateCoordinator[UpdateReport]):
+    """Poll the device and hand the report to the entities.
+
+    The data is the poll's :class:`UpdateReport` rather than a value map:
+    entities read their values straight off the device's typed attributes and
+    use the report only to decide whether their own sub-system answered.
+    """
+
     _device: DeviceInfo | None = None
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: SchwoererConfigEntry,
+        device: SchwoererDevice,
+    ) -> None:
         self._room_devices: dict[int, DeviceInfo] = {}
-        self.config_entry = entry
-        self.client = ModbusClient(
-            host=entry.data[CONF_HOST],
-            port=DEFAULT_PORT,
-        )
+        self.device = device
 
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=DOMAIN,
             update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
         )
+
+        self._failed: frozenset[str] = frozenset()
 
     def has_heating(self) -> bool:
         return self.get_device_type() == DEVICE_TYPE_WGT
@@ -56,55 +72,20 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
     def get_device_type(self) -> str:
         return self.config_entry.data.get(CONF_DEVICE_TYPE, DEVICE_TYPE_WGT)
 
-    async def async_write_register(self, register: int, value: int) -> None:
+    ############################################################################
+    # Writing
+
+    async def async_write(self, component: Component, field: str, value: Any) -> None:
+        """Write one field and refresh, so the new value shows up at once."""
         try:
-            if not await self.hass.async_add_executor_job(self.client.connect):
-                raise UpdateFailed("Failed to connect to device")
+            await component.write(field, value)
+        except ModbusError as err:
+            raise UpdateFailed(f"Error writing {field}: {err}") from err
 
-            success = await self.hass.async_add_executor_job(
-                self.client.write_register, register, int(value)
-            )
+        await self.async_request_refresh()
 
-            if success:
-                await self.async_request_refresh()
-
-        except Exception as err:
-            raise UpdateFailed(f"Error communicating with device: {err}") from err
-        finally:
-            await self.hass.async_add_executor_job(self.client.disconnect)
-
-    async def async_write_room_register(
-        self, base_register: int, roomt_number: int, value: int
-    ) -> None:
-        await self.async_write_register(room_reg(base_register, roomt_number), value)
-
-    def get_data(self, register: int | None, map: dict[int, str] | None = None) -> Any:
-        if self.data is None or register is None:
-            return None
-
-        try:
-            key = REG_KEYS.get(register)
-            if key is None:
-                return None
-
-            if not self.client.is_subscribed(register):
-                self.client.subscribe(register)
-
-            value = self.data.get(key)
-
-            if map is not None and value is not None:
-                return map.get(value)
-
-            return value
-
-        except Exception as err:
-            _LOGGER.error(f"Error getting data for register {register}: {err}")
-            return None
-
-    def get_room_data(
-        self, base_register: int, room_number: int, map: dict[int, str] | None = None
-    ) -> Any:
-        return self.get_data(room_reg(base_register, room_number), map)
+    ############################################################################
+    # Device registry
 
     def register_device(self) -> None:
         """Register the main device in the device registry."""
@@ -163,20 +144,26 @@ class Coordinator(DataUpdateCoordinator[dict[str, Any]]):
                 via_device=self.get_device_identifier(),
             )
 
-            _LOGGER.debug(
-                f"Created device info for room {room_number}: [ via_device: {self.config_entry.entry_id} ]"
-            )
-
         return self._room_devices[room_number]
 
-    async def _async_update_data(self) -> dict[str, Any]:
+    ############################################################################
+    # Polling
+
+    async def _async_update_data(self) -> UpdateReport:
         try:
-            if not await self.hass.async_add_executor_job(self.client.connect):
-                raise UpdateFailed("Failed to connect to device")
-
-            return await self.hass.async_add_executor_job(self.client.read_data)
-
-        except Exception as err:
+            report = await self.device.async_update()
+        except ModbusError as err:
             raise UpdateFailed(f"Error communicating with device: {err}") from err
-        finally:
-            await self.hass.async_add_executor_job(self.client.disconnect)
+
+        if not report.updated:
+            errors = list(report.failed.values())
+            raise UpdateFailed(
+                f"No sub-system answered: {errors[0]}"
+            ) from ExceptionGroup("every sub-system failed", errors)
+
+        # Log a sub-system the first time it starts failing, not on every poll.
+        for name in sorted(report.failed.keys() - self._failed):
+            _LOGGER.warning("Failed to fetch %s: %s", name, report.failed[name])
+        self._failed = frozenset(report.failed)
+
+        return report
