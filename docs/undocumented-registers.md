@@ -14,7 +14,7 @@ single read is not: the address is not implemented.
 The device answers **exception code 2 (Illegal Data Address)** for anything it
 does not implement, which makes the probe unambiguous. That same strictness is
 why the integration reads only contiguous runs of declared fields; see
-`modbus-modernization.md`.
+[ADR 0002](adr/0002-contiguous-only-register-blocks.md).
 
 Probed unit: WGT, no ground heat exchanger, 6 rooms, 2026-09-07.
 
