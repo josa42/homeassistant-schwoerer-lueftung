@@ -3,7 +3,7 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
-## 2.0.0 (unreleased)
+## 2.0.0 - 2026-09-07
 
 A rewrite onto the Modbus architecture Home Assistant introduced in 2026.9.
 Entities keep their IDs, so history, automations and dashboards survive the
@@ -45,6 +45,10 @@ upgrade and no reconfiguration is needed.
   entity exists, enabling one costs no Modbus traffic. T9, the device clock and
   the per-room auxiliary heating binary sensor stay off. Existing installs keep
   whatever the entity registry holds.
+- **Fewer round trips per poll.** Reads are planned as blocks over contiguous
+  runs of registers rather than one request per address, so a fully subscribed
+  poll costs around 32 reads where 1.x needed 40 or more. The interval is
+  unchanged at 30 seconds.
 - **Writes are range-checked before they reach the device.** Room setpoints and
   linear fan power are validated locally, where 1.x let the device reject them.
   The climate entity still clamps rather than raises, so a thermostat card
