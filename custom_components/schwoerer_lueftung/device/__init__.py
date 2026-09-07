@@ -20,11 +20,13 @@ from modbus_connection.model import Component, ComponentGroup
 
 from .components import (
     Alarms,
+    Clock,
     GroundHeatExchanger,
     Heating,
     OperatingHours,
     Room,
     Temperatures,
+    UndocumentedTemperatures,
     Ventilation,
 )
 
@@ -74,6 +76,12 @@ class SchwoererDevice:
         self.alarms = Alarms(unit)
         self.operating_hours = OperatingHours(unit)
 
+        # Undocumented, found by probing one unit. Always constructed, since
+        # neither depends on installed hardware, but kept apart so a firmware
+        # without them fails only its own sub-system.
+        self.undocumented_temperatures = UndocumentedTemperatures(unit)
+        self.clock = Clock(unit)
+
         self.heating = Heating(unit) if has_heating else None
         self.ground_heat_exchanger = (
             GroundHeatExchanger(unit) if has_ground_heat_exchanger else None
@@ -93,10 +101,12 @@ class SchwoererDevice:
             for name in (
                 "ventilation",
                 "temperatures",
+                "undocumented_temperatures",
                 "alarms",
                 "operating_hours",
                 "heating",
                 "ground_heat_exchanger",
+                "clock",
                 "rooms",
             )
             if self._subsystem(name) is not None

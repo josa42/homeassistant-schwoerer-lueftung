@@ -84,15 +84,23 @@ keeping the map in a single place is what makes it readable as a datasheet.
 The split is driven by [the untestable configuration](#the-untestable-configuration):
 a device that refuses a block fails only the component that asked for it.
 
-| Component            | Registers                                                       | Present when |
-| -------------------- | --------------------------------------------------------------- | ------------ |
-| `Ventilation`        | 100-104, 110-112, 117-118, 123, 131, 133, 140-145               | always |
-| `Temperatures`       | 204, 205, 209                                                   | always |
-| `Alarms`             | 240, 242-248, 250-254, 263, 265                                 | always |
-| `OperatingHours`     | 800-804                                                         | always |
-| `Heating`            | 114, 116, 201-203, 206-207, 230-234, 805-810                    | `device_type == wgt` |
-| `GroundHeatExchanger`| 121, 200, 813                                                   | `has_ground_heat_exchanger` |
-| `Room` × N           | 360+i, 400+i, 420+i, 440+i, 460+i, 500+i                        | per configured room |
+| Component                  | Registers                                                 | Present when |
+| -------------------------- | --------------------------------------------------------- | ------------ |
+| `Ventilation`              | 100-104, 110-112, 117-118, 123, 131, 133, 140-145         | always |
+| `Temperatures`             | 204, 205, 209                                             | always |
+| `UndocumentedTemperatures` | 208 (T9)                                                  | always |
+| `Alarms`                   | 240, 242-248, 250-254, 263, 265                           | always |
+| `OperatingHours`           | 800-804                                                   | always |
+| `Heating`                  | 114, 116, 201-203, 206-207, 230-234, 805-810              | `device_type == wgt` |
+| `GroundHeatExchanger`      | 121, 200, 813                                             | `has_ground_heat_exchanger` |
+| `Clock`                    | 620-625                                                   | always |
+| `Room` × N                 | 360+i, 400+i, 420+i, 440+i, 460+i, 500+i                  | per configured room |
+
+`UndocumentedTemperatures` and `Clock` hold registers found by probing rather
+than from the datasheet — see `undocumented-registers.md`. They are kept apart
+from the documented components on the same principle as the hardware-dependent
+ones: this is one firmware's behaviour on one unit, and a device without them
+must not lose documented sensors alongside them. Both entities ship disabled.
 
 `Room` instances go into a `ComponentGroup` so N rooms still cost six block
 reads, not 6×N.

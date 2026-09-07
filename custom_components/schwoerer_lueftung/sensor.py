@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -11,9 +12,10 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import UnitOfTemperature, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util import dt as dt_util
 
 from .const import CONF_ROOMS
 from .coordinator import SchwoererConfigEntry
@@ -152,6 +154,19 @@ TEMPERATURE_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     _temperature("temperature_t5_exhaust_air", "temperatures"),
     _temperature("temperature_t6_in_heat_exchanger", "temperatures"),
     _temperature("temperature_t10_outdoor", "temperatures", enabled=True),
+    # Undocumented, so off by default: it was found on one unit and what it
+    # measures is unknown.
+    _temperature("temperature_t9", "undocumented_temperatures"),
+)
+
+# The unit's own real-time clock. Diagnostic, and off by default.
+CLOCK_SENSOR = SchwoererSensorEntityDescription(
+    key="device_clock",
+    subsystem="clock",
+    field="datetime",
+    device_class=SensorDeviceClass.TIMESTAMP,
+    entity_category=EntityCategory.DIAGNOSTIC,
+    entity_registry_enabled_default=False,
 )
 
 ALARM_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
@@ -227,6 +242,7 @@ async def async_setup_entry(
         *TEMPERATURE_SENSORS,
         *ALARM_SENSORS,
         *OPERATING_HOURS_SENSORS,
+        CLOCK_SENSOR,
     ]
 
     if coordinator.has_ground_heat_exchanger():
@@ -272,6 +288,11 @@ class SchwoererSensor(SchwoererEntity, SensorEntity):
 
         if (options := self.entity_description.options_map) is not None:
             return options.get(value)
+
+        if isinstance(value, datetime) and value.tzinfo is None:
+            # The unit keeps local time with no zone of its own, so read it as
+            # Home Assistant's configured one.
+            return value.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
 
         return value
 

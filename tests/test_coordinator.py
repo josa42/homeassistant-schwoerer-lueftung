@@ -27,10 +27,12 @@ async def test_data_is_the_update_report(
     assert set(report.updated) == {
         "ventilation",
         "temperatures",
+        "undocumented_temperatures",
         "alarms",
         "operating_hours",
         "heating",
         "ground_heat_exchanger",
+        "clock",
         "rooms",
     }
     assert report.failed == {}

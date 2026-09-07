@@ -13,11 +13,13 @@ from modbus_connection.mock import MockModbusUnit
 from custom_components.schwoerer_lueftung.device import SchwoererDevice
 from custom_components.schwoerer_lueftung.device.components import (
     Alarms,
+    Clock,
     GroundHeatExchanger,
     Heating,
     OperatingHours,
     Room,
     Temperatures,
+    UndocumentedTemperatures,
     Ventilation,
 )
 
@@ -121,6 +123,8 @@ def declared_addresses() -> set[int]:
         OperatingHours,
         Heating,
         GroundHeatExchanger,
+        UndocumentedTemperatures,
+        Clock,
     ):
         addresses |= {
             field.address
@@ -225,3 +229,44 @@ async def test_read_raw_covers_every_subsystem(unit: MockModbusUnit) -> None:
     assert raw["holding"][204] == 215  # raw, not 21.5
     assert raw["holding"][114] == 5
     assert raw["holding"][360] == 210
+
+
+async def test_undocumented_t9_decodes_as_a_temperature(unit: MockModbusUnit) -> None:
+    """208 is absent from the datasheet, which numbers T1-T8 and T10."""
+    device = make_device(unit)
+    await device.async_update()
+
+    assert device.undocumented_temperatures.temperature_t9 == 25.9
+
+
+async def test_device_clock_reads_as_a_datetime(unit: MockModbusUnit) -> None:
+    """620-625 is year, month, day, hour, minute, second."""
+    from datetime import datetime
+
+    device = make_device(unit)
+    await device.async_update()
+
+    assert device.clock.datetime == datetime(2026, 9, 7, 12, 21, 32)
+
+
+async def test_device_clock_folds_nonsense_into_none(unit: MockModbusUnit) -> None:
+    """A unit with a dead clock must not raise out of the poll."""
+    unit.holding[621] = 13  # month 13
+    device = make_device(unit)
+    await device.async_update()
+
+    assert device.clock.datetime is None
+
+
+async def test_undocumented_registers_fail_alone(unit: MockModbusUnit) -> None:
+    """A firmware without them must not lose the documented sensors."""
+    unit.fail_read(208, IllegalDataAddressError(2))
+    for address in range(620, 626):
+        unit.fail_read(address, IllegalDataAddressError(2))
+
+    device = make_device(unit)
+    report = await device.async_update()
+
+    assert set(report.failed) == {"undocumented_temperatures", "clock"}
+    assert "temperatures" in report.updated
+    assert device.temperatures.temperature_t10_outdoor == 7.8

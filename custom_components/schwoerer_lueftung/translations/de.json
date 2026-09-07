@@ -169,6 +169,9 @@
       "current_temperature_room": {
         "name": "Aktuelle Temperatur"
       },
+      "device_clock": {
+        "name": "Geräteuhr"
+      },
       "device_filter_remaining": {
         "name": "Restlaufzeit Gerätefilter"
       },
@@ -303,6 +306,9 @@
       },
       "temperature_t8_condenser": {
         "name": "Temperatur im Kondensator (T8)"
+      },
+      "temperature_t9": {
+        "name": "Temperatur T9"
       },
       "time_program_base_level": {
         "name": "Zeitprogramm Basis Luftstufe"

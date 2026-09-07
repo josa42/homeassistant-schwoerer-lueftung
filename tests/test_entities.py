@@ -9,9 +9,13 @@ were taken from the pre-2.0 code, where they were built as
 
 from __future__ import annotations
 
+from datetime import datetime
+
 import pytest
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
 from modbus_connection import IllegalDataAddressError
 from modbus_connection.mock import MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -175,3 +179,44 @@ def _by_unique_id(hass: HomeAssistant, entry: MockConfigEntry, suffix: str):
         if er_entry.unique_id == f"{entry.entry_id}_{suffix}":
             return hass.states.get(er_entry.entity_id)
     return None
+
+
+async def test_undocumented_sensors_render(
+    hass: HomeAssistant,
+    mock_modbus,
+    wgt_entry_all_enabled: MockConfigEntry,
+) -> None:
+    """T9 and the device clock, which ship disabled, produce sane states."""
+    wgt_entry = wgt_entry_all_enabled
+    await setup_entry(hass, wgt_entry)
+
+    t9 = _by_unique_id(hass, wgt_entry, "temperature_t9")
+    assert t9 is not None
+    assert float(t9.state) == 25.9
+    assert t9.attributes["entity_type"] == "temperature_t9"
+
+    clock = _by_unique_id(hass, wgt_entry, "device_clock")
+    assert clock is not None
+    # A timestamp sensor renders as an ISO string, serialized to UTC. The unit
+    # keeps local time with no zone, so it is read as Home Assistant's - the
+    # comparison is between instants, not wall clocks.
+    parsed = datetime.fromisoformat(clock.state)
+    assert parsed.tzinfo is not None
+    assert parsed == datetime(2026, 9, 7, 12, 21, 32, tzinfo=dt_util.DEFAULT_TIME_ZONE)
+
+
+async def test_clock_is_diagnostic_and_off_by_default(
+    hass: HomeAssistant, mock_modbus, wgt_entry: MockConfigEntry
+) -> None:
+    """Undocumented extras must not clutter a fresh install."""
+    await setup_entry(hass, wgt_entry)
+
+    registry = er.async_get(hass)
+    entries = {
+        e.unique_id: e
+        for e in er.async_entries_for_config_entry(registry, wgt_entry.entry_id)
+    }
+    clock = entries[f"{wgt_entry.entry_id}_device_clock"]
+    assert clock.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+    assert clock.entity_category is EntityCategory.DIAGNOSTIC
+    assert entries[f"{wgt_entry.entry_id}_temperature_t9"].disabled_by is not None

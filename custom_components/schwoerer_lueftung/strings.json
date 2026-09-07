@@ -169,6 +169,9 @@
       "current_temperature_room": {
         "name": "Current Temperature"
       },
+      "device_clock": {
+        "name": "Device Clock"
+      },
       "device_filter_remaining": {
         "name": "Device Filter Remaining"
       },
@@ -303,6 +306,9 @@
       },
       "temperature_t8_condenser": {
         "name": "Temperature T8 Condenser"
+      },
+      "temperature_t9": {
+        "name": "Temperature T9"
       },
       "time_program_base_level": {
         "name": "Time Program Base Level"

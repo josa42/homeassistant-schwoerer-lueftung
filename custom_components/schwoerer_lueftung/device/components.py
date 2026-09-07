@@ -41,6 +41,8 @@ sets ``force_fc16=True``.
 
 from __future__ import annotations
 
+from datetime import datetime as _datetime
+
 from modbus_connection.model import Component, gauge, integer
 
 
@@ -163,6 +165,55 @@ class Temperatures(SchwoererComponent):
 
     temperature_t10_outdoor = gauge(209, 0.1, unit="°C")
     """T10 Aussen."""
+
+
+class UndocumentedTemperatures(SchwoererComponent):
+    """Air-path sensors the datasheet omits, found by probing a real WGT.
+
+    The datasheet numbers its sensors T1-T8 and T10, skipping 208. That address
+    is implemented and reads a temperature sitting among its neighbours, so it
+    is almost certainly the missing T9. What it measures is unknown.
+
+    Read as its own component rather than folded into :class:`Temperatures`:
+    this is one firmware's behaviour on one unit, and a device without it must
+    not lose the documented sensors alongside it. It costs no extra round trip,
+    since 208 is adjacent to T10 and would share its block either way.
+    """
+
+    temperature_t9 = gauge(208, 0.1, unit="°C")
+    """T9 — undocumented; position in the air path unknown."""
+
+
+class Clock(SchwoererComponent):
+    """The unit's own real-time clock, 620-625. Not in the datasheet.
+
+    Confirmed by reading it three times three seconds apart and watching it
+    track the wall clock. Its own component for the same reason as
+    :class:`UndocumentedTemperatures`.
+    """
+
+    year = integer(620)
+    month = integer(621)
+    day = integer(622)
+    hour = integer(623)
+    minute = integer(624)
+    second = integer(625)
+
+    @property
+    def datetime(self) -> _datetime | None:
+        """The device's clock, or None until read or if it reads nonsense.
+
+        Naive: the unit keeps local time with no zone, so the caller attaches
+        one. A device with a dead clock can report an out-of-range date, which
+        ``datetime`` would raise on, so that is folded into None.
+        """
+        parts = (self.year, self.month, self.day, self.hour, self.minute, self.second)
+        if any(part is None for part in parts):
+            return None
+        try:
+            return _datetime(*parts)  # type: ignore[arg-type]
+        except ValueError:
+            return None
 
 
 class Alarms(SchwoererComponent):
