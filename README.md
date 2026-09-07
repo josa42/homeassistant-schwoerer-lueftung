@@ -85,10 +85,9 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 | **Device Type**               | WGT (with heating) or WRT (ventilation only)                  | WGT      |
 | **Number of Rooms**           | Rooms with climate control (1-17)                             | 1        |
 | **Has ground heat exchanger** | Enable if your system has a ground heat exchanger (EWT)       | Off      |
-| **Enable All Sensors**        | Enable all sensors by default (otherwise some are disabled)   | Off      |
 
 > [!TIP]
-> Set "Enable All Sensors" to ON if you want access to detailed diagnostic information like operating hours and additional temperature sensors. These can be disabled individually later.
+> Almost every entity is enabled on a fresh install. Three ship disabled: the undocumented T9 temperature, the device clock, and the per-room auxiliary heating binary sensor, which duplicates the switch next to it. Turn any of them on from the entity's own page.
 
 <br><br>
 
