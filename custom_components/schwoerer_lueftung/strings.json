@@ -166,6 +166,9 @@
       "current_supply_air_rpm": {
         "name": "Current Supply Air RPM"
       },
+      "current_temperature_room": {
+        "name": "Current Temperature"
+      },
       "device_filter_remaining": {
         "name": "Device Filter Remaining"
       },

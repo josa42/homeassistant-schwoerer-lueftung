@@ -56,6 +56,7 @@ VALID_ENTITY_KEYS = {
         "current_fan_level",
         "current_supply_air_flow",
         "current_supply_air_rpm",
+        "current_temperature_room",
         "device_filter_remaining",
         "error_message",
         "exhaust_air_fan_status",
