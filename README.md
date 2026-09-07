@@ -30,9 +30,15 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josa42&repository=homeassistant-schwoerer-lueftung)
 
 ### Requirements
-- Home Assistant **2026.1.0** or newer
+- Home Assistant **2026.9.0** or newer
 - Schwörer ventilation system with Modbus TCP connectivity
 - Network connection to your ventilation unit
+
+> **Upgrading from 1.x?** Version 2.0 requires Home Assistant 2026.9, where the
+> `modbus` integration hands out units over connections it shares. This
+> integration no longer opens its own socket, so another integration talking to
+> the same unit no longer competes with it for the device. Your entities keep
+> their IDs and history; no reconfiguration is needed.
 
 ### HACS (Recommended)
 

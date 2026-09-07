@@ -72,32 +72,49 @@ against the mock backend alone.
 
 ```
 device/
-  __init__.py        SchwoererDevice, UpdateReport
-  ventilation.py     Ventilation    — 100-145
-  temperatures.py    Temperatures   — 200-209 (T5, T6, T10 always; rest WGT-only)
-  alarms.py          Alarms         — 230-265
-  heating.py         Heating        — WGT-only registers in 114/116/230-234
-  operating_hours.py OperatingHours — 800-813
-  rooms.py           Room           — 360/400/420/440/460/500, index + stride 1
+  __init__.py     SchwoererDevice, UpdateReport
+  components.py   the whole register map, one Component per sub-system
 ```
+
+The components live in one file rather than one file each: they are short, and
+keeping the map in a single place is what makes it readable as a datasheet.
 
 ### Component split
 
-The split is driven by [constraint 5](#the-untestable-configuration): a device
-that refuses a block fails only the component that asked for it.
+The split is driven by [the untestable configuration](#the-untestable-configuration):
+a device that refuses a block fails only the component that asked for it.
 
-| Component        | Registers                          | Present when |
-| ---------------- | ---------------------------------- | ------------ |
-| `Ventilation`    | 100-104, 110-112, 117-118, 121, 123, 131, 133, 140-145 | always |
-| `Temperatures`   | 204, 205, 209                      | always |
-| `Alarms`         | 240, 242-248, 250-254, 263, 265    | always |
-| `OperatingHours` | 800-804                            | always |
-| `GroundHeat`     | 121 state, 200 (T1), 813 hours     | `has_ground_heat_exchanger` |
-| `Heating`        | 114, 116, 201-203, 206-207, 230-234, 805-810 | `device_type == wgt` |
-| `Room` × N       | 360+i, 400+i, 420+i, 440+i, 460+i, 500+i | per configured room |
+| Component            | Registers                                                       | Present when |
+| -------------------- | --------------------------------------------------------------- | ------------ |
+| `Ventilation`        | 100-104, 110-112, 117-118, 123, 131, 133, 140-145               | always |
+| `Temperatures`       | 204, 205, 209                                                   | always |
+| `Alarms`             | 240, 242-248, 250-254, 263, 265                                 | always |
+| `OperatingHours`     | 800-804                                                         | always |
+| `Heating`            | 114, 116, 201-203, 206-207, 230-234, 805-810                    | `device_type == wgt` |
+| `GroundHeatExchanger`| 121, 200, 813                                                   | `has_ground_heat_exchanger` |
+| `Room` × N           | 360+i, 400+i, 420+i, 440+i, 460+i, 500+i                        | per configured room |
+
+`Ventilation` and `Temperatures` sit inside clusters that also hold optional
+hardware, so their ranges step around 114-116, 121 and 200-203/206-207 rather
+than reading the cluster whole. That costs a few extra round trips and is the
+price of the isolation.
 
 `Room` instances go into a `ComponentGroup` so N rooms still cost six block
 reads, not 6×N.
+
+### Measured read counts
+
+Against the mock, per 30-second poll:
+
+| Configuration                   | Blocks | Registers |
+| ------------------------------- | ------ | --------- |
+| WGT + ground heat exchanger + 3 rooms | 22 | 104 |
+| WGT + ground heat exchanger + 17 rooms | 22 | 188 |
+| WRT, no ground heat exchanger, no rooms | 8 | 64 |
+
+Room count changes the registers read but not the number of round trips. For
+comparison, the 1.x client grouped only strictly consecutive addresses, so a
+comparably subscribed poll was 40+ round trips.
 
 ### Room placement
 
@@ -227,8 +244,27 @@ extra round trips and nothing else. If it is strict, they are what makes it work
 
 ### 7. Docs
 
-- Regenerate `docs/registers.md` from the component definitions.
 - README: note the 2026.9 requirement and the shared connection.
+- `docs/registers.md` is the transcribed vendor datasheet, not a generated
+  artifact, so it stays as it is.
+
+## Known deviations from 1.x behaviour
+
+- **`raw_value` on temperature sensors.** 1.x exposed the undecoded register
+  word (`215`); it is now the decoded value (`21.5`). Every other sensor is
+  unscaled, so its `raw_value` is unchanged. The undecoded map now lives in the
+  diagnostics download, which is what it was really for.
+- **Write validation.** Room setpoints and linear fan power are range-checked
+  by the field before the write reaches the wire, where 1.x let the device
+  reject them. The climate entity still clamps rather than raises, so a
+  thermostat card asking for an out-of-range value behaves as before.
+
+## Known issue, not addressed here
+
+`DeviceInfo(via_device=...)` is deprecated in 2026.9 in favour of
+`via_device_id`, and Home Assistant logs a warning naming this integration. It
+keeps working until 2027.8. Fixing it needs the registry's device id rather
+than the identifier tuple, which is a separate change.
 
 ## Deliberately out of scope
 
