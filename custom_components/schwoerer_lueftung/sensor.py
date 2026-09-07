@@ -65,14 +65,16 @@ def _temperature(
     )
 
 
-def _operating_hours(key: str, subsystem: str) -> SchwoererSensorEntityDescription:
+def _operating_hours(
+    key: str, subsystem: str, *, enabled: bool = False
+) -> SchwoererSensorEntityDescription:
     return SchwoererSensorEntityDescription(
         key=key,
         subsystem=subsystem,
         device_class=SensorDeviceClass.DURATION,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfTime.HOURS,
-        entity_registry_enabled_default=False,
+        entity_registry_enabled_default=enabled,
     )
 
 
@@ -108,7 +110,6 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         subsystem="ventilation",
         device_class=SensorDeviceClass.ENUM,
         options_map=BYPASS_STATE,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="time_program_fan_level",
@@ -125,14 +126,12 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         subsystem="ventilation",
         native_unit_of_measurement="%",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="current_exhaust_air_flow",
         subsystem="ventilation",
         native_unit_of_measurement="%",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="current_supply_air_rpm",
@@ -151,7 +150,7 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
 )
 
 TEMPERATURE_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _temperature("temperature_t5_exhaust_air", "temperatures"),
+    _temperature("temperature_t5_exhaust_air", "temperatures", enabled=True),
     _temperature("temperature_t6_in_heat_exchanger", "temperatures"),
     _temperature("temperature_t10_outdoor", "temperatures", enabled=True),
     # Undocumented, so off by default: it was found on one unit and what it
@@ -182,12 +181,11 @@ ALARM_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         subsystem="alarms",
         device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.DAYS,
-        entity_registry_enabled_default=False,
     ),
 )
 
 OPERATING_HOURS_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _operating_hours("operating_hours_fan", "operating_hours"),
+    _operating_hours("operating_hours_fan", "operating_hours", enabled=True),
     _operating_hours("operating_hours_fan_level_1", "operating_hours"),
     _operating_hours("operating_hours_fan_level_2", "operating_hours"),
     _operating_hours("operating_hours_fan_level_3", "operating_hours"),
@@ -203,7 +201,7 @@ HEATING_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     ),
     _temperature("temperature_t2_after_preheating_coil", "heating"),
     _temperature("temperature_t3_before_reheater", "heating"),
-    _temperature("temperature_t4_after_reheater", "heating"),
+    _temperature("temperature_t4_after_reheater", "heating", enabled=True),
     _temperature("temperature_t7_evaporator", "heating"),
     _temperature("temperature_t8_condenser", "heating"),
     _operating_hours("operating_hours_heat_pump", "heating"),
@@ -213,14 +211,18 @@ HEATING_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
 )
 
 GROUND_HEAT_EXCHANGER_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _temperature("temperature_t1_after_ground_heat_exchanger", "ground_heat_exchanger"),
+    _temperature(
+        "temperature_t1_after_ground_heat_exchanger",
+        "ground_heat_exchanger",
+        enabled=True,
+    ),
     SchwoererSensorEntityDescription(
         key="ground_heat_exchanger_state",
         subsystem="ground_heat_exchanger",
         device_class=SensorDeviceClass.ENUM,
         options_map=GROUND_HEAT_EXCHANGER_STATE,
-        entity_registry_enabled_default=False,
     ),
+    _operating_hours("operating_hours_ground_heat_exchanger", "ground_heat_exchanger"),
 )
 
 # Room temperature is surfaced as a plain sensor only on a WRT. A WGT gets a
