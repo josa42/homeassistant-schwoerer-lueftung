@@ -42,7 +42,7 @@
 | 117 | ✅ | ❌ | Status Gebläse Zuluft (Supply Fan Status) | 0=Deaktiviert (Disabled)<br>1=Anlaufphase (Startup)<br>2=Aktiv (Active)<br>5=Standby<br>6=Fehler (Error) | Read-only |
 | 118 | ✅ | ❌ | Status Gebläse Abluft (Exhaust Fan Status) | 0=Deaktiviert<br>1=Anlaufphase<br>2=Aktiv<br>5=Standby<br>6=Fehler | Read-only |
 | 121 | ✅ | ❌ | EWT Zustand (Ground Heat Exchanger State) | 0=EWT aus/geschlossen (Off/Closed)<br>1=EWT Heizbetrieb (Heating)<br>2=EWT Kühlbetrieb (Cooling) | Read-only |
-| 123 | ✅ | ❌ | Bypass Zustand (Bypass State) | 0=Bypass geschlossen (Closed)<br>1=Bypass offen Kühlen (Open Cooling)<br>2=Bypass offen Heizen (Open Heating) | Read-only |
+| 123 | ✅ | ❌ | Bypass Zustand (Bypass State) | 0=Bypass geschlossen (Closed)<br>1=Bypass offen Kühlen (Open Cooling)<br>2=Bypass offen Heizen (Open Heating) | Read-only, see [Bypass Behaviour](#bypass-behaviour) |
 | 131 | ✅ | ❌ | Aussenklappe Zustand (Outdoor Damper State) | 0=geschlossen (Closed)<br>1=offen (Open) | Read-only |
 | 133 | ✅ | ❌ | Vorheizregister Zustand (Pre-Heater State) | 0=Aus (Off)<br>1=VHR 1 aktiv<br>2=VHR 2 aktiv<br>3=VHR 1 & 2 aktiv | Read-only |
 | 140 | ✅ | ❌ | Luftstufe Zeitprogramm (Fan Level Time Program) | 0=Aus<br>1-4=Stufe 1-4 | Read-only |
@@ -318,6 +318,27 @@ Examples:
 - Value 201 = 20.1°C
 - Value -50 = -5.0°C
 - Value 373 = 37.3°C
+
+### Bypass Behaviour
+
+The bypass has no write register. The damper is driven by the controller, which
+BIC's WRG 134 BP HK datasheet describes as `außentemperaturgesteuert` and fits
+with a `Stellmotor`.
+
+SchwörerHaus gives the condition it opens on: the outdoor temperature must be
+below the room temperature, and the room setpoint must be set below the room
+temperature. Both comparisons are visible over Modbus, and the second one is
+writable:
+
+| Condition | Registers |
+|-----------|-----------|
+| Outdoor colder than the room | 209 < 360+n |
+| Room setpoint below the room temperature | 400+n < 360+n |
+
+So the bypass cannot be commanded, but lowering a room setpoint below its
+current temperature while it is cooler outside than inside produces the cooling
+demand the controller opens it for. `docs/research/001-bypass-control.md` has
+the sources and the open questions.
 
 ### Optional Features
 
