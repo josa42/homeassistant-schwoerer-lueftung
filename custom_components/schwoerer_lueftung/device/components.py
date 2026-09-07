@@ -8,20 +8,29 @@ Field names are the keys the entity layer builds unique_ids and translation keys
 from. **Renaming a field renames the entity**, which loses its history, so the
 names here reproduce the pre-2.0 ``REG_KEYS`` values exactly.
 
+## Why every read is a run of declared fields
+
+This firmware refuses any block containing an address it does not implement.
+Asked for holding 100-112 — a single block over the fields at 100-104 and
+110-112, bridging the unimplemented 105-109 — it answers exception code 2,
+Illegal Data Address, and the whole read fails.
+
+So :class:`SchwoererComponent` sets ``max_gap = 1``, which merges only fields
+at adjacent addresses. Every block is then a contiguous run of registers we
+declared a field for, and a read can never reach an address the device does not
+have. Declaring ``register_ranges`` would undo this — inside a range the
+planner merges freely again — so no component declares one.
+
+This is what the pre-2.0 client did by grouping strictly consecutive addresses.
+That was load-bearing, not a limitation.
+
 ## How the components are split
 
-Registers sit in four documented clusters — 100-145, 200-265, 360-516 and
-800-813 — and the planner may merge freely over gaps inside a cluster. What it
-must never do is read a register belonging to hardware the device does not
-have: a WRT has no heat pump, and not every unit has a ground heat exchanger.
-Those registers are carved out into :class:`Heating` and
-:class:`GroundHeatExchanger`, each declaring its own ``register_ranges``, so a
-device that refuses them fails only that component and the rest of the poll
+A device answering some sub-systems and not others should not lose the ones it
+does answer. The heat pump registers (a WRT has none) and the ground heat
+exchanger registers (not every unit has one) are therefore their own
+components, so a refusal fails that component alone and the rest of the poll
 still lands.
-
-We cannot verify this: the entities for those subsystems have always been
-created conditionally, so a device lacking them has never read the registers.
-The split is a hedge, not a measurement. See ``docs/modbus-modernization.md``.
 
 ## Why writes force FC16
 
@@ -33,6 +42,21 @@ sets ``force_fc16=True``.
 from __future__ import annotations
 
 from modbus_connection.model import Component, gauge, integer
+
+
+class SchwoererComponent(Component):
+    """Base for every sub-system, fixing how blocks may be formed.
+
+    ``max_gap = 1`` merges only fields at adjacent addresses, so a block never
+    covers a register we did not declare a field for. The device rejects any
+    block spanning an address it does not implement, so this is a correctness
+    requirement, not a tuning knob. Do not add ``register_ranges`` to a
+    subclass: a range lets the planner merge freely inside it and reintroduces
+    exactly the reads this prevents.
+    """
+
+    max_gap = 1
+
 
 # Value ranges the device accepts, enforced before a write reaches the wire.
 LINEAR_FAN_POWER_MIN = 30
@@ -52,15 +76,14 @@ def _within[T: (int, float)](low: T, high: T):
     return validate
 
 
-class Ventilation(Component):
+class Ventilation(SchwoererComponent):
     """Fan control and air-path state — the registers every unit serves.
 
-    114 and 116 (heat pump, reheater) and 121 (ground heat exchanger) fall
-    inside this cluster but belong to optional hardware, so the ranges below
-    step around them.
+    114 and 116 (heat pump, reheater) and 121 (ground heat exchanger) sit
+    between these addresses but belong to optional hardware. No field is
+    declared for them here, and ``max_gap = 1`` will not merge across the gaps
+    they leave, so this component never reads them.
     """
-
-    register_ranges = ((100, 113), (117, 120), (122, 145))
 
     operation_mode = integer(100, writable=True, force_fc16=True)
     """Betriebsart: 0=off, 1=manual, 2=winter, 3=summer, 4=summer exhaust."""
@@ -125,14 +148,12 @@ class Ventilation(Component):
     """Aktuelle Drehzahl Abluft."""
 
 
-class Temperatures(Component):
+class Temperatures(SchwoererComponent):
     """The air-path sensors every unit has.
 
     200-203 and 206-207 belong to the heat pump and the ground heat exchanger
     and are read by :class:`Heating` and :class:`GroundHeatExchanger`.
     """
-
-    register_ranges = ((204, 205), (208, 209))
 
     temperature_t5_exhaust_air = gauge(204, 0.1, unit="°C")
     """T5 Abluft."""
@@ -144,16 +165,13 @@ class Temperatures(Component):
     """T10 Aussen."""
 
 
-class Alarms(Component):
+class Alarms(SchwoererComponent):
     """Fault and maintenance registers.
 
-    These are status words in a contiguous alarm block, so they are read on
-    every unit. Some are only meaningful on a WGT and the entity layer surfaces
-    them accordingly, but that is a presentation choice, not a claim about
-    which registers the device serves.
+    Read on every unit. Some are only meaningful on a WGT and the entity layer
+    surfaces them accordingly, but that is a presentation choice, not a claim
+    about which registers the device serves.
     """
-
-    register_ranges = ((240, 254), (263, 265))
 
     error_message = integer(240)
     """Fehlermeldung."""
@@ -201,10 +219,8 @@ class Alarms(Component):
     """Restlaufzeit Gerätefilter."""
 
 
-class OperatingHours(Component):
+class OperatingHours(SchwoererComponent):
     """Hour counters for the fan, which every unit has."""
-
-    register_ranges = ((800, 804),)
 
     operating_hours_fan = integer(800, unit="h")
     """Betriebsstunden Gebläse."""
@@ -222,14 +238,12 @@ class OperatingHours(Component):
     """Betriebsstunden Luftstufe 4."""
 
 
-class Heating(Component):
+class Heating(SchwoererComponent):
     """Heat pump, reheater and auxiliary heating — WGT only.
 
     Read as its own component so a WRT, which has none of this hardware, fails
     only here.
     """
-
-    register_ranges = ((114, 116), (201, 203), (206, 207), (230, 234), (805, 810))
 
     heat_pump_status = integer(114)
     """Status Wärmepumpe: 0=off, 5=heating, 49=cooling."""
@@ -277,10 +291,8 @@ class Heating(Component):
     """Betriebsstunden Zusatzheizung Haus."""
 
 
-class GroundHeatExchanger(Component):
+class GroundHeatExchanger(SchwoererComponent):
     """Erdwärmetauscher — present only where the installation has one."""
-
-    register_ranges = ((121, 121), (200, 200), (813, 813))
 
     ground_heat_exchanger_state = integer(121)
     """EWT Zustand: 0=off/closed, 1=heating, 2=cooling."""
@@ -292,7 +304,7 @@ class GroundHeatExchanger(Component):
     """Betriebsstunden EWT."""
 
 
-class Room(Component):
+class Room(SchwoererComponent):
     """One of up to 17 rooms.
 
     A room is *not* a contiguous block: register addresses are grouped by
@@ -305,15 +317,6 @@ class Room(Component):
     all 17 slots, because an indexed field shifts on its own rather than the
     block shifting with it.
     """
-
-    register_ranges = (
-        (360, 376),
-        (400, 416),
-        (420, 436),
-        (440, 456),
-        (460, 476),
-        (500, 516),
-    )
 
     current_temperature = gauge(360, 0.1, stride=1, unit="°C")
     """Aktuelle Temperatur Raum."""

@@ -94,13 +94,29 @@ a device that refuses a block fails only the component that asked for it.
 | `GroundHeatExchanger`| 121, 200, 813                                                   | `has_ground_heat_exchanger` |
 | `Room` × N           | 360+i, 400+i, 420+i, 440+i, 460+i, 500+i                        | per configured room |
 
-`Ventilation` and `Temperatures` sit inside clusters that also hold optional
-hardware, so their ranges step around 114-116, 121 and 200-203/206-207 rather
-than reading the cluster whole. That costs a few extra round trips and is the
-price of the isolation.
-
 `Room` instances go into a `ComponentGroup` so N rooms still cost six block
 reads, not 6×N.
+
+### Block formation: `max_gap = 1`, no `register_ranges`
+
+**The firmware refuses any block containing an address it does not implement.**
+Asked for holding 100-112 — one block over the fields at 100-104 and 110-112,
+bridging the unimplemented 105-109 — a real WGT answers exception code 2,
+Illegal Data Address, and the whole read fails.
+
+So `SchwoererComponent` sets `max_gap = 1`, which merges only fields at
+adjacent addresses. Every block is then a contiguous run of registers we
+declared a field for, and a read can never reach an address the device does not
+have. No component declares `register_ranges`: inside a range the planner
+merges freely again, which is exactly what must not happen.
+
+This is what the 1.x client did by grouping strictly consecutive addresses
+(`client.py:134-136`). That was load-bearing, not a naive limitation — the
+first draft of this rewrite replaced it with gap-based merging and the device
+rejected the very first read.
+
+Two tests pin it: one asserts every address read has a field declared behind
+it, the other that the specific rejected block is never formed again.
 
 ### Measured read counts
 
@@ -108,13 +124,14 @@ Against the mock, per 30-second poll:
 
 | Configuration                   | Blocks | Registers |
 | ------------------------------- | ------ | --------- |
-| WGT + ground heat exchanger + 3 rooms | 22 | 104 |
-| WGT + ground heat exchanger + 17 rooms | 22 | 188 |
-| WRT, no ground heat exchanger, no rooms | 8 | 64 |
+| WGT + ground heat exchanger + 3 rooms | 32 | 78 |
+| WGT + ground heat exchanger + 17 rooms | 32 | 162 |
+| WRT, no ground heat exchanger, no rooms | 15 | 42 |
 
-Room count changes the registers read but not the number of round trips. For
-comparison, the 1.x client grouped only strictly consecutive addresses, so a
-comparably subscribed poll was 40+ round trips.
+Room count changes the registers read but not the number of round trips. More
+blocks than the first draft's 22, but that draft did not work on the hardware.
+Still fewer than 1.x, which fragmented the same map into 40+ reads because its
+grouping ran over a sparser, entity-driven register set.
 
 ### Room placement
 
@@ -171,9 +188,10 @@ The design hedges rather than guesses:
 - Optional subsystems are their own `Component`, so `_async_poll` catches the
   `ModbusError` and records it in `UpdateReport.failed` instead of failing the
   whole poll.
-- Every component declares `register_ranges`, so a block read never bridges
-  from a mapped cluster into unmapped addresses. The default `max_gap` of 16
-  would otherwise bridge, for example, 254 → 263.
+- `max_gap = 1` means a block never covers an address without a declared field,
+  so a component reads only its own registers and nothing speculative. See
+  [Block formation](#block-formation-max_gap--1-no-register_ranges) — this
+  turned out to be a hard requirement of the firmware, not just a hedge.
 - Entities go unavailable via `report.failed`, per subsystem.
 - A diagnostics download exposes the raw register map, which is how a WRT owner
   can supply real data. `modbus-connection`'s `load_raw()` replays such a dump

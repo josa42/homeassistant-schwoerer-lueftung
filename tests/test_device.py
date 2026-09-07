@@ -11,7 +11,15 @@ from modbus_connection import IllegalDataAddressError
 from modbus_connection.mock import MockModbusUnit
 
 from custom_components.schwoerer_lueftung.device import SchwoererDevice
-from custom_components.schwoerer_lueftung.device.components import Room, Ventilation
+from custom_components.schwoerer_lueftung.device.components import (
+    Alarms,
+    GroundHeatExchanger,
+    Heating,
+    OperatingHours,
+    Room,
+    Temperatures,
+    Ventilation,
+)
 
 # Registers that only exist on a device with the matching hardware. Nothing may
 # read these unless the corresponding component was constructed.
@@ -103,15 +111,55 @@ async def test_a_wgt_does_read_optional_hardware(unit: MockModbusUnit) -> None:
     assert GROUND_HEAT_EXCHANGER_ONLY <= read
 
 
-async def test_no_read_crosses_into_unmapped_space(unit: MockModbusUnit) -> None:
-    """Blocks stay inside the clusters the device documents."""
+def declared_addresses() -> set[int]:
+    """Every address any component declares a field at, all 17 rooms included."""
+    addresses: set[int] = set()
+    for component in (
+        Ventilation,
+        Temperatures,
+        Alarms,
+        OperatingHours,
+        Heating,
+        GroundHeatExchanger,
+    ):
+        addresses |= {
+            field.address
+            for field in vars(component).values()
+            if hasattr(field, "address")
+        }
+    for base in (360, 400, 420, 440, 460, 500):
+        addresses |= set(range(base, base + 17))
+    return addresses
+
+
+async def test_every_address_read_has_a_field_behind_it(unit: MockModbusUnit) -> None:
+    """The firmware refuses any block containing an address it does not implement.
+
+    A real WGT answered exception code 2 to holding 100-112 — one block over
+    the fields at 100-104 and 110-112, bridging the unimplemented 105-109. So
+    a block may never cover an address we did not declare a field for.
+    """
+    device = make_device(unit, room_numbers=list(range(1, 18)))
+    await device.async_update()
+
+    assert not addresses_read(unit) - declared_addresses()
+
+
+async def test_reads_never_bridge_a_gap(unit: MockModbusUnit) -> None:
+    """The exact block the device rejected must not be formed again."""
     device = make_device(unit)
     await device.async_update()
 
-    # The gaps between the documented clusters, which the default max_gap of
-    # 16 would otherwise bridge (254 -> 263, for one).
-    unmapped = set(range(146, 200)) | set(range(266, 360)) | set(range(517, 800))
-    assert not addresses_read(unit) & unmapped
+    blocks = {(event.address, event.count) for event in unit.read_events}
+
+    # 100-112 was the failing read: it spans the unimplemented 105-109.
+    assert (100, 13) not in blocks
+    # The two runs either side of that gap are read separately instead.
+    assert (100, 5) in blocks
+    assert (110, 3) in blocks
+    # 240 and 242-248 likewise, with 241 unimplemented between them.
+    assert (240, 1) in blocks
+    assert (242, 7) in blocks
 
 
 async def test_a_refused_subsystem_fails_alone(unit: MockModbusUnit) -> None:

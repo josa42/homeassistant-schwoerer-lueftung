@@ -54,6 +54,8 @@ SEEDED_REGISTERS: dict[int, int] = {
     231: 1,
     232: 0,
     234: 1,
+    # Ground heat exchanger
+    121: 1,
     # Temperatures
     200: 95,
     204: 215,
