@@ -34,9 +34,22 @@ still lands.
 
 ## Why writes force FC16
 
-The device rejects Write Single Register (FC06) and answers only Write Multiple
-Registers (FC16), even for a single register. Every writable field therefore
-sets ``force_fc16=True``.
+The device answers Write Multiple Registers (FC16) even for a single register,
+so every writable field sets ``force_fc16=True``.
+
+Confirmed against a real WGT by writing register 103 back to the value it
+already held. The request and its reply:
+
+    sent  00 09 00 00 00 09 01 10 00 67 00 01 02 00 32
+    recv  00 09 00 00 00 06 01 10 00 67 00 01
+
+``01`` is the unit, ``10`` is FC16, ``00 67`` is register 103, and ``00 32`` is
+the value 50. The reply echoes the function code without the ``0x80`` error
+bit, so the device accepted it.
+
+That the device *rejects* FC06 is inherited from the pre-2.0 client, which
+carried a comment saying so. It has not been re-tested here, and there is no
+reason to: FC16 works.
 """
 
 from __future__ import annotations

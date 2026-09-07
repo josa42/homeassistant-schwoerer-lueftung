@@ -274,6 +274,27 @@ extra round trips and nothing else. If it is strict, they are what makes it work
 - `docs/registers.md` is the transcribed vendor datasheet, not a generated
   artifact, so it stays as it is.
 
+## Verified against real hardware
+
+A WGT at firmware level as of 2026-09-07, no ground heat exchanger, 6 rooms.
+
+- **Reads.** All sub-systems answer; every gauge cross-checked raw → decoded;
+  every coded register maps to a known option; room placement lands on the
+  right addresses. `async_read_raw()` returned exactly 93 registers — the field
+  count, with nothing read beyond what is declared.
+- **Writes.** One write, register 103 back to the value it already held, over
+  the production path. The wire frame carried function code `0x10` and the
+  device echoed it without the error bit. See `device/components.py`.
+- **Reconnection.** Observed unplanned: the device serves one Modbus session at
+  a time, so a probe holding the socket made setup fail with
+  `ConfigEntryNotReady`. Home Assistant retried after 10 s and succeeded, with
+  no reload — which is the designed behaviour.
+
+Still unexercised: every writable register other than 103, since they all have
+physical effects — operation mode and fan speed change ventilation, the heating
+switches change heating. The encoder and validators behind them are covered by
+tests against the mock.
+
 ## Known deviations from 1.x behaviour
 
 - **`raw_value` on temperature sensors.** 1.x exposed the undecoded register
@@ -284,6 +305,12 @@ extra round trips and nothing else. If it is strict, they are what makes it work
   by the field before the write reaches the wire, where 1.x let the device
   reject them. The climate entity still clamps rather than raises, so a
   thermostat card asking for an out-of-range value behaves as before.
+- **Scaled writes round where 1.x truncated.** Encoding moved from
+  `int(value * 10)` in the entity to the library's `gauge` encoder. On exact
+  0.1 boundaries they agree; off-boundary they differ by a tenth — 21.99 now
+  writes 220 where 1.x wrote 219. Rounding is the better behaviour, and it is
+  more robust to float representation, where 21.9 can arrive as
+  `21.900000000000002`.
 
 ## Known issue, not addressed here
 
