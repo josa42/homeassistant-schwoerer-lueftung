@@ -38,7 +38,8 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 > `modbus` integration hands out units over connections it shares. This
 > integration no longer opens its own socket, so another integration talking to
 > the same unit no longer competes with it for the device. Your entities keep
-> their IDs and history; no reconfiguration is needed.
+> their IDs and history; no reconfiguration is needed. The
+> [changelog](CHANGELOG.md) has the full list of changes.
 
 ### HACS (Recommended)
 
