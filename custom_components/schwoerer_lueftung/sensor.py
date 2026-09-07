@@ -79,15 +79,21 @@ def _operating_hours(
 
 
 VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    SchwoererSensorEntityDescription(key="current_fan_level", subsystem="ventilation"),
+    SchwoererSensorEntityDescription(
+        key="current_fan_level",
+        subsystem="ventilation",
+        state_class=SensorStateClass.MEASUREMENT,
+    ),
     SchwoererSensorEntityDescription(
         key="time_program_base_level",
         subsystem="ventilation",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SchwoererSensorEntityDescription(
         key="shock_ventilation_remaining",
         subsystem="ventilation",
         device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SchwoererSensorEntityDescription(
@@ -111,10 +117,12 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     SchwoererSensorEntityDescription(
         key="time_program_fan_level",
         subsystem="ventilation",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SchwoererSensorEntityDescription(
         key="sensor_fan_level",
         subsystem="ventilation",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SchwoererSensorEntityDescription(
         key="current_supply_air_flow",
@@ -167,12 +175,14 @@ ALARM_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         key="device_filter_remaining",
         subsystem="alarms",
         device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
     SchwoererSensorEntityDescription(
         key="upstream_filter_remaining",
         subsystem="alarms",
         device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTime.DAYS,
     ),
 )

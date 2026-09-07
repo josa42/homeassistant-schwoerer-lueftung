@@ -58,6 +58,12 @@ upgrade and no reconfiguration is needed.
 
 - Per-room temperature sensors on a WRT came out unnamed. Their translation key
   was never in `strings.json`.
+- Long-term statistics work again for the fan level sensors and the three
+  countdowns (shock ventilation, device filter, upstream filter). They lost
+  their state class back in January 2026, so Home Assistant had stopped
+  recording them and raised a repair asking whether to delete the old
+  statistics. The error message sensor deliberately keeps no state class: it
+  reports a code, and the mean of an error code means nothing.
 - The ground heat exchanger operating hours sensor is back after the rewrite
   dropped it.
 - Room devices link to the ventilation unit by device ID. The identifier tuple
