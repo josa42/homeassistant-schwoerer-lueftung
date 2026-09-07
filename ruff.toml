@@ -1,3 +1,6 @@
+# Home Assistant 2026.9 requires Python 3.14.
+target-version = "py314"
+
 [lint]
 select = [
     "E",  # pycodestyle

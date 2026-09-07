@@ -1,157 +1,99 @@
-"""Tests for Coordinator."""
+"""Tests for the coordinator's polling and error mapping."""
 
-from unittest.mock import MagicMock, patch
+from __future__ import annotations
 
 import pytest
-from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
+from modbus_connection import IllegalDataAddressError, ModbusConnectionError
+from modbus_connection.mock import MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.schwoerer_lueftung.const import (
-    CONF_DEVICE_TYPE,
-    CONF_ROOMS,
-    DEVICE_TYPE_WGT,
-    DEVICE_TYPE_WRT,
-    DOMAIN,
-)
-from custom_components.schwoerer_lueftung.coordinator import Coordinator
+
+async def setup_entry(hass: HomeAssistant, entry: MockConfigEntry) -> MockConfigEntry:
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    return entry
 
 
-@pytest.fixture
-def mock_modbus_client():
-    """Mock Modbus client."""
-    with patch(
-        "custom_components.schwoerer_lueftung.coordinator.ModbusClient"
-    ) as mock:
-        client_instance = MagicMock()
-        client_instance.connect.return_value = True
-        client_instance.is_subscribed.return_value = False
-        client_instance.read_data.return_value = {
-            "current_fan_level": 2,
-            "temperature_t10_outdoor": 220,
-        }
-        mock.return_value = client_instance
-        yield mock, client_instance
+async def test_data_is_the_update_report(
+    hass: HomeAssistant, mock_modbus, wgt_entry: MockConfigEntry
+) -> None:
+    """Every sub-system a WGT with a ground heat exchanger has answers."""
+    await setup_entry(hass, wgt_entry)
+
+    report = wgt_entry.runtime_data.data
+    assert set(report.updated) == {
+        "ventilation",
+        "temperatures",
+        "undocumented_temperatures",
+        "alarms",
+        "operating_hours",
+        "heating",
+        "ground_heat_exchanger",
+        "clock",
+        "rooms",
+    }
+    assert report.failed == {}
 
 
-@pytest.fixture
-def config_entry_wgt():
-    """Mock config entry for WGT device."""
-    return MockConfigEntry(
-        domain=DOMAIN,
-        data={
-            CONF_HOST: "192.168.1.100",
-            CONF_DEVICE_TYPE: DEVICE_TYPE_WGT,
-            CONF_ROOMS: [
-                {"number": 1, "name": "Living Room"},
-                {"number": 2, "name": "Bedroom"},
-            ],
-        },
-    )
+async def test_a_wrt_reports_only_what_it_has(
+    hass: HomeAssistant, mock_modbus, wrt_entry: MockConfigEntry
+) -> None:
+    await setup_entry(hass, wrt_entry)
+
+    report = wrt_entry.runtime_data.data
+    assert "heating" not in report.updated
+    assert "ground_heat_exchanger" not in report.updated
+    assert report.failed == {}
 
 
-@pytest.fixture
-def config_entry_wrt():
-    """Mock config entry for WRT device."""
-    return MockConfigEntry(
-        domain=DOMAIN,
-        data={
-            CONF_HOST: "192.168.1.100",
-            CONF_DEVICE_TYPE: DEVICE_TYPE_WRT,
-        },
-    )
+async def test_a_refused_subsystem_is_reported_not_raised(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    """One failing block must not fail the poll."""
+    await setup_entry(hass, wgt_entry)
+
+    for address in (114, 115, 116):
+        unit.fail_read(address, IllegalDataAddressError(2))
+
+    report = await wgt_entry.runtime_data._async_update_data()
+
+    assert "heating" in report.failed
+    assert "ventilation" in report.updated
 
 
-class TestCoordinatorInit:
-    """Test Coordinator initialization."""
+async def test_a_dead_link_fails_the_update(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    """A dropped connection surfaces as UpdateFailed, not as a reload."""
+    await setup_entry(hass, wgt_entry)
+    coordinator = wgt_entry.runtime_data
 
-    async def test_init_creates_client(self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt):
-        """Test coordinator initialization creates modbus client."""
-        coordinator = Coordinator(hass, config_entry_wgt)
-        assert coordinator.client is not None
+    unit.fail_requests(ModbusConnectionError("connection reset"))
 
-
-class TestCoordinatorDataUpdate:
-    """Test Coordinator data update cycle."""
-
-    async def test_update_data_success(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test successful data update."""
-        _, client_instance = mock_modbus_client
-        coordinator = Coordinator(hass, config_entry_wgt)
-
-        result = await coordinator._async_update_data()
-
-        assert result is not None
-        assert "current_fan_level" in result
-        assert result["current_fan_level"] == 2
-        client_instance.connect.assert_called()
-        client_instance.read_data.assert_called()
-        client_instance.disconnect.assert_called()
-
-    async def test_update_data_connection_failure(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test data update with connection failure."""
-        _, client_instance = mock_modbus_client
-        client_instance.connect.return_value = False
-
-        coordinator = Coordinator(hass, config_entry_wgt)
-
-        with pytest.raises(UpdateFailed, match="Failed to connect to device"):
-            await coordinator._async_update_data()
-
-    async def test_update_data_read_exception(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test data update with read exception."""
-        _, client_instance = mock_modbus_client
-        client_instance.read_data.side_effect = Exception("Read error")
-
-        coordinator = Coordinator(hass, config_entry_wgt)
-
-        with pytest.raises(UpdateFailed, match="Error communicating with device"):
-            await coordinator._async_update_data()
-
-        # Ensure disconnect is still called
-        client_instance.disconnect.assert_called()
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_update_data()
 
 
-class TestCoordinatorDataRetrieval:
-    """Test Coordinator data retrieval methods."""
+async def test_writing_a_field_refreshes(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    await setup_entry(hass, wgt_entry)
+    coordinator = wgt_entry.runtime_data
 
-    async def test_get_data_with_value(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test get_data returns value when available."""
-        coordinator = Coordinator(hass, config_entry_wgt)
-        coordinator.data = {"current_fan_level": 2}
+    await coordinator.async_write(coordinator.device.ventilation, "fan_speed", 3)
+    await hass.async_block_till_done()
 
-        result = coordinator.get_data(102)  # REG_CURRENT_FAN_LEVEL
-
-        assert result == 2
-
-    async def test_get_data_none_when_no_data(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test get_data returns None when data not available."""
-        coordinator = Coordinator(hass, config_entry_wgt)
-        coordinator.data = None
-
-        result = coordinator.get_data(102)
-
-        assert result is None
-
-    async def test_get_data_with_map(
-        self, hass: HomeAssistant, mock_modbus_client, config_entry_wgt
-    ):
-        """Test get_data with mapping."""
-        coordinator = Coordinator(hass, config_entry_wgt)
-        coordinator.data = {"current_fan_level": 2}
-
-        mapping = {0: "off", 1: "level_1", 2: "level_2"}
-        result = coordinator.get_data(102, mapping)
-
-        assert result == "level_2"
+    assert unit.holding[101] == 3
+    assert coordinator.device.ventilation.fan_speed == 3

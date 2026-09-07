@@ -7,6 +7,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.components.modbus import async_get_temporary_unit
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -20,51 +21,50 @@ from homeassistant.helpers.selector import (
     SelectSelectorConfig,
     SelectSelectorMode,
 )
+from modbus_connection import ModbusError, ModbusTcpParams
 
 from .const import (
     CONF_DEVICE_TYPE,
-    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT,
     CONF_HAS_GROUND_HEAT_EXCHANGER,
     CONF_ROOMS,
     DEFAULT_DEVICE_TYPE,
     DEFAULT_PORT,
+    DEFAULT_UNIT_ID,
     DEVICE_TYPE_WGT,
     DEVICE_TYPE_WRT,
     DOMAIN,
     MODEL_WGT,
     MODEL_WRT,
 )
+from .device.components import Ventilation
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
+    """Check the device answers before creating the entry.
+
+    The flow has no config entry yet to tie a connection to, so it borrows a
+    unit for the duration of the context. A connection an entry already holds
+    is shared and stays up; one opened here closes on exit.
+    """
+    params = ModbusTcpParams(host=data[CONF_HOST], port=DEFAULT_PORT)
+
     try:
-        from .modbus.client import ModbusClient
-    except ImportError as err:
-        _LOGGER.error("Failed to import modbus client: %s", err)
+        async with async_get_temporary_unit(hass, params, DEFAULT_UNIT_ID) as unit:
+            # Ventilation is the one block every model serves, so reading it is
+            # the cheapest proof that we are talking to a Schwörer unit.
+            await Ventilation(unit).async_update()
+    except ModbusError as err:
+        _LOGGER.error("Failed to reach the device: %s", err)
         raise CannotConnect from err
-
-    client = ModbusClient(
-        data[CONF_HOST],
-        DEFAULT_PORT,
-    )
-
-    try:
-        await hass.async_add_executor_job(client.connect)
-        if not client.is_connected():
-            raise CannotConnect
-
-        await hass.async_add_executor_job(client.disconnect)
-
-        model = MODEL_WGT if data[CONF_DEVICE_TYPE] == DEVICE_TYPE_WGT else MODEL_WRT
-
-        return {"title": f"{model} {data[CONF_HOST]}"}
-    except CannotConnect:
+    except HomeAssistantError:
+        # The device is already in use over different link settings.
         raise
-    except Exception as err:
-        _LOGGER.error("Failed to connect: %s", err)
-        raise CannotConnect from err
+
+    model = MODEL_WGT if data[CONF_DEVICE_TYPE] == DEVICE_TYPE_WGT else MODEL_WRT
+
+    return {"title": f"{model} {data[CONF_HOST]}"}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -76,8 +76,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.hass, self.hass.config.language, "selector", {DOMAIN}
         )
 
-        wgt_key = f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WGT}"
-        wrt_key = f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WRT}"
+        wgt_key = (
+            f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WGT}"
+        )
+        wrt_key = (
+            f"component.{DOMAIN}.selector.{CONF_DEVICE_TYPE}.options.{DEVICE_TYPE_WRT}"
+        )
 
         wgt_label = translations.get(wgt_key, "WGT (with heating)")
         wrt_label = translations.get(wrt_key, "WRT (ventilation only)")
@@ -85,7 +89,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return vol.Schema(
             {
                 vol.Required(CONF_HOST): str,
-                vol.Required(CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE): SelectSelector(
+                vol.Required(
+                    CONF_DEVICE_TYPE, default=DEFAULT_DEVICE_TYPE
+                ): SelectSelector(
                     SelectSelectorConfig(
                         options=[
                             SelectOptionDict(value=DEVICE_TYPE_WGT, label=wgt_label),
@@ -103,7 +109,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
-                vol.Required(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, default=False): bool,
             }
         )
 
@@ -133,9 +138,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_HAS_GROUND_HEAT_EXCHANGER: user_input[
                         CONF_HAS_GROUND_HEAT_EXCHANGER
                     ],
-                    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[
-                        CONF_ENABLE_ALL_SENSORS_BY_DEFAULT
-                    ],
                 }
 
                 # Get translations to use the correct room prefix
@@ -151,9 +153,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title=info["title"], data=data)
 
         schema = await self._get_schema()
-        return self.async_show_form(
-            step_id="user", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
 
 class CannotConnect(HomeAssistantError):

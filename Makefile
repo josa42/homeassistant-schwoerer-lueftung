@@ -10,7 +10,7 @@ help:
 	@echo "Available commands:"
 	@echo ""
 	@echo "Development:"
-	@echo "  make dev-up       - Start local Home Assistant for testing"
+	@echo "  make dev-up       - Start local Home Assistant for testing (pulls the latest image)"
 	@echo "  make dev-down     - Stop local Home Assistant"
 	@echo "  make dev-logs     - Follow Home Assistant logs"
 	@echo "  make dev-restart  - Restart after code changes"
@@ -76,6 +76,11 @@ dev-up:
 	@cp -n config.template.yaml config/configuration.yaml 2>/dev/null || true
 	@touch config/automations.yaml config/scripts.yaml config/scenes.yaml config/secrets.yaml 2>/dev/null || true
 	@echo "Access at: http://localhost:8123"
+	@echo "Checking for a newer Home Assistant image..."
+	@# `stable` is a moving tag, and docker keeps serving whatever it cached
+	@# the first time. Without this the container silently stays on an old
+	@# release and the integration fails to import APIs that exist upstream.
+	docker-compose pull
 	docker-compose up -d
 	@echo ""
 	@echo "Waiting for Home Assistant to start..."

@@ -2,114 +2,108 @@
 
 from __future__ import annotations
 
-from homeassistant.config_entries import ConfigEntry
+from dataclasses import dataclass
+
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import AbstractSelect
-from .const import DOMAIN
-from .coordinator import Coordinator
-from .modbus.registers import (
-    REG_FAN_SPEED,
-    REG_HEATING_COOLING_FUNCTION,
-    REG_OPERATION_MODE,
+from .coordinator import SchwoererConfigEntry
+from .entity import SchwoererEntity, SchwoererEntityDescription
+
+# Betriebsart.
+OPERATION_MODE = {
+    0: "off",
+    1: "manual",
+    2: "winter",
+    3: "summer",
+    4: "summer_exhaust",
+}
+
+# Manuelle Luftstufe.
+FAN_SPEED = {
+    0: "0",
+    1: "1",
+    2: "2",
+    3: "3",
+    4: "4",
+    5: "automatic",
+    6: "linear",
+}
+
+# Heiz-Kühlfunktion.
+HEATING_COOLING_FUNCTION = {
+    0: "off",
+    1: "heating",
+    2: "cooling",
+    3: "auto_outdoor_temp",
+    4: "auto_digital_input",
+}
+
+
+@dataclass(frozen=True, kw_only=True)
+class SchwoererSelectEntityDescription(
+    SchwoererEntityDescription, SelectEntityDescription
+):
+    """Describe a select over a coded, writable device field."""
+
+    options_map: dict[int, str]
+
+
+COMMON_SELECTS: tuple[SchwoererSelectEntityDescription, ...] = (
+    SchwoererSelectEntityDescription(
+        key="operation_mode", subsystem="ventilation", options_map=OPERATION_MODE
+    ),
+    SchwoererSelectEntityDescription(
+        key="fan_speed", subsystem="ventilation", options_map=FAN_SPEED
+    ),
+)
+
+HEATING_SELECTS: tuple[SchwoererSelectEntityDescription, ...] = (
+    SchwoererSelectEntityDescription(
+        key="heating_cooling_function",
+        subsystem="heating",
+        options_map=HEATING_COOLING_FUNCTION,
+    ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: SchwoererConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
-    has_heating = coordinator.has_heating()
+    coordinator = entry.runtime_data
 
-    entities = [
-        OperationModeSelect(coordinator),
-        FanSpeedSelect(coordinator),
-    ]
+    descriptions = list(COMMON_SELECTS)
+    if coordinator.has_heating():
+        descriptions.extend(HEATING_SELECTS)
 
-    if has_heating:
-        entities.append(HeatingCoolingFunctionSelect(coordinator))
-
-    async_add_entities(entities)
+    async_add_entities(
+        SchwoererSelect(coordinator, description) for description in descriptions
+    )
 
 
-class OperationModeSelect(AbstractSelect):
-    """
-    Select entity for operation mode.
-    (Betriebsart; 0=Aus, 1=Handbetrieb, 2=Winterbetrieb, 3=Sommerbetrieb, 4=Sommer Abluft)
+class SchwoererSelect(SchwoererEntity, SelectEntity):
+    """A select over a coded, writable device field."""
 
-    Registers: 100
-    Value:     0-4
-    """
+    entity_description: SchwoererSelectEntityDescription
 
     def __init__(
-        self,
-        coordinator: Coordinator,
+        self, coordinator, description: SchwoererSelectEntityDescription
     ) -> None:
-        super().__init__(
-            coordinator,
-            REG_OPERATION_MODE,
-            {
-                0: "off",
-                1: "manual",
-                2: "winter",
-                3: "summer",
-                4: "summer_exhaust",
-            },
-        )
+        super().__init__(coordinator, description)
+        self._attr_options = list(description.options_map.values())
 
+    @property
+    def current_option(self) -> str | None:
+        value = self._value
+        if value is None:
+            return None
+        return self.entity_description.options_map.get(value)
 
-class FanSpeedSelect(AbstractSelect):
-    """
-    Select entity for fan speed.
-    (Manuelle Luftstufe: 0=Aus, 1=Stufe 1, 2=Stufe 2, 3=Stufe 3, 4=Stufe 4, 5=Automatik, 6=Linearbetrieb)
-
-    Registers: 101
-    Value:     0-6
-    """
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-    ) -> None:
-        super().__init__(
-            coordinator,
-            REG_FAN_SPEED,
-            {
-                0: "0",
-                1: "1",
-                2: "2",
-                3: "3",
-                4: "4",
-                5: "automatic",
-                6: "linear",
-            },
-        )
-
-
-class HeatingCoolingFunctionSelect(AbstractSelect):
-    """
-    Select entity for heating/cooling function.
-    (Heiz-Kühlfunktion: 0=Aus, 1=Heizen, 2=Kühlen, 3=Auto T-Aussen, 4=Auto Digitaler Eingang)
-
-    Register: 230
-    Value:     0-4
-    """
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-    ) -> None:
-        super().__init__(
-            coordinator,
-            REG_HEATING_COOLING_FUNCTION,
-            {
-                0: "off",
-                1: "heating",
-                2: "cooling",
-                3: "auto_outdoor_temp",
-                4: "auto_digital_input",
-            },
-        )
+    async def async_select_option(self, option: str) -> None:
+        for value, name in self.entity_description.options_map.items():
+            if name == option:
+                await self._async_write(value)
+                return

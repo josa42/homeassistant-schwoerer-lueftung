@@ -1,256 +1,134 @@
+"""Binary sensor platform for Schwörer Lüftung."""
+
 from __future__ import annotations
+
+from dataclasses import dataclass
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
+    BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .abstract import AbstractBinaryRoomSensor, AbstractBinarySensor
-from .const import DOMAIN
-from .coordinator import Coordinator
-from .modbus.registers import (
-    PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
-    PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
-    PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE,
-    REG_ALARM_DEVICE_FILTER_DIRTY,
-    REG_ALARM_DOOR_OPEN,
-    REG_ALARM_EMERGENCY_MODE,
-    REG_ALARM_EXTERNAL_UTILITY_LOCK,
-    REG_ALARM_HEATING_MODULE_TEST,
-    REG_ALARM_OFF_PEAK_DISABLED,
-    REG_ALARM_PRESSOSTAT_TRIGGERED,
-    REG_ALARM_PRESSURE_SWITCH,
-    REG_ALARM_SUPPLY_AIR_COLD,
-    REG_ALARM_SUPPLY_VOLTAGE_OFF,
-    REG_ALARM_UPSTREAM_FILTER_DIRTY,
-    REG_ALARM_UTILITY_LOCK,
-    REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
-    REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
-    REG_FAN_OVERRIDE,
-    REG_OUTDOOR_DAMPER_STATE,
-    REG_PREHEATER_STATE,
-    REG_REHEATER_STATE,
+from .const import CONF_ROOMS
+from .coordinator import SchwoererConfigEntry
+from .entity import ROOMS, SchwoererEntity, SchwoererEntityDescription
+
+# Vorheizregister Zustand: 0=off, 1=VHR 1, 2=VHR 2, 3=VHR 1 & 2.
+PREHEATER_COIL_1_ACTIVE = {1, 3}
+PREHEATER_COIL_2_ACTIVE = {2, 3}
+
+
+@dataclass(frozen=True, kw_only=True)
+class SchwoererBinarySensorEntityDescription(
+    SchwoererEntityDescription, BinarySensorEntityDescription
+):
+    """Describe a binary sensor backed by a device field."""
+
+
+def _alarm(key: str, *, enabled: bool = True) -> SchwoererBinarySensorEntityDescription:
+    return SchwoererBinarySensorEntityDescription(
+        key=key,
+        subsystem="alarms",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_registry_enabled_default=enabled,
+    )
+
+
+COMMON_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
+    SchwoererBinarySensorEntityDescription(key="fan_override", subsystem="ventilation"),
+    SchwoererBinarySensorEntityDescription(
+        key="outdoor_damper_state",
+        subsystem="ventilation",
+    ),
+    _alarm("alarm_pressure_switch"),
+    _alarm("alarm_utility_lock"),
+    _alarm("alarm_door_open"),
+    _alarm("alarm_device_filter_dirty"),
+    _alarm("alarm_upstream_filter_dirty"),
+    _alarm("alarm_off_peak_disabled"),
+    _alarm("alarm_supply_voltage_off"),
+    _alarm("alarm_pressostat_triggered"),
+    _alarm("alarm_external_utility_lock"),
+    _alarm("alarm_emergency_mode"),
+)
+
+HEATING_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
+    SchwoererBinarySensorEntityDescription(
+        key="reheater_state",
+        subsystem="heating",
+    ),
+    # Both coils are reported by one register, so each entity tests the
+    # values that mean its own coil is running.
+    SchwoererBinarySensorEntityDescription(
+        key="preheater_1",
+        subsystem="ventilation",
+        field="preheater_state",
+        value_fn=lambda value: value in PREHEATER_COIL_1_ACTIVE,
+    ),
+    SchwoererBinarySensorEntityDescription(
+        key="preheater_2",
+        subsystem="ventilation",
+        field="preheater_state",
+        value_fn=lambda value: value in PREHEATER_COIL_2_ACTIVE,
+    ),
+    _alarm("alarm_heating_module_test"),
+    _alarm("alarm_supply_air_cold"),
+)
+
+ROOM_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
+    SchwoererBinarySensorEntityDescription(
+        key="auxiliary_heating_enabled",
+        subsystem=ROOMS,
+        # Register 440+i already has a switch, and drives the room's climate
+        # entity. A third read-only view of it is redundant.
+        entity_registry_enabled_default=False,
+    ),
+    SchwoererBinarySensorEntityDescription(
+        key="auxiliary_heating_active",
+        subsystem=ROOMS,
+        device_class=BinarySensorDeviceClass.HEAT,
+    ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: SchwoererConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
-    has_heating = coordinator.has_heating()
+    coordinator = entry.runtime_data
 
-    entities = []
-    entities.extend(
-        [
-            FanOverrideBinarySensor(coordinator),
-            OutdoorDamperStateSensor(coordinator),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_PRESSURE_SWITCH, enabled_by_default=False
-            ),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_UTILITY_LOCK, enabled_by_default=False
-            ),
-            AlarmBinarySensor(coordinator, REG_ALARM_DOOR_OPEN),
-            AlarmBinarySensor(coordinator, REG_ALARM_DEVICE_FILTER_DIRTY),
-            AlarmBinarySensor(coordinator, REG_ALARM_UPSTREAM_FILTER_DIRTY),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_OFF_PEAK_DISABLED, enabled_by_default=False
-            ),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_SUPPLY_VOLTAGE_OFF, enabled_by_default=False
-            ),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_PRESSOSTAT_TRIGGERED, enabled_by_default=False
-            ),
-            AlarmBinarySensor(
-                coordinator, REG_ALARM_EXTERNAL_UTILITY_LOCK, enabled_by_default=False
-            ),
-            AlarmBinarySensor(coordinator, REG_ALARM_EMERGENCY_MODE),
-        ]
-    )
+    entities = [
+        SchwoererBinarySensor(coordinator, description)
+        for description in COMMON_BINARY_SENSORS
+    ]
 
-    # Add heating-related binary sensors only for WGT devices
-    if has_heating:
+    if coordinator.has_heating():
         entities.extend(
-            [
-                NhrStateBinarySensor(coordinator),
-                Preheater1BinarySensor(coordinator),
-                Preheater2BinarySensor(coordinator),
-                AlarmBinarySensor(
-                    coordinator, REG_ALARM_HEATING_MODULE_TEST, enabled_by_default=False
-                ),
-                AlarmBinarySensor(coordinator, REG_ALARM_SUPPLY_AIR_COLD),
-            ]
+            SchwoererBinarySensor(coordinator, description)
+            for description in HEATING_BINARY_SENSORS
         )
-
-        for room in entry.data.get("rooms", []):
-            entities.extend(
-                [
-                    RoomAuxiliaryHeatingEnabledSensor(coordinator, room["number"]),
-                    RoomAuxiliaryHeatingActiveBinarySensor(coordinator, room["number"]),
-                ]
-            )
+        entities.extend(
+            SchwoererBinarySensor(coordinator, description, room["number"])
+            for room in entry.data.get(CONF_ROOMS, [])
+            for description in ROOM_BINARY_SENSORS
+        )
 
     async_add_entities(entities)
 
 
-class OutdoorDamperStateSensor(AbstractBinarySensor):
-    """
-    Outdoor Damper State Binary Sensor
-    (Aussenklappe Zustand)
+class SchwoererBinarySensor(SchwoererEntity, BinarySensorEntity):
+    """A binary sensor reading one device field."""
 
-    Register: 131
-    Values:     0 = Closed
-                1 = Open
-    """
+    entity_description: SchwoererBinarySensorEntityDescription
 
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(
-            coordinator, REG_OUTDOOR_DAMPER_STATE, enabled_by_default=False
-        )
-
-
-class FanOverrideBinarySensor(AbstractBinarySensor):
-    """
-    Fan Override Binary Sensor
-    (Luftstufen Überschreibung)
-
-    Register: 104
-    Values:     0 = Inactive
-                1 = Active
-    """
-
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_FAN_OVERRIDE)
-
-
-class NhrStateBinarySensor(AbstractBinarySensor):
-    """
-    Reheater State Binary Sensor
-    (Nachheizregister Zustand)
-
-    Register: 116
-    Values:     0 = Inactive
-                1 = Active
-    """
-
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(coordinator, REG_REHEATER_STATE, enabled_by_default=False)
-
-
-class Preheater1BinarySensor(AbstractBinarySensor):
-    """
-    Preheater Coil 1 State Binary Sensor
-    (Vorheizregister Stufe 1 Zustand)
-
-    Register: 133
-    Values:     0 = Inactive
-                1 = Coil 1 Active
-                3 = Coil 1 and 2 Active
-    """
-
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(
-            coordinator,
-            REG_PREHEATER_STATE,
-            {
-                PREHEATER_STATE_PREHEATING_COIL_1_ACTIVE,
-                PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
-            },
-            key="preheater_1",
-            enabled_by_default=False,
-        )
-
-
-class Preheater2BinarySensor(AbstractBinarySensor):
-    """
-    Preheater Coil 2 State Binary Sensor
-    (Vorheizregister Stufe 2 Zustand)
-
-    Register: 133
-    Values:     0 = Inactive
-                2 = Coil 2 Active
-                3 = Coil 1 and 2 Active
-    """
-
-    def __init__(self, coordinator: Coordinator) -> None:
-        super().__init__(
-            coordinator,
-            REG_PREHEATER_STATE,
-            {
-                PREHEATER_STATE_PREHEATING_COIL_2_ACTIVE,
-                PREHEATER_STATE_PREHEATING_COIL_1_2_ACTIVE,
-            },
-            key="preheater_2",
-            enabled_by_default=False,
-        )
-
-
-class AlarmBinarySensor(AbstractBinarySensor):
-    """
-    Generic Alarm Binary Sensor
-    (Störung/Alarm)
-
-    Various registers for different alarm types.
-    Values:     0 = No Alarm
-                1 = Alarm Active
-    """
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        register: int,
-        enabled_by_default: bool = True,
-    ) -> None:
-        super().__init__(
-            coordinator,
-            register,
-            enabled_by_default=enabled_by_default,
-            device_class=BinarySensorDeviceClass.PROBLEM,
-        )
-
-
-class RoomAuxiliaryHeatingEnabledSensor(AbstractBinaryRoomSensor):
-    """
-    Room Auxiliary Heating Enabled Sensor
-    (Zusatzheizung Freigabe Raum 1-17)
-
-    Register: 440-456
-    Values:     0 = Blocked
-                1 = Heating Enabled
-    """
-
-    def __init__(self, coordinator: Coordinator, room_number: int) -> None:
-        super().__init__(
-            coordinator,
-            REG_AUXILIARY_HEATING_ENABLED_ROOM_1,
-            room_number,
-            enabled_by_default=False,
-        )
-
-
-class RoomAuxiliaryHeatingActiveBinarySensor(AbstractBinaryRoomSensor):
-    """
-    Room Auxiliary Heating Active Sensor
-    (Zusatzheizung Aktiv Raum 1-17)
-
-    Register: 460-476
-    Values:     0 = Inactive
-                1 = Heating Active
-    """
-
-    def __init__(
-        self,
-        coordinator: Coordinator,
-        room_number: int,
-    ) -> None:
-        super().__init__(
-            coordinator,
-            REG_AUXILIARY_HEATING_ACTIVE_ROOM_1,
-            room_number,
-            device_class=BinarySensorDeviceClass.HEAT,
-        )
+    @property
+    def is_on(self) -> bool | None:
+        value = self._value
+        if value is None:
+            return None
+        # value_fn already reduced the multi-state registers to a bool.
+        return value if isinstance(value, bool) else value == 1

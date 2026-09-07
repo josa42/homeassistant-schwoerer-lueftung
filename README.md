@@ -30,9 +30,16 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josa42&repository=homeassistant-schwoerer-lueftung)
 
 ### Requirements
-- Home Assistant **2026.1.0** or newer
+- Home Assistant **2026.9.0** or newer
 - Schwörer ventilation system with Modbus TCP connectivity
 - Network connection to your ventilation unit
+
+> **Upgrading from 1.x?** Version 2.0 requires Home Assistant 2026.9, where the
+> `modbus` integration hands out units over connections it shares. This
+> integration no longer opens its own socket, so another integration talking to
+> the same unit no longer competes with it for the device. Your entities keep
+> their IDs and history; no reconfiguration is needed. The
+> [changelog](CHANGELOG.md) has the full list of changes.
 
 ### HACS (Recommended)
 
@@ -78,10 +85,9 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 | **Device Type**               | WGT (with heating) or WRT (ventilation only)                  | WGT      |
 | **Number of Rooms**           | Rooms with climate control (1-17)                             | 1        |
 | **Has ground heat exchanger** | Enable if your system has a ground heat exchanger (EWT)       | Off      |
-| **Enable All Sensors**        | Enable all sensors by default (otherwise some are disabled)   | Off      |
 
 > [!TIP]
-> Set "Enable All Sensors" to ON if you want access to detailed diagnostic information like operating hours and additional temperature sensors. These can be disabled individually later.
+> Almost every entity is enabled on a fresh install. Three ship disabled: the undocumented T9 temperature, the device clock, and the per-room auxiliary heating binary sensor, which duplicates the switch next to it. Turn any of them on from the entity's own page.
 
 <br><br>
 

@@ -67,6 +67,31 @@ fi
 print_info "Pulling latest changes..."
 git pull origin "$CURRENT_BRANCH"
 
+# Check the changelog documents this version, before anything is mutated
+print_info "Checking CHANGELOG.md..."
+CHANGELOG_FILE="CHANGELOG.md"
+if [ ! -f "$CHANGELOG_FILE" ]; then
+    print_error "Changelog not found: $CHANGELOG_FILE"
+    exit 1
+fi
+
+# Dots are literal, and the heading must end or continue with a non-digit, so
+# that 2.0.1 does not match a "## 2.0.10" section.
+ESCAPED_VERSION=${VERSION//./\\.}
+if ! grep -qE "^## +${ESCAPED_VERSION}([^0-9]|$)" "$CHANGELOG_FILE"; then
+    print_error "CHANGELOG.md has no '## ${VERSION}' section"
+    print_error "Add one before releasing ${TAG}"
+    exit 1
+fi
+
+# A section still marked unreleased documents the tag in name only.
+if grep -iqE "^## +${ESCAPED_VERSION}([^0-9]|$).*unreleased" "$CHANGELOG_FILE"; then
+    print_error "The ${VERSION} section in CHANGELOG.md is still marked unreleased"
+    exit 1
+fi
+
+print_info "CHANGELOG.md documents ${VERSION}"
+
 # Update version in manifest.json
 print_info "Updating version in manifest.json..."
 MANIFEST_FILE="custom_components/schwoerer_lueftung/manifest.json"

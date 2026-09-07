@@ -102,6 +102,12 @@
       "current_supply_air_rpm": {
         "default": "mdi:fan"
       },
+      "current_temperature_room": {
+        "default": "mdi:thermometer"
+      },
+      "device_clock": {
+        "default": "mdi:clock-outline"
+      },
       "device_filter_remaining": {
         "default": "mdi:air-filter"
       },
@@ -181,6 +187,9 @@
         "default": "mdi:thermometer"
       },
       "temperature_t8_condenser": {
+        "default": "mdi:thermometer"
+      },
+      "temperature_t9": {
         "default": "mdi:thermometer"
       },
       "time_program_base_level": {

@@ -3,10 +3,14 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever it targets: work lands on long-running
+  # branches like `next` before it reaches main, and that is exactly where a
+  # broken build needs to show up.
   pull_request:
-    branches: [main]
+  # Weekly, Sunday 00:00 UTC: catches upstream Home Assistant breakage without
+  # a run a day on a repo that goes quiet for months at a time.
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 0"
 
 jobs:
   lint:
@@ -17,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install dependencies
         run: |
@@ -36,7 +40,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install dependencies
         run: |

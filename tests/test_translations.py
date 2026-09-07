@@ -56,6 +56,8 @@ VALID_ENTITY_KEYS = {
         "current_fan_level",
         "current_supply_air_flow",
         "current_supply_air_rpm",
+        "current_temperature_room",
+        "device_clock",
         "device_filter_remaining",
         "error_message",
         "exhaust_air_fan_status",
@@ -75,6 +77,7 @@ VALID_ENTITY_KEYS = {
         "shock_ventilation_remaining",
         "supply_air_fan_status",
         "temperature_t10_outdoor",
+        "temperature_t9",
         "temperature_t1_after_ground_heat_exchanger",
         "temperature_t2_after_preheating_coil",
         "temperature_t3_before_reheater",
@@ -124,9 +127,9 @@ class TestTranslationSorting:
         """Recursively check if dictionary keys are sorted."""
         if isinstance(obj, dict):
             keys = list(obj.keys())
-            
+
             # Check if all keys are numeric strings - if so, sort numerically
-            if all(k.lstrip('-').isdigit() for k in keys):
+            if all(k.lstrip("-").isdigit() for k in keys):
                 sorted_keys = sorted(keys, key=lambda x: int(x))
             else:
                 sorted_keys = sorted(keys)
