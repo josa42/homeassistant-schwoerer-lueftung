@@ -3,8 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever it targets: work lands on long-running
+  # branches like `next` before it reaches main, and that is exactly where a
+  # broken build needs to show up.
   pull_request:
-    branches: [main]
   schedule:
     - cron: "0 0 * * *"
 
