@@ -64,6 +64,9 @@ upgrade and no reconfiguration is needed.
   recording them and raised a repair asking whether to delete the old
   statistics. The error message sensor deliberately keeps no state class: it
   reports a code, and the mean of an error code means nothing.
+- `Temperatur T9`, the device clock and the per-room temperature sensor had no
+  icon of their own and fell back to the device class default. A test now
+  fails if an entity ships without one.
 - The ground heat exchanger operating hours sensor is back after the rewrite
   dropped it.
 - Room devices link to the ventilation unit by device ID. The identifier tuple

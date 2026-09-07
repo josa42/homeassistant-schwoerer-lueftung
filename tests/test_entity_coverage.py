@@ -9,6 +9,9 @@ pass lost.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from custom_components.schwoerer_lueftung import (
     binary_sensor as binary_sensor_platform,
 )
@@ -20,6 +23,8 @@ from custom_components.schwoerer_lueftung import switch as switch_platform
 from custom_components.schwoerer_lueftung.entity import ROOMS
 
 from .test_translations import VALID_ENTITY_KEYS
+
+COMPONENT_PATH = "custom_components/schwoerer_lueftung"
 
 
 def _keys(descriptions) -> set[str]:
@@ -147,3 +152,24 @@ def test_controls_are_never_hidden() -> None:
     for platform in ("switch", "select", "number"):
         for d in PLATFORM_DESCRIPTIONS[platform]:
             assert d.entity_registry_enabled_default, f"{platform}.{d.key} is hidden"
+
+
+def test_every_entity_has_an_icon() -> None:
+    """Every entity carries an explicit icon.
+
+    Without an entry the frontend falls back to the device class icon, which is
+    silent: `temperature_t9` and `device_clock` shipped without one and looked
+    almost right. The repo's convention is that the icon is stated.
+    """
+    icons = json.loads(
+        (Path(__file__).parent.parent / COMPONENT_PATH / "icons.json").read_text()
+    )["entity"]
+
+    missing = {
+        f"{domain}.{key}"
+        for domain, keys in IMPLEMENTED.items()
+        for key in keys
+        if key not in icons.get(domain, {})
+    }
+
+    assert not missing, f"entities without an icon: {sorted(missing)}"
