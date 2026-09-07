@@ -28,7 +28,7 @@ class SchwoererBinarySensorEntityDescription(
     """Describe a binary sensor backed by a device field."""
 
 
-def _alarm(key: str, *, enabled: bool) -> SchwoererBinarySensorEntityDescription:
+def _alarm(key: str, *, enabled: bool = True) -> SchwoererBinarySensorEntityDescription:
     return SchwoererBinarySensorEntityDescription(
         key=key,
         subsystem="alarms",
@@ -42,25 +42,23 @@ COMMON_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
     SchwoererBinarySensorEntityDescription(
         key="outdoor_damper_state",
         subsystem="ventilation",
-        entity_registry_enabled_default=False,
     ),
-    _alarm("alarm_pressure_switch", enabled=False),
-    _alarm("alarm_utility_lock", enabled=False),
-    _alarm("alarm_door_open", enabled=True),
-    _alarm("alarm_device_filter_dirty", enabled=True),
-    _alarm("alarm_upstream_filter_dirty", enabled=True),
-    _alarm("alarm_off_peak_disabled", enabled=False),
-    _alarm("alarm_supply_voltage_off", enabled=False),
-    _alarm("alarm_pressostat_triggered", enabled=False),
-    _alarm("alarm_external_utility_lock", enabled=False),
-    _alarm("alarm_emergency_mode", enabled=True),
+    _alarm("alarm_pressure_switch"),
+    _alarm("alarm_utility_lock"),
+    _alarm("alarm_door_open"),
+    _alarm("alarm_device_filter_dirty"),
+    _alarm("alarm_upstream_filter_dirty"),
+    _alarm("alarm_off_peak_disabled"),
+    _alarm("alarm_supply_voltage_off"),
+    _alarm("alarm_pressostat_triggered"),
+    _alarm("alarm_external_utility_lock"),
+    _alarm("alarm_emergency_mode"),
 )
 
 HEATING_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
     SchwoererBinarySensorEntityDescription(
         key="reheater_state",
         subsystem="heating",
-        entity_registry_enabled_default=False,
     ),
     # Both coils are reported by one register, so each entity tests the
     # values that mean its own coil is running.
@@ -69,23 +67,23 @@ HEATING_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
         subsystem="ventilation",
         field="preheater_state",
         value_fn=lambda value: value in PREHEATER_COIL_1_ACTIVE,
-        entity_registry_enabled_default=False,
     ),
     SchwoererBinarySensorEntityDescription(
         key="preheater_2",
         subsystem="ventilation",
         field="preheater_state",
         value_fn=lambda value: value in PREHEATER_COIL_2_ACTIVE,
-        entity_registry_enabled_default=False,
     ),
-    _alarm("alarm_heating_module_test", enabled=False),
-    _alarm("alarm_supply_air_cold", enabled=True),
+    _alarm("alarm_heating_module_test"),
+    _alarm("alarm_supply_air_cold"),
 )
 
 ROOM_BINARY_SENSORS: tuple[SchwoererBinarySensorEntityDescription, ...] = (
     SchwoererBinarySensorEntityDescription(
         key="auxiliary_heating_enabled",
         subsystem=ROOMS,
+        # Register 440+i already has a switch, and drives the room's climate
+        # entity. A third read-only view of it is redundant.
         entity_registry_enabled_default=False,
     ),
     SchwoererBinarySensorEntityDescription(

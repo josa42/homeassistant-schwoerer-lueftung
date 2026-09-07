@@ -41,12 +41,10 @@ ROOM_SWITCHES: tuple[SchwoererSwitchEntityDescription, ...] = (
     SchwoererSwitchEntityDescription(
         key="auxiliary_heating_enabled",
         subsystem=ROOMS,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSwitchEntityDescription(
         key="scheduled_heating_enabled",
         subsystem=ROOMS,
-        entity_registry_enabled_default=False,
     ),
 )
 

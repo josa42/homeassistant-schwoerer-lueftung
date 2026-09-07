@@ -53,7 +53,7 @@ class SchwoererSensorEntityDescription(
 
 
 def _temperature(
-    key: str, subsystem: str, *, enabled: bool = False
+    key: str, subsystem: str, *, enabled: bool = True
 ) -> SchwoererSensorEntityDescription:
     return SchwoererSensorEntityDescription(
         key=key,
@@ -66,7 +66,7 @@ def _temperature(
 
 
 def _operating_hours(
-    key: str, subsystem: str, *, enabled: bool = False
+    key: str, subsystem: str, *, enabled: bool = True
 ) -> SchwoererSensorEntityDescription:
     return SchwoererSensorEntityDescription(
         key=key,
@@ -83,7 +83,6 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     SchwoererSensorEntityDescription(
         key="time_program_base_level",
         subsystem="ventilation",
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="shock_ventilation_remaining",
@@ -96,14 +95,12 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         subsystem="ventilation",
         device_class=SensorDeviceClass.ENUM,
         options_map=SUPPLY_AIR_FAN_STATUS,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="exhaust_air_fan_status",
         subsystem="ventilation",
         device_class=SensorDeviceClass.ENUM,
         options_map=EXHAUST_AIR_FAN_STATUS,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="bypass_state",
@@ -114,12 +111,10 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     SchwoererSensorEntityDescription(
         key="time_program_fan_level",
         subsystem="ventilation",
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="sensor_fan_level",
         subsystem="ventilation",
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="current_supply_air_flow",
@@ -138,24 +133,22 @@ VENTILATION_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
         subsystem="ventilation",
         native_unit_of_measurement="rpm",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
     ),
     SchwoererSensorEntityDescription(
         key="current_exhaust_air_rpm",
         subsystem="ventilation",
         native_unit_of_measurement="rpm",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
     ),
 )
 
 TEMPERATURE_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _temperature("temperature_t5_exhaust_air", "temperatures", enabled=True),
+    _temperature("temperature_t5_exhaust_air", "temperatures"),
     _temperature("temperature_t6_in_heat_exchanger", "temperatures"),
-    _temperature("temperature_t10_outdoor", "temperatures", enabled=True),
+    _temperature("temperature_t10_outdoor", "temperatures"),
     # Undocumented, so off by default: it was found on one unit and what it
     # measures is unknown.
-    _temperature("temperature_t9", "undocumented_temperatures"),
+    _temperature("temperature_t9", "undocumented_temperatures", enabled=False),
 )
 
 # The unit's own real-time clock. Diagnostic, and off by default.
@@ -185,7 +178,7 @@ ALARM_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
 )
 
 OPERATING_HOURS_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _operating_hours("operating_hours_fan", "operating_hours", enabled=True),
+    _operating_hours("operating_hours_fan", "operating_hours"),
     _operating_hours("operating_hours_fan_level_1", "operating_hours"),
     _operating_hours("operating_hours_fan_level_2", "operating_hours"),
     _operating_hours("operating_hours_fan_level_3", "operating_hours"),
@@ -201,7 +194,7 @@ HEATING_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     ),
     _temperature("temperature_t2_after_preheating_coil", "heating"),
     _temperature("temperature_t3_before_reheater", "heating"),
-    _temperature("temperature_t4_after_reheater", "heating", enabled=True),
+    _temperature("temperature_t4_after_reheater", "heating"),
     _temperature("temperature_t7_evaporator", "heating"),
     _temperature("temperature_t8_condenser", "heating"),
     _operating_hours("operating_hours_heat_pump", "heating"),
@@ -211,11 +204,7 @@ HEATING_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
 )
 
 GROUND_HEAT_EXCHANGER_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
-    _temperature(
-        "temperature_t1_after_ground_heat_exchanger",
-        "ground_heat_exchanger",
-        enabled=True,
-    ),
+    _temperature("temperature_t1_after_ground_heat_exchanger", "ground_heat_exchanger"),
     SchwoererSensorEntityDescription(
         key="ground_heat_exchanger_state",
         subsystem="ground_heat_exchanger",
@@ -227,7 +216,7 @@ GROUND_HEAT_EXCHANGER_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
 
 # Room temperature is surfaced as a plain sensor only on a WRT. A WGT gets a
 # climate entity for the room instead, which carries the same reading.
-ROOM_SENSOR = _temperature("current_temperature", ROOMS, enabled=True)
+ROOM_SENSOR = _temperature("current_temperature", ROOMS)
 
 
 async def async_setup_entry(

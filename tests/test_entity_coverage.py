@@ -82,36 +82,31 @@ def test_every_entity_has_a_translation() -> None:
         )
 
 
-# Which sensors a fresh install shows. Pinned deliberately: the choice is a
-# curation call, not an accident, and `entity_registry_enabled_default` is
-# applied only at first registration - so getting it wrong is not something a
-# user can be talked through fixing later, entity by entity.
-ENABLED_SENSORS = {
-    # Air path: outdoor in, supply into the house, extract back out.
-    "temperature_t10_outdoor",
-    "temperature_t4_after_reheater",
-    "temperature_t5_exhaust_air",
-    "current_temperature_room",
-    # What the unit is doing right now.
-    "current_fan_level",
-    "current_supply_air_flow",
-    "current_exhaust_air_flow",
-    "bypass_state",
-    "heat_pump_status",
-    "shock_ventilation_remaining",
-    # Maintenance and faults.
-    "error_message",
-    "device_filter_remaining",
-    "upstream_filter_remaining",
-    "operating_hours_fan",
-    # Only created when the user declared the hardware at setup.
-    "temperature_t1_after_ground_heat_exchanger",
-    "ground_heat_exchanger_state",
+# Entities a fresh install leaves switched off. Everything else is on.
+#
+# Enabling costs no Modbus traffic - components read every declared field
+# whether or not an entity exists - so the only cost is recorder rows. Measured
+# against a real unit: temperatures and fan RPM run 17-29 rows a day each,
+# everything binary or enum is under one. The whole integration is a few
+# hundred rows a day, which is not worth curating around.
+#
+# So the bar for staying off is narrow: an entity nobody can interpret, one
+# that would flood the recorder, or a third view of something already exposed
+# twice.
+DISABLED_BY_DEFAULT = {
+    # Undocumented. Found by probing one unit, and what it measures is unknown,
+    # so there is nothing useful to tell a user about it.
+    ("sensor", "temperature_t9"),
+    # The seconds field ticks, so this writes a recorder row on every poll -
+    # about 2880 a day, ten times the rest of the integration, for a
+    # diagnostic.
+    ("sensor", "device_clock"),
+    # Register 440+i already has a switch and drives the room's climate entity.
+    ("binary_sensor", "auxiliary_heating_enabled_room"),
 }
 
-
-def test_sensor_defaults_are_deliberate() -> None:
-    descriptions = [
+PLATFORM_DESCRIPTIONS = {
+    "sensor": [
         *sensor_platform.VENTILATION_SENSORS,
         *sensor_platform.TEMPERATURE_SENSORS,
         *sensor_platform.ALARM_SENSORS,
@@ -120,19 +115,35 @@ def test_sensor_defaults_are_deliberate() -> None:
         *sensor_platform.GROUND_HEAT_EXCHANGER_SENSORS,
         sensor_platform.CLOCK_SENSOR,
         sensor_platform.ROOM_SENSOR,
-    ]
-    enabled = {
-        f"{d.key}_room" if d.subsystem == ROOMS else d.key
+    ],
+    "binary_sensor": [
+        *binary_sensor_platform.COMMON_BINARY_SENSORS,
+        *binary_sensor_platform.HEATING_BINARY_SENSORS,
+        *binary_sensor_platform.ROOM_BINARY_SENSORS,
+    ],
+    "switch": [
+        *switch_platform.COMMON_SWITCHES,
+        *switch_platform.HEATING_SWITCHES,
+        *switch_platform.ROOM_SWITCHES,
+    ],
+    "select": [*select_platform.COMMON_SELECTS, *select_platform.HEATING_SELECTS],
+    "number": [*number_platform.COMMON_NUMBERS, *number_platform.ROOM_NUMBERS],
+}
+
+
+def test_only_the_listed_entities_ship_disabled() -> None:
+    """Turning an entity off by default should be a deliberate, argued choice."""
+    disabled = {
+        (platform, f"{d.key}_room" if d.subsystem == ROOMS else d.key)
+        for platform, descriptions in PLATFORM_DESCRIPTIONS.items()
         for d in descriptions
-        if d.entity_registry_enabled_default
+        if not d.entity_registry_enabled_default
     }
-    assert enabled == ENABLED_SENSORS
+    assert disabled == DISABLED_BY_DEFAULT
 
 
-def test_undocumented_sensors_ship_disabled() -> None:
-    """Registers found by probing one unit must not be on for everyone."""
-    assert not sensor_platform.CLOCK_SENSOR.entity_registry_enabled_default
-    t9 = next(
-        d for d in sensor_platform.TEMPERATURE_SENSORS if d.key == "temperature_t9"
-    )
-    assert not t9.entity_registry_enabled_default
+def test_controls_are_never_hidden() -> None:
+    """A control a user cannot see is a feature they do not have."""
+    for platform in ("switch", "select", "number"):
+        for d in PLATFORM_DESCRIPTIONS[platform]:
+            assert d.entity_registry_enabled_default, f"{platform}.{d.key} is hidden"

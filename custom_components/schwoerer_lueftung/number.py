@@ -40,7 +40,6 @@ COMMON_NUMBERS: tuple[SchwoererNumberEntityDescription, ...] = (
         native_max_value=LINEAR_FAN_POWER_MAX,
         native_step=1,
         native_unit_of_measurement="%",
-        entity_registry_enabled_default=False,
     ),
 )
 
@@ -54,7 +53,6 @@ ROOM_NUMBERS: tuple[SchwoererNumberEntityDescription, ...] = (
         native_max_value=ROOM_TEMPERATURE_MAX,
         native_step=0.1,
         mode=NumberMode.BOX,
-        entity_registry_enabled_default=False,
     ),
 )
 
