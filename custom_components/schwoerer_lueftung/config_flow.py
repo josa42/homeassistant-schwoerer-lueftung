@@ -25,7 +25,6 @@ from modbus_connection import ModbusError, ModbusTcpParams
 
 from .const import (
     CONF_DEVICE_TYPE,
-    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT,
     CONF_HAS_GROUND_HEAT_EXCHANGER,
     CONF_ROOMS,
     DEFAULT_DEVICE_TYPE,
@@ -110,7 +109,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=NumberSelectorMode.BOX,
                     )
                 ),
-                vol.Required(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, default=False): bool,
             }
         )
 
@@ -139,9 +137,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_ROOMS: [],
                     CONF_HAS_GROUND_HEAT_EXCHANGER: user_input[
                         CONF_HAS_GROUND_HEAT_EXCHANGER
-                    ],
-                    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: user_input[
-                        CONF_ENABLE_ALL_SENSORS_BY_DEFAULT
                     ],
                 }
 

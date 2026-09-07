@@ -172,6 +172,17 @@ async def test_entities_go_unavailable_only_with_their_own_subsystem(
     )
 
 
+async def _enable(hass: HomeAssistant, entry: MockConfigEntry, *suffixes: str) -> None:
+    """Turn entities on the way the entity page does, then reload."""
+    registry = er.async_get(hass)
+    wanted = {f"{entry.entry_id}_{s}" for s in suffixes}
+    for er_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if er_entry.unique_id in wanted:
+            registry.async_update_entity(er_entry.entity_id, disabled_by=None)
+    await hass.config_entries.async_reload(entry.entry_id)
+    await hass.async_block_till_done()
+
+
 def _by_unique_id(hass: HomeAssistant, entry: MockConfigEntry, suffix: str):
     """Look a state up by the unique_id suffix, not by a guessed entity_id."""
     registry = er.async_get(hass)
@@ -182,13 +193,15 @@ def _by_unique_id(hass: HomeAssistant, entry: MockConfigEntry, suffix: str):
 
 
 async def test_undocumented_sensors_render(
-    hass: HomeAssistant,
-    mock_modbus,
-    wgt_entry_all_enabled: MockConfigEntry,
+    hass: HomeAssistant, mock_modbus, wgt_entry: MockConfigEntry
 ) -> None:
-    """T9 and the device clock, which ship disabled, produce sane states."""
-    wgt_entry = wgt_entry_all_enabled
+    """T9 and the device clock, which ship disabled, produce sane states.
+
+    Enabled the way a user would: switch them on in the entity page, which
+    reloads the entry.
+    """
     await setup_entry(hass, wgt_entry)
+    await _enable(hass, wgt_entry, "temperature_t9", "device_clock")
 
     t9 = _by_unique_id(hass, wgt_entry, "temperature_t9")
     assert t9 is not None

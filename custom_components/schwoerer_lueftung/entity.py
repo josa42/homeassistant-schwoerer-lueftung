@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_ENABLE_ALL_SENSORS_BY_DEFAULT
 from .coordinator import Coordinator
 
 if TYPE_CHECKING:
@@ -77,9 +76,12 @@ class SchwoererEntity(CoordinatorEntity[Coordinator]):
             self._attr_translation_key = f"{description.key}_room"
             self._attr_device_info = coordinator.get_room_device(room_number)
 
+        # Whether an entity starts enabled is the description's call. Home
+        # Assistant applies this only when the entity is first registered, so
+        # there is nothing here for a user preference to usefully hook into -
+        # enabling entities later is the entity page's job.
         self._attr_entity_registry_enabled_default = (
             description.entity_registry_enabled_default
-            or entry.data.get(CONF_ENABLE_ALL_SENSORS_BY_DEFAULT, False)
         )
 
     @property

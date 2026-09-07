@@ -12,7 +12,6 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.schwoerer_lueftung.const import (
     CONF_DEVICE_TYPE,
-    CONF_ENABLE_ALL_SENSORS_BY_DEFAULT,
     CONF_HAS_GROUND_HEAT_EXCHANGER,
     CONF_ROOMS,
     DEVICE_TYPE_WGT,
@@ -153,16 +152,16 @@ def make_entry(
     device_type: str = DEVICE_TYPE_WGT,
     ground_heat_exchanger: bool = True,
     rooms: int = 2,
-    enable_all: bool = False,
 ) -> MockConfigEntry:
     """A config entry shaped the way the config flow writes one."""
     return MockConfigEntry(
         domain=DOMAIN,
+        # The flow keys uniqueness on the host, so a realistic entry has it.
+        unique_id="192.168.1.100",
         data={
             CONF_HOST: "192.168.1.100",
             CONF_DEVICE_TYPE: device_type,
             CONF_HAS_GROUND_HEAT_EXCHANGER: ground_heat_exchanger,
-            CONF_ENABLE_ALL_SENSORS_BY_DEFAULT: enable_all,
             CONF_ROOMS: [
                 {"number": n, "name": f"Room {n}"} for n in range(1, rooms + 1)
             ],
@@ -180,9 +179,3 @@ def wgt_entry() -> MockConfigEntry:
 def wrt_entry() -> MockConfigEntry:
     """A WRT with neither heating nor a ground heat exchanger."""
     return make_entry(device_type=DEVICE_TYPE_WRT, ground_heat_exchanger=False, rooms=2)
-
-
-@pytest.fixture
-def wgt_entry_all_enabled() -> MockConfigEntry:
-    """A WGT with the config flow's "enable all sensors" option turned on."""
-    return make_entry(enable_all=True)
