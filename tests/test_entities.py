@@ -83,7 +83,7 @@ async def test_room_unique_ids_are_unchanged(
 async def test_wrt_room_temperature_unique_ids_are_unchanged(
     hass: HomeAssistant, mock_modbus, wrt_entry: MockConfigEntry, suffix: str
 ) -> None:
-    """Only a WRT gets a room temperature sensor; a WGT gets a climate entity."""
+    """A WRT has carried this id since 1.x, so it must not shift."""
     await setup_entry(hass, wrt_entry)
 
     assert f"{wrt_entry.entry_id}_{suffix}" in unique_ids(hass, wrt_entry)
@@ -235,3 +235,42 @@ async def test_clock_is_diagnostic_and_off_by_default(
     assert clock.disabled_by is er.RegistryEntryDisabler.INTEGRATION
     assert clock.entity_category is EntityCategory.DIAGNOSTIC
     assert entries[f"{wgt_entry.entry_id}_temperature_t9"].disabled_by is not None
+
+
+async def test_every_room_gets_a_temperature_sensor(
+    hass: HomeAssistant, mock_modbus, wgt_entry: MockConfigEntry
+) -> None:
+    """A WGT gets one too, not just a WRT.
+
+    The climate entity carries the same reading, but only as an attribute -
+    which cannot be graphed or fed to a helper without a template.
+    """
+    await setup_entry(hass, wgt_entry)
+
+    ids = unique_ids(hass, wgt_entry)
+    for number in (1, 2):
+        assert f"{wgt_entry.entry_id}_current_temperature_room_{number}" in ids
+
+    state = _by_unique_id(hass, wgt_entry, "current_temperature_room_1")
+    assert state is not None
+    assert float(state.state) == 21.0
+    assert state.attributes["room_number"] == 1
+
+
+async def test_the_room_sensor_costs_no_extra_reads(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    """It reads a register the Room component already polls for the climate."""
+    await setup_entry(hass, wgt_entry)
+
+    unit.read_events.clear()
+    await wgt_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    # Two rooms, six fields each, pooled into one block per field.
+    room_reads = [e for e in unit.read_events if 360 <= e.address <= 516]
+    assert len(room_reads) == 6
+    assert all(event.count == 2 for event in room_reads)

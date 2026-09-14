@@ -224,8 +224,14 @@ GROUND_HEAT_EXCHANGER_SENSORS: tuple[SchwoererSensorEntityDescription, ...] = (
     _operating_hours("operating_hours_ground_heat_exchanger", "ground_heat_exchanger"),
 )
 
-# Room temperature is surfaced as a plain sensor only on a WRT. A WGT gets a
-# climate entity for the room instead, which carries the same reading.
+# Every room gets its own temperature sensor, on a WGT as well as a WRT. A WGT
+# also has a climate entity carrying the same reading, but only as an attribute
+# - and an attribute cannot be graphed, put on a dashboard card, or fed to a
+# threshold helper without a template wrapping it.
+#
+# This costs no extra Modbus traffic: the Room component reads 360+i on every
+# device regardless, since the rooms come from the config entry rather than from
+# whether the unit can heat.
 ROOM_SENSOR = _temperature("current_temperature", ROOMS)
 
 
@@ -256,11 +262,10 @@ async def async_setup_entry(
         SchwoererSensor(coordinator, description) for description in descriptions
     ]
 
-    if not has_heating:
-        entities.extend(
-            SchwoererSensor(coordinator, ROOM_SENSOR, room["number"])
-            for room in entry.data.get(CONF_ROOMS, [])
-        )
+    entities.extend(
+        SchwoererSensor(coordinator, ROOM_SENSOR, room["number"])
+        for room in entry.data.get(CONF_ROOMS, [])
+    )
 
     async_add_entities(entities)
 
