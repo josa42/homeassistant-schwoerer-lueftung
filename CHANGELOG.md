@@ -3,6 +3,17 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Added
+
+- **Every room has its own temperature sensor.** A WGT previously exposed the
+  room temperature only through the climate entity's `current_temperature`
+  attribute, which cannot be graphed, put on a dashboard card, or fed to a
+  threshold helper without a template wrapping it. WRT models already had the
+  sensor and are unchanged. It costs no extra Modbus traffic: the register was
+  already being read for the climate entity.
+
 ## 2.0.0 - 2026-09-07
 
 A rewrite onto the Modbus architecture Home Assistant introduced in 2026.9.

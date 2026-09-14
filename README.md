@@ -152,7 +152,7 @@ Individual room controls (one set per configured room):
 
 | Type            | Entity                           | Description                                        | States                                      |
 |-----------------|----------------------------------|----------------------------------------------------|---------------------------------------------|
-| **Sensor**      | Room Temperature                 | Current room temperature sensor                    | °C                                          |
+| **Sensor**      | Room Temperature                 | Current room temperature, one sensor per room      | °C                                          |
 |                 |                                  |                                                    |                                             |
 | **Climate**     | Room Climate (WGT)               | Room temperature control                           | `10`-`30` °C, step `0.5`; Heat / Fan only   |
 |                 |                                  |                                                    |                                             |
@@ -166,6 +166,8 @@ Individual room controls (one set per configured room):
 
 > [!NOTE]
 > Entities marked **(WGT)** are only available on WGT (heating) models. WRT models provide ventilation monitoring and control only.
+>
+> Room Temperature is a sensor on both models. On a WGT the room's climate entity reports the same reading, but only as an attribute — the sensor is what you can graph, put on a card, or feed to a helper.
 
 <br><br>
 
