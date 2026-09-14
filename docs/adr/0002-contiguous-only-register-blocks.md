@@ -14,9 +14,8 @@ gaps up to `max_gap` (16 registers), and merges freely inside any declared
 It also does not work. The firmware refuses any block that contains an address
 it does not implement. Asked for holding 100 to 112, one block over the fields
 at 100-104 and 110-112 bridging the unimplemented 105-109, a real WGT answers
-exception code 2, Illegal Data Address, and the entire read fails. The separate
-0-1023 probe recorded in `docs/undocumented-registers.md` confirms the same
-strictness at single-register granularity.
+exception code 2, Illegal Data Address, and the entire read fails. A separate
+0-1023 probe confirms the same strictness at single-register granularity.
 
 The strict grouping in 1.x was therefore load-bearing rather than a naive
 limitation, and nothing in the code said so. The first draft of the rewrite

@@ -337,8 +337,7 @@ writable:
 
 So the bypass cannot be commanded, but lowering a room setpoint below its
 current temperature while it is cooler outside than inside produces the cooling
-demand the controller opens it for. `docs/research/001-bypass-control.md` has
-the sources and the open questions.
+demand the controller opens it for.
 
 ### Optional Features
 
