@@ -3,7 +3,7 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
-## Unreleased
+## 2.1.0 - 2026-09-14
 
 ### Added
 
