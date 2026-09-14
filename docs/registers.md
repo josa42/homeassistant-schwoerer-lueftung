@@ -332,12 +332,36 @@ writable:
 
 | Condition | Registers |
 |-----------|-----------|
-| Outdoor colder than the room | 209 < 360+n |
-| Room setpoint below the room temperature | 400+n < 360+n |
+| Outdoor colder than the room | 209 < 360 |
+| Room setpoint below the room temperature | 400 < 360 |
 
-So the bypass cannot be commanded, but lowering a room setpoint below its
+The setpoint comparison is room 1's. A week of recorder history has rooms 2 to 6
+spending up to a quarter of the week under their setpoints without the damper
+reacting, while room 1 crossing its setpoint closed it within minutes, so
+401-405 are not part of that decision. Which temperature the outdoor comparison
+uses is not established: T5 extract at 204 and all six rooms track each other
+closely enough that the week cannot separate them.
+
+So the bypass cannot be commanded, but lowering room 1's setpoint below its
 current temperature while it is cooler outside than inside produces the cooling
 demand the controller opens it for.
+
+The same week fills in what the manufacturer's statement leaves out. The damper
+closes when the outdoor temperature reaches the extract air and reopens about 2 K
+below it, a hysteresis of 1.5 to 2 K, so both comparisons move with the indoor
+temperature rather than with any absolute value. Below 10 °C outdoor it stays
+shut no matter how much cooling the rooms want, which matches the factory default
+of the WRG-Temperatur lower limit; no register for that limit is identified.
+Register 230 gates the whole thing, closing the damper within seconds of leaving
+Kühlen, while Betriebsart, the heat pump registers and the fan stage do not
+affect it at all.
+
+All of that is the cooling side. The week was measured with 230 on Kühlen and 123
+never left `0` or `1`, so the conditions behind `2 = open (heating)` are unknown,
+including whether the 10 °C limit applies to them.
+
+`docs/research/001-bypass-control.md` has the measurements, the sources and the
+open questions.
 
 ### Optional Features
 
