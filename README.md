@@ -103,42 +103,42 @@ System-wide controls and monitoring:
 
 <br><br>
 
-| Type            | Entity                          | Description                                                    |
-|-----------------|---------------------------------|----------------------------------------------------------------|
-| **Sensor**      | Fan Level                       | Current fan speed (Off, Level 1-4)                             |
-|                 | Supply Air Flow                 | Supply air flow percentage                                     |
-|                 | Exhaust Air Flow                | Exhaust air flow percentage                                    |
-|                 | Supply Fan Speed                | Supply fan rotation speed (RPM)                                |
-|                 | Exhaust Fan Speed               | Exhaust fan rotation speed (RPM)                               |
-|                 | Temperature T1-T10              | Multiple temperature sensors (outdoor, supply, exhaust, etc.)  |
-|                 | Filter Remaining (Device)       | Device filter life in days                                     |
-|                 | Filter Remaining (Upstream)     | Upstream filter life in days                                   |
-|                 | Operating Hours                 | Runtime tracking (fan, heat pump, heating elements)            |
-|                 | Supply Air Fan Status           | Fan state (Disabled/Startup/Active/Standby/Error)              |
-|                 | Exhaust Air Fan Status          | Fan state (Disabled/Startup/Active/Standby/Error)              |
-|                 | Error Message                   | System error reporting                                         |
-|                 | Time Program Base Level         | Programmed base ventilation level                              |
-|                 | Shock Ventilation Remaining     | Remaining boost mode time (minutes)                            |
-|                 |                                 |                                                                |
-| **Binary**      | Door Open                       | Door open alarm                                                |
-|                 | Device Filter Dirty             | Device filter replacement notification                         |
-|                 | Upstream Filter Dirty           | Upstream filter replacement notification                       |
-|                 | Emergency Mode                  | Emergency mode indicator                                       |
-|                 | Outdoor Damper                  | Outdoor damper state (open/closed)                             |
-|                 | Fan Override                    | Fan override mode active                                       |
-|                 | Reheater Active (WGT)           | Reheater element status                                        |
-|                 | Preheater 1/2 Active (WGT)      | Preheater element status                                       |
-|                 |                                 |                                                                |
-| **Select**      | Operation Mode                  | Off / Manual / Winter / Summer / Summer Exhaust                |
-|                 | Manual Fan Speed                | Off / Level 1-4 / Automatic / Linear Mode                      |
-|                 | Heating/Cooling Function (WGT)  | Off / Heating / Cooling / Auto (outdoor) / Auto (digital)      |
-|                 |                                 |                                                                |
-| **Number**      | Linear Fan Power                | Manual linear fan control (30-100%)                            |
-|                 |                                 |                                                                |
-| **Switch**      | Shock Ventilation               | Temporary boost mode                                           |
-|                 | Heat Pump Heating (WGT)         | Enable/disable heat pump heating                               |
-|                 | Heat Pump Cooling (WGT)         | Enable/disable heat pump cooling                               |
-|                 | Auxiliary Heating System (WGT)  | Enable/disable auxiliary heating system-wide                   |
+| Type            | Entity                          | Description                                                    | States                                                      |
+|-----------------|---------------------------------|----------------------------------------------------------------|-------------------------------------------------------------|
+| **Sensor**      | Fan Level                       | Current fan speed                                              | `0`-`4` (`0` = off)                                         |
+|                 | Supply Air Flow                 | Supply air flow percentage                                     | `0`-`100` %                                                 |
+|                 | Exhaust Air Flow                | Exhaust air flow percentage                                    | `0`-`100` %                                                 |
+|                 | Supply Fan Speed                | Supply fan rotation speed                                      | rpm                                                         |
+|                 | Exhaust Fan Speed               | Exhaust fan rotation speed                                     | rpm                                                         |
+|                 | Temperature T1-T10              | Multiple temperature sensors (outdoor, supply, exhaust, etc.)  | °C                                                          |
+|                 | Filter Remaining (Device)       | Device filter life                                             | days                                                        |
+|                 | Filter Remaining (Upstream)     | Upstream filter life                                           | days                                                        |
+|                 | Operating Hours                 | Runtime tracking (fan, heat pump, heating elements)            | hours, counting up                                          |
+|                 | Supply Air Fan Status           | Fan state                                                      | Disabled / Startup / Active / Standby / Error               |
+|                 | Exhaust Air Fan Status          | Fan state                                                      | Disabled / Startup / Active / Standby / Error               |
+|                 | Error Message                   | System error reporting                                         | `0` = no error, otherwise a code from `257`-`1284`                      |
+|                 | Time Program Base Level         | Programmed base ventilation level                              | `0`-`4`                                                     |
+|                 | Shock Ventilation Remaining     | Remaining boost mode time                                      | `0`-`60` minutes                                            |
+|                 |                                 |                                                                |                                                             |
+| **Binary**      | Door Open                       | Door open alarm                                                | Problem / OK                                                |
+|                 | Device Filter Dirty             | Device filter replacement notification                         | Problem / OK                                                |
+|                 | Upstream Filter Dirty           | Upstream filter replacement notification                       | Problem / OK                                                |
+|                 | Emergency Mode                  | Emergency mode indicator                                       | Problem / OK                                                |
+|                 | Outdoor Damper                  | Outdoor damper state                                           | Open / Closed                                               |
+|                 | Fan Override                    | Fan override mode active                                       | On / Off                                                    |
+|                 | Reheater Active (WGT)           | Reheater element status                                        | On / Off                                                    |
+|                 | Preheater 1/2 Active (WGT)      | Preheater element status                                       | On / Off                                                    |
+|                 |                                 |                                                                |                                                             |
+| **Select**      | Operation Mode                  | Seasonal operating mode                                        | Off / Manual / Winter / Summer / Summer Exhaust             |
+|                 | Manual Fan Speed                | Fan stage, or how the stage is chosen                          | Off / 1 / 2 / 3 / 4 / Automatic / Linear                    |
+|                 | Heating/Cooling Function (WGT)  | What the heat pump is asked to do                              | Off / Heating / Cooling / Auto Outdoor Temp / Auto Digital Input |
+|                 |                                 |                                                                |                                                             |
+| **Number**      | Linear Fan Power                | Manual linear fan control                                      | `30`-`100` %, step `1`                                      |
+|                 |                                 |                                                                |                                                             |
+| **Switch**      | Shock Ventilation               | Temporary boost mode                                           | On / Off                                                    |
+|                 | Heat Pump Heating (WGT)         | Enable/disable heat pump heating                               | On / Off                                                    |
+|                 | Heat Pump Cooling (WGT)         | Enable/disable heat pump cooling                               | On / Off                                                    |
+|                 | Auxiliary Heating System (WGT)  | Enable/disable auxiliary heating system-wide                   | On / Off                                                    |
 
 <br><br>
 
@@ -150,19 +150,19 @@ Individual room controls (one set per configured room):
 
 <br><br>
 
-| Type            | Entity                           | Description                                        |
-|-----------------|----------------------------------|----------------------------------------------------|
-| **Sensor**      | Room Temperature                 | Current room temperature sensor                    |
-|                 |                                  |                                                    |
-| **Climate**     | Room Climate (WGT)               | Room temperature control (10-30°C, HVAC mode)      |
-|                 |                                  |                                                    |
-| **Number**      | Room Base Temperature (WGT)      | Room baseline temperature setpoint (10-30°C)       |
-|                 |                                  |                                                    |
-| **Binary**      | Auxiliary Heating Enabled (WGT)  | Room auxiliary heating enabled status              |
-|                 | Auxiliary Heating Active (WGT)   | Room auxiliary heating active status               |
-|                 |                                  |                                                    |
-| **Switch**      | Auxiliary Heating (WGT)          | Enable/disable auxiliary heating for this room     |
-|                 | Time Program Heating (WGT)       | Enable/disable time-programmed heating for room    |
+| Type            | Entity                           | Description                                        | States                                      |
+|-----------------|----------------------------------|----------------------------------------------------|---------------------------------------------|
+| **Sensor**      | Room Temperature                 | Current room temperature sensor                    | °C                                          |
+|                 |                                  |                                                    |                                             |
+| **Climate**     | Room Climate (WGT)               | Room temperature control                           | `10`-`30` °C, step `0.5`; Heat / Fan only   |
+|                 |                                  |                                                    |                                             |
+| **Number**      | Room Base Temperature (WGT)      | Room baseline temperature setpoint                 | `10`-`30` °C, step `0.1`                    |
+|                 |                                  |                                                    |                                             |
+| **Binary**      | Auxiliary Heating Enabled (WGT)  | Room auxiliary heating enabled status              | On / Off                                    |
+|                 | Auxiliary Heating Active (WGT)   | Room auxiliary heating active status               | Active / Inactive                           |
+|                 |                                  |                                                    |                                             |
+| **Switch**      | Auxiliary Heating (WGT)          | Enable/disable auxiliary heating for this room     | On / Off                                    |
+|                 | Time Program Heating (WGT)       | Enable/disable time-programmed heating for room    | On / Off                                    |
 
 > [!NOTE]
 > Entities marked **(WGT)** are only available on WGT (heating) models. WRT models provide ventilation monitoring and control only.
