@@ -27,42 +27,15 @@ Control and monitor your Schwörer ventilation system with comprehensive Home As
 
 ## Installation
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josa42&repository=homeassistant-schwoerer-lueftung)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=josa42&repository=homeassistant-schwoerer-lueftung&category=integration)
 
 ### Requirements
 - Home Assistant **2026.9.0** or newer
 - Schwörer ventilation system with Modbus TCP connectivity
 - Network connection to your ventilation unit
 
-> **Upgrading from 1.x?** Version 2.0 requires Home Assistant 2026.9, where the
-> `modbus` integration hands out units over connections it shares. This
-> integration no longer opens its own socket, so another integration talking to
-> the same unit no longer competes with it for the device. Your entities keep
-> their IDs and history; no reconfiguration is needed. The
-> [changelog](CHANGELOG.md) has the full list of changes.
-
-### HACS (Recommended)
-
-1. Ensure [HACS](https://hacs.xyz/) is installed in your Home Assistant instance
-2. Open HACS → Integrations
-3. Click the three dots menu (top right) → Custom repositories
-4. Add repository URL: `https://github.com/josa42/homeassistant-schwoerer-lueftung`
-5. Category: Integration
-6. Click "Add"
-7. Click "Download" on the Schwörer Lüftung card
-8. Restart Home Assistant
-
-### Manual Installation
-
-1. Download the latest release from [GitHub releases](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases)
-2. Extract the `custom_components/schwoerer_lueftung` folder
-3. Copy it to your Home Assistant `custom_components` directory:
-   ```
-   config/
-   └── custom_components/
-       └── schwoerer_lueftung/
-   ```
-4. Restart Home Assistant
+[Manual installation](docs/manual_installation.md) covers adding the repository
+by hand and installing without HACS.
 
 <br><br>
 
