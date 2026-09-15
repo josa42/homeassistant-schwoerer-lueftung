@@ -6,6 +6,12 @@
 
 A Home Assistant integration for [Schwörer](https://www.bauinfocenter.de/lueftung) ventilation and heating systems through Modbus TCP.
 
+> [!TIP]
+> Dashboard cards for this integration live in
+> [homeassistant-schwoerer-lueftung-cards](https://github.com/josa42/homeassistant-schwoerer-lueftung-cards):
+> a schematic of the unit's air path with every temperature sensor in place,
+> and a per-room view of measured against target.
+
 <br><br>
 
 ## Supported Devices
