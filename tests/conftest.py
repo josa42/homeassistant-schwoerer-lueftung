@@ -115,6 +115,23 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 
 
 @pytest.fixture
+def instant_writes():
+    """Take the waiting out of the write queue.
+
+    The queue paces its requests and waits before reading one back, which is
+    the device's requirement and not something a test should sit through. The
+    constants are bound into the module at import, so they are patched there.
+    """
+    with (
+        patch("custom_components.schwoerer_lueftung.write_queue.WRITE_SPACING", 0),
+        patch(
+            "custom_components.schwoerer_lueftung.write_queue.WRITE_READBACK_DELAY", 0
+        ),
+    ):
+        yield
+
+
+@pytest.fixture
 def unit() -> MockModbusUnit:
     """A mock Modbus unit seeded with a full, plausible register map."""
     mock_unit = MockModbusConnection().for_unit(1)

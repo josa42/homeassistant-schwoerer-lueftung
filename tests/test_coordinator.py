@@ -88,11 +88,17 @@ async def test_writing_a_field_refreshes(
     mock_modbus,
     unit: MockModbusUnit,
     wgt_entry: MockConfigEntry,
+    instant_writes: None,
 ) -> None:
+    """The write lands, and the poll behind it brings the new value back."""
     await setup_entry(hass, wgt_entry)
     coordinator = wgt_entry.runtime_data
 
     await coordinator.async_write(coordinator.device.ventilation, "fan_speed", 3)
+
+    # The queue's worker is a background task, which `async_block_till_done`
+    # deliberately does not wait for, so the refresh is awaited explicitly.
+    await coordinator.async_wait_for_writes()
     await hass.async_block_till_done()
 
     assert unit.holding[101] == 3

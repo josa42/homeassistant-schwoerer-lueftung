@@ -3,6 +3,28 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Fixed
+
+- **Values set in quick succession no longer go missing.** Writing one field
+  triggered a full device poll, so setting fifteen of them, which is what a
+  controller does with six room setpoints, six modes, the fan level and two
+  switches, fired fifteen polls of 34 register reads each over the one Modbus
+  session the device grants. Those reads competed with the writes that were
+  still going out, and some of the writes were silently discarded. Writes now
+  go through a queue: one at a time, with a pause between them, keeping only
+  the newest value per field, and one poll once the queue has drained instead
+  of one per write. Each write is also read back, so a value the device accepts
+  and then ignores is reported in the log rather than disappearing quietly.
+
+### Changed
+
+- Setting several values at once now writes them in sequence rather than all at
+  once, so the last of a large batch reaches the device a few seconds after the
+  first. Setting a single value returns as soon as the device has acknowledged
+  it, which is sooner than before, because it no longer waits for a poll.
+
 ## 2.1.0 - 2026-09-14
 
 ### Added

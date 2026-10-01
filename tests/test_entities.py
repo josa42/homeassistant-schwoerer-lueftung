@@ -274,3 +274,91 @@ async def test_the_room_sensor_costs_no_extra_reads(
     room_reads = [e for e in unit.read_events if 360 <= e.address <= 516]
     assert len(room_reads) == 6
     assert all(event.count == 2 for event in room_reads)
+
+
+def _entity_id(hass: HomeAssistant, entry: MockConfigEntry, suffix: str) -> str:
+    """The entity_id behind a unique_id suffix, for a service call."""
+    registry = er.async_get(hass)
+    for er_entry in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if er_entry.unique_id == f"{entry.entry_id}_{suffix}":
+            return er_entry.entity_id
+    raise AssertionError(f"no entity for {suffix}")
+
+
+async def test_a_switch_writes_its_register(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    instant_writes: None,
+) -> None:
+    """Turning a switch on writes 1 to its register, once."""
+    await setup_entry(hass, wgt_entry)
+
+    written = []
+    unit.on_write(written.append)
+
+    await hass.services.async_call(
+        "switch",
+        "turn_on",
+        {"entity_id": _entity_id(hass, wgt_entry, "shock_ventilation")},
+        blocking=True,
+    )
+    await wgt_entry.runtime_data.async_wait_for_writes()
+
+    assert [(event.address, event.values) for event in written] == [(111, [1])]
+
+
+async def test_a_number_writes_its_register(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    instant_writes: None,
+) -> None:
+    """A room setpoint goes out in tenths of a degree, as one FC16 write."""
+    await setup_entry(hass, wgt_entry)
+
+    written = []
+    unit.on_write(written.append)
+
+    await hass.services.async_call(
+        "number",
+        "set_value",
+        {
+            "entity_id": _entity_id(hass, wgt_entry, "base_temperature_room_2"),
+            "value": 21.5,
+        },
+        blocking=True,
+    )
+    await wgt_entry.runtime_data.async_wait_for_writes()
+
+    # Room 2's base temperature is 420 + 1, and 21.5 degrees is 215 tenths.
+    assert [(event.address, event.values) for event in written] == [(421, [215])]
+    assert written[0].function_code == 0x10
+
+
+async def test_a_select_writes_the_option_it_maps_to(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    instant_writes: None,
+) -> None:
+    await setup_entry(hass, wgt_entry)
+
+    entity_id = _entity_id(hass, wgt_entry, "fan_speed")
+    option = hass.states.get(entity_id).attributes["options"][1]
+
+    written = []
+    unit.on_write(written.append)
+
+    await hass.services.async_call(
+        "select",
+        "select_option",
+        {"entity_id": entity_id, "option": option},
+        blocking=True,
+    )
+    await wgt_entry.runtime_data.async_wait_for_writes()
+
+    assert [event.address for event in written] == [101]

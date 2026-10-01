@@ -25,6 +25,7 @@ from .const import (
     MODEL_WRT,
 )
 from .device import SchwoererDevice, UpdateReport
+from .write_queue import WriteQueue
 
 if TYPE_CHECKING:
     from modbus_connection.model import Component
@@ -64,6 +65,20 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
 
         self._failed: frozenset[str] = frozenset()
 
+        # The worker is a background task of the config entry, so unloading
+        # cancels it instead of waiting for a device that stopped answering.
+        #
+        # It starts on the next tick rather than eagerly: a consumer that
+        # submits a bundle concurrently has all of it queued by then, so the
+        # whole bundle coalesces and drains in one pass. An eager worker would
+        # send the first value of the bundle before the rest had arrived.
+        self._writes = WriteQueue(
+            spawn=lambda coro: entry.async_create_background_task(
+                hass, coro, f"{DOMAIN} write queue", eager_start=False
+            ),
+            refresh=self.async_request_refresh,
+        )
+
     def has_heating(self) -> bool:
         return self.get_device_type() == DEVICE_TYPE_WGT
 
@@ -77,13 +92,21 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
     # Writing
 
     async def async_write(self, component: Component, field: str, value: Any) -> None:
-        """Write one field and refresh, so the new value shows up at once."""
+        """Queue one field write and wait until the device acknowledged it.
+
+        The queue serializes and paces the writes, keeps only the newest value
+        per field, and polls once after the whole burst rather than once per
+        write. Readback and retry happen behind this call: a write the device
+        acknowledges and then discards is logged and re-sent, not raised here.
+        """
         try:
-            await component.write(field, value)
+            await self._writes.async_write(component, field, value)
         except ModbusError as err:
             raise UpdateFailed(f"Error writing {field}: {err}") from err
 
-        await self.async_request_refresh()
+    async def async_wait_for_writes(self) -> None:
+        """Wait until the queued writes have gone out and been verified."""
+        await self._writes.async_join()
 
     ############################################################################
     # Device registry
