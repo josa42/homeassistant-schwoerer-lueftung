@@ -1,6 +1,8 @@
 name: CI
 
 on:
+  # Lets release.yml run these checks on the commit it releases.
+  workflow_call:
   push:
     branches: [main]
   # Every pull request, whatever it targets: work lands on long-running

@@ -3,6 +3,15 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Changed
+
+- **Releases are built by the release workflow.** It runs CI, bumps the
+  version, dates this changelog and publishes the release. Start it from the
+  Actions tab or with `gh workflow run release -f version=<version>`.
+  `scripts/release.sh` is gone.
+
 ## 2.2.1 - 2026-10-01
 
 ### Fixed
