@@ -16,4 +16,4 @@ on:
 
 jobs:
   ci:
-    uses: josa42/gha-workflows/.github/workflows/ha-integration.yml@main
+    uses: josa42/actions/.github/workflows/shared-ha-integration.yml@main

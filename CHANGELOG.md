@@ -12,6 +12,9 @@ Releases before 2.0.0 are described on the
   Actions tab or with `gh workflow run release -f version=<version>`.
   `scripts/release.sh` is gone.
 
+- **CI calls the shared workflows in josa42/actions.** They moved there from
+  josa42/gha-workflows.
+
 ## 2.2.1 - 2026-10-01
 
 ### Fixed
