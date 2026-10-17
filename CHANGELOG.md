@@ -5,6 +5,23 @@ Releases before 2.0.0 are described on the
 
 ## Unreleased
 
+### Fixed
+
+- **Units missing some registers can be set up.** Firmware versions differ in
+  which registers they serve, and the unit refuses a whole block for one
+  address it lacks. A VentCube without 142-145 failed setup outright, and at
+  runtime would have taken every ventilation entity down. Refused registers
+  are now found on the first read, skipped, and their entities stay
+  unavailable while the rest keep working. The diagnostics download lists them
+  under `unserved`.
+
+- **Setup checks only the fan control registers.** The connection test read
+  the whole ventilation block, so one optional register could fail setup.
+
+- **Setup tells a refused read from a failed connection.** The connection
+  error now mentions that the unit accepts only one Modbus connection at a
+  time, and a unit that answers but refuses the read gets its own message.
+
 ### Changed
 
 - **Releases are built by the release workflow.** It runs CI, bumps the

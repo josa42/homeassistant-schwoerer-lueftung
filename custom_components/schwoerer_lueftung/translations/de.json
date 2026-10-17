@@ -4,7 +4,8 @@
       "already_configured": "Gerät ist bereits konfiguriert"
     },
     "error": {
-      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfe die IP-Adresse und den Port.",
+      "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfe die IP-Adresse und ob bereits eine andere Modbus-Verbindung zur Anlage besteht: Sie lässt nur eine gleichzeitig zu.",
+      "device_refused": "Das Gerät antwortet, lehnt die Abfrage aber ab. Bitte prüfe, ob Modbus am Bedienteil aktiviert ist; auch eine ältere Firmware kann die Ursache sein.",
       "unknown": "Unerwarteter Fehler aufgetreten"
     },
     "step": {

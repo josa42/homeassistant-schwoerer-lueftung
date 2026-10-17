@@ -21,7 +21,7 @@ from homeassistant.helpers.selector import (
     SelectSelectorConfig,
     SelectSelectorMode,
 )
-from modbus_connection import ModbusError, ModbusTcpParams
+from modbus_connection import ModbusError, ModbusExceptionError, ModbusTcpParams
 
 from .const import (
     CONF_DEVICE_TYPE,
@@ -40,6 +40,17 @@ from .device.components import Ventilation
 
 _LOGGER = logging.getLogger(__name__)
 
+# The block at 100-104 is the fan control every firmware serves. Reading the
+# whole of Ventilation instead would fail the flow on a firmware that lacks one
+# of its optional registers, which the device layer would otherwise skip.
+PROBE_FIELDS = (
+    "operation_mode",
+    "fan_speed",
+    "current_fan_level",
+    "linear_fan_power",
+    "fan_override",
+)
+
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Check the device answers before creating the entry.
@@ -52,9 +63,13 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     try:
         async with async_get_temporary_unit(hass, params, DEFAULT_UNIT_ID) as unit:
-            # Ventilation is the one block every model serves, so reading it is
-            # the cheapest proof that we are talking to a Schwörer unit.
-            await Ventilation(unit).async_update()
+            probe = Ventilation(unit)
+            probe.restrict_fields(PROBE_FIELDS)
+            await probe.async_update()
+    except ModbusExceptionError as err:
+        # The device answered, so the link works; it refused the registers.
+        _LOGGER.error("The device refused the probe read: %s", err)
+        raise DeviceRefused from err
     except ModbusError as err:
         _LOGGER.error("Failed to reach the device: %s", err)
         raise CannotConnect from err
@@ -121,6 +136,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_input(self.hass, user_input)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
+            except DeviceRefused:
+                errors["base"] = "device_refused"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -158,3 +175,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
+
+
+class DeviceRefused(HomeAssistantError):
+    """Error to indicate the device answered but refused the registers."""

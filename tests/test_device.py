@@ -7,10 +7,14 @@ mock backend is one.
 from __future__ import annotations
 
 import pytest
-from modbus_connection import IllegalDataAddressError
+from modbus_connection import (
+    IllegalDataAddressError,
+    ModbusTimeoutError,
+    ServerDeviceFailureError,
+)
 from modbus_connection.mock import MockModbusUnit
 
-from custom_components.schwoerer_lueftung.device import SchwoererDevice
+from custom_components.schwoerer_lueftung.device import SchwoererDevice, UnservedField
 from custom_components.schwoerer_lueftung.device.components import (
     Alarms,
     Clock,
@@ -167,15 +171,15 @@ async def test_reads_never_bridge_a_gap(unit: MockModbusUnit) -> None:
 
 
 async def test_a_refused_subsystem_fails_alone(unit: MockModbusUnit) -> None:
-    """A device that rejects the heat pump registers keeps the rest polling."""
+    """A device failing the heat pump registers keeps the rest polling."""
     for address in (114, 115, 116):
-        unit.fail_read(address, IllegalDataAddressError(2))
+        unit.fail_read(address, ServerDeviceFailureError(4))
 
     device = make_device(unit)
     report = await device.async_update()
 
     assert "heating" in report.failed
-    assert isinstance(report.failed["heating"], IllegalDataAddressError)
+    assert isinstance(report.failed["heating"], ServerDeviceFailureError)
     assert "ventilation" in report.updated
     assert "rooms" in report.updated
     assert device.ventilation.current_fan_level == 3
@@ -260,9 +264,9 @@ async def test_device_clock_folds_nonsense_into_none(unit: MockModbusUnit) -> No
 
 async def test_undocumented_registers_fail_alone(unit: MockModbusUnit) -> None:
     """A firmware without them must not lose the documented sensors."""
-    unit.fail_read(208, IllegalDataAddressError(2))
+    unit.fail_read(208, ServerDeviceFailureError(4))
     for address in range(620, 626):
-        unit.fail_read(address, IllegalDataAddressError(2))
+        unit.fail_read(address, ServerDeviceFailureError(4))
 
     device = make_device(unit)
     report = await device.async_update()
@@ -270,3 +274,87 @@ async def test_undocumented_registers_fail_alone(unit: MockModbusUnit) -> None:
     assert set(report.failed) == {"undocumented_temperatures", "clock"}
     assert "temperatures" in report.updated
     assert device.temperatures.temperature_t10_outdoor == 7.8
+
+
+async def test_registers_the_firmware_lacks_are_skipped(
+    unit: MockModbusUnit,
+) -> None:
+    """A firmware without 142-145 keeps the rest of the ventilation block.
+
+    Reported on a VentCube: the device refused 140-145 as a block, which took
+    the whole of Ventilation down with it, fan control included.
+    """
+    for address in range(142, 146):
+        unit.fail_read(address, IllegalDataAddressError(2))
+
+    device = make_device(unit)
+    report = await device.async_update()
+
+    assert "ventilation" in report.updated
+    assert device.ventilation.time_program_fan_level == 2
+    assert device.ventilation.sensor_fan_level == 1
+    assert device.ventilation.current_supply_air_flow is None
+    assert device.ventilation.current_exhaust_air_rpm is None
+    assert device.unserved == [
+        UnservedField("ventilation", "current_supply_air_flow", 142),
+        UnservedField("ventilation", "current_exhaust_air_flow", 143),
+        UnservedField("ventilation", "current_supply_air_rpm", 144),
+        UnservedField("ventilation", "current_exhaust_air_rpm", 145),
+    ]
+
+
+async def test_skipped_registers_are_not_probed_again(
+    unit: MockModbusUnit,
+) -> None:
+    for address in range(142, 146):
+        unit.fail_read(address, IllegalDataAddressError(2))
+    device = make_device(unit)
+    await device.async_update()
+
+    unit.read_events.clear()
+    report = await device.async_update()
+
+    assert report.failed == {}
+    assert addresses_read(unit).isdisjoint(range(142, 146))
+    assert (140, 2) in {(event.address, event.count) for event in unit.read_events}
+
+
+async def test_a_skipped_room_field_affects_only_that_room(
+    unit: MockModbusUnit,
+) -> None:
+    unit.fail_read(500, IllegalDataAddressError(2))
+
+    device = make_device(unit)
+    report = await device.async_update()
+
+    assert "rooms" in report.updated
+    assert device.rooms[1].scheduled_heating_enabled is None
+    assert device.rooms[2].scheduled_heating_enabled == 1
+    assert device.rooms[1].current_temperature == 21.0
+    assert device.unserved == [
+        UnservedField("rooms", "scheduled_heating_enabled", 500, room=1)
+    ]
+
+
+async def test_only_a_refused_address_costs_a_field(unit: MockModbusUnit) -> None:
+    """A timeout while probing proves nothing, so nothing is dropped."""
+    unit.fail_read(142, IllegalDataAddressError(2))
+    unit.fail_read(143, ModbusTimeoutError("no answer"))
+
+    device = make_device(unit)
+    with pytest.raises(ModbusTimeoutError):
+        await device.async_update()
+
+    assert device.unserved == []
+    assert "current_supply_air_flow" in device.ventilation.resolved_fields
+
+
+async def test_other_refusals_drop_nothing(unit: MockModbusUnit) -> None:
+    for address in range(142, 146):
+        unit.fail_read(address, ServerDeviceFailureError(4))
+
+    device = make_device(unit)
+    report = await device.async_update()
+
+    assert "ventilation" in report.failed
+    assert device.unserved == []

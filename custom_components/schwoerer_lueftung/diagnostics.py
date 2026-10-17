@@ -10,6 +10,7 @@ with no hardware.
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any
 
 from homeassistant.const import CONF_HOST
@@ -40,6 +41,8 @@ async def async_get_config_entry_diagnostics(
         },
         "updated": report.updated,
         "failed": {name: str(err) for name, err in report.failed.items()},
+        # Fields skipped because this firmware refuses their address.
+        "unserved": [asdict(field) for field in coordinator.device.unserved],
     }
 
     try:

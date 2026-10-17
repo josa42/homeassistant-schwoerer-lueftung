@@ -4,7 +4,8 @@
       "already_configured": "Device is already configured"
     },
     "error": {
-      "cannot_connect": "Failed to connect to the device",
+      "cannot_connect": "Failed to connect to the device. Check the IP address, and that no other Modbus connection to the unit is open: it accepts only one at a time.",
+      "device_refused": "The device answers but refused the read. Check that Modbus is enabled on the control panel; an older firmware may also be the cause.",
       "unknown": "Unexpected error occurred"
     },
     "step": {

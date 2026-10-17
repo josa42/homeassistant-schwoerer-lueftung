@@ -8,10 +8,12 @@ with no hardware and no Home Assistant in the loop.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from modbus_connection import (
+    IllegalDataAddressError,
     ModbusConnectionError,
     ModbusError,
     ModbusTimeoutError,
@@ -35,8 +37,13 @@ if TYPE_CHECKING:
 
 __all__ = [
     "SchwoererDevice",
+    "UnservedField",
     "UpdateReport",
 ]
+
+_LOGGER = logging.getLogger(__name__)
+
+type Raw = dict[str, dict[int, int | bool]]
 
 
 @dataclass
@@ -52,6 +59,16 @@ class UpdateReport:
     failed: dict[str, ModbusError] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class UnservedField:
+    """A field dropped because the device refused its address."""
+
+    subsystem: str
+    field: str
+    address: int
+    room: int | None = None
+
+
 class SchwoererDevice:
     """A Schwörer WGT or WRT ventilation unit.
 
@@ -59,6 +76,11 @@ class SchwoererDevice:
     probing: the user tells us the device type and whether there is a ground
     heat exchanger during setup. Absent sub-systems are simply never
     constructed, so their registers are never read.
+
+    Which registers a present sub-system serves does vary by firmware, and that
+    is probed: a field the device refuses is dropped on the first read that
+    hits it and listed in ``unserved``. The list lives as long as the device
+    object, so a firmware update shows up on the next reload.
     """
 
     def __init__(
@@ -70,6 +92,7 @@ class SchwoererDevice:
         room_numbers: list[int],
     ) -> None:
         self._unit = unit
+        self.unserved: list[UnservedField] = []
 
         self.ventilation = Ventilation(unit)
         self.temperatures = Temperatures(unit)
@@ -118,6 +141,79 @@ class SchwoererDevice:
             return self._room_group
         return getattr(self, name)
 
+    def _components(self, name: str) -> list[tuple[int | None, Component]]:
+        """The components behind a report name, each with its room number."""
+        if name == "rooms":
+            return list(self.rooms.items())
+        component = getattr(self, name)
+        return [] if component is None else [(None, component)]
+
+    async def _async_update_subsystem(self, name: str, *, raw: bool) -> Raw:
+        """Read one sub-system, dropping fields at addresses the device lacks.
+
+        Firmware versions differ in which registers they implement, and the
+        device refuses a whole block for one address it does not have. On such
+        a refusal the fields in that block are probed one by one, the refused
+        ones are dropped, and the read is tried again. Each pass drops at least
+        one field, so this ends.
+        """
+        subsystem = self._subsystem(name)
+        assert subsystem is not None
+        while True:
+            try:
+                if raw:
+                    return await subsystem.async_read_raw(notify=False)
+                await subsystem.async_update(notify=False)
+                return {}
+            except IllegalDataAddressError as err:
+                if not await self._async_drop_unserved(name, err):
+                    raise
+
+    async def _async_drop_unserved(
+        self, name: str, err: IllegalDataAddressError
+    ) -> bool:
+        """Drop the fields in the refused block the device does not serve.
+
+        Only Illegal Data Address counts as proof that a register is missing.
+        Any other error while probing propagates, so a timeout or a dropped
+        link never costs a field. Returns False when every field in the block
+        reads on its own, which leaves the refusal unexplained.
+        """
+        block = err.block
+        if block is None or block.space != "holding":
+            return False
+        end = block.address + block.count
+
+        dropped = False
+        for room, component in self._components(name):
+            refused: list[UnservedField] = []
+            for field_name, resolved in component.resolved_fields.items():
+                if not block.address <= resolved.address < end:
+                    continue
+                try:
+                    await self._unit.read_holding_registers(
+                        resolved.address, resolved.count
+                    )
+                except IllegalDataAddressError:
+                    refused.append(
+                        UnservedField(name, field_name, resolved.address, room)
+                    )
+            if not refused:
+                continue
+            for unserved in refused:
+                _LOGGER.info(
+                    "The device does not serve register %s (%s), skipping it",
+                    unserved.address,
+                    unserved.field,
+                )
+            names = {unserved.field for unserved in refused}
+            component.restrict_fields(
+                [f for f in component.resolved_fields if f not in names]
+            )
+            self.unserved.extend(refused)
+            dropped = True
+        return dropped
+
     @property
     def unit(self) -> ModbusUnit:
         """The unit this device is read over."""
@@ -131,10 +227,8 @@ class SchwoererDevice:
         """Refresh every sub-system, reporting which ones answered."""
         report = UpdateReport()
         for name in self._names:
-            subsystem = self._subsystem(name)
-            assert subsystem is not None
             try:
-                await subsystem.async_update(notify=False)
+                await self._async_update_subsystem(name, raw=False)
             except ModbusConnectionError:
                 # The link is down; polling on would only wait for timeouts.
                 raise
@@ -165,10 +259,8 @@ class SchwoererDevice:
         """
         raw: dict[str, dict[int, int | bool]] = {}
         for name in self._names:
-            subsystem = self._subsystem(name)
-            assert subsystem is not None
             try:
-                read = await subsystem.async_read_raw(notify=False)
+                read = await self._async_update_subsystem(name, raw=True)
             except ModbusError:
                 # A dump is most wanted precisely when something is refusing to
                 # answer, so a failing sub-system must not cost us the rest.

@@ -6,7 +6,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
-from modbus_connection import ModbusConnectionError
+from modbus_connection import IllegalDataAddressError, ModbusConnectionError
 from modbus_connection.mock import MockModbusUnit
 
 from custom_components.schwoerer_lueftung.const import (
@@ -89,6 +89,40 @@ async def test_an_unreachable_device_is_reported(
 
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "cannot_connect"}
+
+
+async def test_a_firmware_without_optional_registers_can_be_added(
+    hass: HomeAssistant, mock_modbus, unit: MockModbusUnit
+) -> None:
+    """The probe reads only the fan control block every firmware serves."""
+    for address in range(142, 146):
+        unit.fail_read(address, IllegalDataAddressError(2))
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], USER_INPUT
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+
+
+async def test_a_refusing_device_is_told_apart_from_an_unreachable_one(
+    hass: HomeAssistant, mock_modbus, unit: MockModbusUnit
+) -> None:
+    unit.fail_read(100, IllegalDataAddressError(2))
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], USER_INPUT
+    )
+
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "device_refused"}
 
 
 async def test_the_same_host_cannot_be_added_twice(

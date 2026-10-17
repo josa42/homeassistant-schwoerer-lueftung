@@ -113,11 +113,21 @@ class SchwoererEntity(CoordinatorEntity[Coordinator]):
         """Available while this entity's own sub-system keeps answering.
 
         A sub-system the device refuses fails alone, so the entities that do
-        not depend on it stay up.
+        not depend on it stay up. A field the device turned out not to serve
+        is dropped from its component's reads, and its entity stays
+        unavailable. A value derived in code, like the clock's ``datetime``,
+        is not a declared field and is not affected.
         """
+        component = self._component
+        dropped = (
+            component is not None
+            and self._field in component.declared_fields
+            and self._field not in component.resolved_fields
+        )
         return (
             super().available
             and self.entity_description.subsystem in self.coordinator.data.updated
+            and not dropped
         )
 
     @property

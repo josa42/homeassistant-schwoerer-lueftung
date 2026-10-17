@@ -174,6 +174,23 @@ async def test_entities_go_unavailable_only_with_their_own_subsystem(
     )
 
 
+async def test_a_register_the_firmware_lacks_leaves_its_neighbours_up(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    for address in range(142, 146):
+        unit.fail_read(address, IllegalDataAddressError(2))
+
+    await setup_entry(hass, wgt_entry)
+
+    state = _by_unique_id(hass, wgt_entry, "current_supply_air_flow")
+    assert state.state == "unavailable"
+    assert _by_unique_id(hass, wgt_entry, "time_program_fan_level").state == "2"
+    assert _by_unique_id(hass, wgt_entry, "current_fan_level").state != "unavailable"
+
+
 async def _enable(hass: HomeAssistant, entry: MockConfigEntry, *suffixes: str) -> None:
     """Turn entities on the way the entity page does, then reload."""
     registry = er.async_get(hass)

@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import UpdateFailed
-from modbus_connection import IllegalDataAddressError, ModbusConnectionError
+from modbus_connection import ModbusConnectionError, ServerDeviceFailureError
 from modbus_connection.mock import MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -59,7 +59,7 @@ async def test_a_refused_subsystem_is_reported_not_raised(
     await setup_entry(hass, wgt_entry)
 
     for address in (114, 115, 116):
-        unit.fail_read(address, IllegalDataAddressError(2))
+        unit.fail_read(address, ServerDeviceFailureError(4))
 
     report = await wgt_entry.runtime_data._async_update_data()
 

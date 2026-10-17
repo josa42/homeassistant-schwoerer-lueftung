@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from homeassistant.core import HomeAssistant
-from modbus_connection import IllegalDataAddressError
+from modbus_connection import IllegalDataAddressError, ServerDeviceFailureError
 from modbus_connection.mock import MockModbusUnit
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -29,6 +29,7 @@ async def test_diagnostics_returns_the_raw_map(
     assert diagnostics["registers"]["holding"][204] == 215
     assert "heating" in diagnostics["updated"]
     assert diagnostics["failed"] == {}
+    assert diagnostics["unserved"] == []
 
 
 async def test_diagnostics_omits_the_host(
@@ -53,7 +54,7 @@ async def test_a_failing_subsystem_still_yields_a_dump(
     await setup_entry(hass, wgt_entry)
 
     for address in (114, 115, 116):
-        unit.fail_read(address, IllegalDataAddressError(2))
+        unit.fail_read(address, ServerDeviceFailureError(4))
     await wgt_entry.runtime_data.async_refresh()
 
     diagnostics = await async_get_config_entry_diagnostics(hass, wgt_entry)
@@ -62,3 +63,25 @@ async def test_a_failing_subsystem_still_yields_a_dump(
     # The rest of the map still came back.
     assert diagnostics["registers"]["holding"][204] == 215
     assert 114 not in diagnostics["registers"]["holding"]
+
+
+async def test_diagnostics_list_the_registers_the_firmware_lacks(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    unit.fail_read(145, IllegalDataAddressError(2))
+    await setup_entry(hass, wgt_entry)
+
+    diagnostics = await async_get_config_entry_diagnostics(hass, wgt_entry)
+
+    assert diagnostics["unserved"] == [
+        {
+            "subsystem": "ventilation",
+            "field": "current_exhaust_air_rpm",
+            "address": 145,
+            "room": None,
+        }
+    ]
+    assert diagnostics["registers"]["holding"][144] == 1200
