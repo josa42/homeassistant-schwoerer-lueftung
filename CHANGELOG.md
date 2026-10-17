@@ -24,6 +24,9 @@ Releases before 2.0.0 are described on the
 
 ### Changed
 
+- **The README covers the common setup failures.** A second Modbus
+  connection blocking setup, and registers missing on older firmware.
+
 - **Releases are built by the release workflow.** It runs CI, bumps the
   version, dates this changelog and publishes the release. Start it from the
   Actions tab or with `gh workflow run release -f version=<version>`.

@@ -152,6 +152,26 @@ Individual room controls (one set per configured room):
 
 ## Troubleshooting
 
+### Setup fails with "Failed to connect to the device"
+
+The unit accepts only one Modbus TCP connection at a time. If anything else
+holds one, such as a `modbus:` block in `configuration.yaml` or a test tool,
+remove or stop it, and power-cycle the unit if the connection does not free up.
+
+Also check that Modbus is enabled on the control panel and that the IP address
+opens the unit's web interface in a browser.
+
+### Some entities stay unavailable
+
+Firmware versions differ in which registers they serve. A register the unit
+refuses is skipped, and its entity stays unavailable while the rest keep
+working. The diagnostics download lists the skipped registers under
+`unserved`.
+
+Some units have had missing registers added by a firmware update from
+Schwörer or Bauinfocenter, done remotely while online access is enabled on the
+control panel. Reload the integration afterwards to pick them up.
+
 ### Logs
 
 Enable debug logging by adding to `configuration.yaml`:
