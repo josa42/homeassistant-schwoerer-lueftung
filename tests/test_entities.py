@@ -191,6 +191,23 @@ async def test_a_register_the_firmware_lacks_leaves_its_neighbours_up(
     assert _by_unique_id(hass, wgt_entry, "current_fan_level").state != "unavailable"
 
 
+async def test_an_unknown_code_shows_as_unknown_and_is_logged_once(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    unit.holding[114] = 7  # not in the datasheet's heat pump status table
+    await setup_entry(hass, wgt_entry)
+
+    await wgt_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    assert _by_unique_id(hass, wgt_entry, "heat_pump_status").state == "unknown"
+    assert caplog.text.count("heat_pump_status reported 7") == 1
+
+
 async def _enable(hass: HomeAssistant, entry: MockConfigEntry, *suffixes: str) -> None:
     """Turn entities on the way the entity page does, then reload."""
     registry = er.async_get(hass)

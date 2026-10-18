@@ -100,7 +100,7 @@ class SchwoererSelect(SchwoererEntity, SelectEntity):
         value = self._value
         if value is None:
             return None
-        return self.entity_description.options_map.get(value)
+        return self._option(self.entity_description.options_map, value)
 
     async def async_select_option(self, option: str) -> None:
         for value, name in self.entity_description.options_map.items():

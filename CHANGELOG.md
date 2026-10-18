@@ -12,6 +12,10 @@ Releases before 2.0.0 are described on the
   its block reads in between queued writes, which is what loses writes on this
   device. Polls, write bursts and the diagnostics read now take turns.
 
+- **Unknown status codes are logged.** A code missing from the datasheet's
+  tables shows as unknown, as before, and is now logged once with its value so
+  it can be reported and added.
+
 - **Units missing some registers can be set up.** Firmware versions differ in
   which registers they serve, and the unit refuses a whole block for one
   address it lacks. A VentCube without 142-145 failed setup outright, and at

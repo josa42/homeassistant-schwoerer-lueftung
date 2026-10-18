@@ -15,7 +15,8 @@ from ``description.key`` exactly the way the pre-2.0 code derived them from
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import logging
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -26,6 +27,8 @@ from .coordinator import Coordinator
 
 if TYPE_CHECKING:
     from modbus_connection.model import Component
+
+_LOGGER = logging.getLogger(__name__)
 
 # The sub-system every room entity reports under. Rooms are polled as one
 # component group, so they share a single report name.
@@ -62,6 +65,7 @@ class SchwoererEntity(CoordinatorEntity[Coordinator]):
 
         self.entity_description = description
         self._room_number = room_number
+        self._unknown_codes: set[int] = set()
 
         entry = coordinator.config_entry
 
@@ -107,6 +111,25 @@ class SchwoererEntity(CoordinatorEntity[Coordinator]):
         if value is None or self.entity_description.value_fn is None:
             return value
         return self.entity_description.value_fn(value)
+
+    def _option(self, options: Mapping[int, str], value: int) -> str | None:
+        """The state string for a coded value, or None for a code we lack.
+
+        The register tables come from the datasheet, and a firmware may report
+        a code it does not list. That shows as unknown, and is logged once per
+        code so it can be reported and added rather than going unnoticed.
+        """
+        option = options.get(value)
+        if option is None and value not in self._unknown_codes:
+            self._unknown_codes.add(value)
+            _LOGGER.warning(
+                "%s reported %s, which is not a known value; showing it as "
+                "unknown. Please report it at "
+                "https://github.com/josa42/homeassistant-schwoerer-lueftung/issues",
+                self._field,
+                value,
+            )
+        return option
 
     @property
     def available(self) -> bool:

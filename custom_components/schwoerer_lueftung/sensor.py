@@ -293,7 +293,7 @@ class SchwoererSensor(SchwoererEntity, SensorEntity):
             return None
 
         if (options := self.entity_description.options_map) is not None:
-            return options.get(value)
+            return self._option(options, value)
 
         if isinstance(value, datetime) and value.tzinfo is None:
             # The unit keeps local time with no zone of its own, so read it as
