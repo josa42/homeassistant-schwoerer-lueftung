@@ -17,6 +17,9 @@ Everything here is one worker task writing one field at a time:
   register words rather than the decoded values keeps the check exact.
 - One poll follows the whole burst, once the queue has drained, instead of one
   poll per write.
+- The burst holds the lock the coordinator's poll takes, so a scheduled poll
+  waits for the burst instead of slotting its reads in between the writes, and
+  a burst that arrives during a poll waits for the poll to finish.
 
 :meth:`WriteQueue.async_write` returns as soon as the request has been
 acknowledged, not once it has been verified. That keeps the errors a caller can
@@ -79,15 +82,20 @@ class WriteQueue:
         self,
         spawn: Callable[[Coroutine[Any, Any, None]], object],
         refresh: Callable[[], Awaitable[None]],
+        lock: asyncio.Lock,
     ) -> None:
-        """Take how to start the worker, and what to do once it idles.
+        """Take how to start the worker, what to do once it idles, and the lock.
 
         ``spawn`` ties the worker to a lifecycle that cancels it; the config
         entry's background tasks do that, so unloading cannot strand the queue
         waiting on a device that stopped answering.
+
+        ``lock`` is held for the whole burst and shared with the poll. It is
+        released before ``refresh`` runs, since that poll takes it too.
         """
         self._spawn = spawn
         self._refresh = refresh
+        self._lock = lock
 
         # Ordered by insertion and indexed by field at the same time: the first
         # entry is the next write, and a second write to a field already in
@@ -147,10 +155,11 @@ class WriteQueue:
             while True:
                 await self._wake.wait()
 
-                while self._pending:
-                    key, item = next(iter(self._pending.items()))
-                    del self._pending[key]
-                    await self._write(key, item)
+                async with self._lock:
+                    while self._pending:
+                        key, item = next(iter(self._pending.items()))
+                        del self._pending[key]
+                        await self._write(key, item)
 
                 self._wake.clear()
                 await self._drain_refresh()

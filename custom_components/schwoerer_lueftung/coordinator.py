@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
@@ -65,6 +66,12 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
 
         self._failed: frozenset[str] = frozenset()
 
+        # One lock for everything that talks to the device in bulk: a poll, a
+        # diagnostics read, and a burst of queued writes. Without it the
+        # scheduled poll can land in the middle of a burst and interleave its
+        # block reads with the writes, which is what loses writes.
+        self._io_lock = asyncio.Lock()
+
         # The worker is a background task of the config entry, so unloading
         # cancels it instead of waiting for a device that stopped answering.
         #
@@ -77,6 +84,7 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
                 hass, coro, f"{DOMAIN} write queue", eager_start=False
             ),
             refresh=self.async_request_refresh,
+            lock=self._io_lock,
         )
 
     def has_heating(self) -> bool:
@@ -103,6 +111,11 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
             await self._writes.async_write(component, field, value)
         except ModbusError as err:
             raise UpdateFailed(f"Error writing {field}: {err}") from err
+
+    async def async_read_raw(self) -> dict[str, dict[int, int | bool]]:
+        """Read the raw register map, never while a poll or a burst runs."""
+        async with self._io_lock:
+            return await self.device.async_read_raw()
 
     async def async_wait_for_writes(self) -> None:
         """Wait until the queued writes have gone out and been verified."""
@@ -194,7 +207,8 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
 
     async def _async_update_data(self) -> UpdateReport:
         try:
-            report = await self.device.async_update()
+            async with self._io_lock:
+                report = await self.device.async_update()
         except ModbusError as err:
             raise UpdateFailed(f"Error communicating with device: {err}") from err
 

@@ -7,6 +7,11 @@ Releases before 2.0.0 are described on the
 
 ### Fixed
 
+- **A scheduled poll no longer runs in the middle of a write burst.** The
+  write queue paced only its own requests, so the 30-second poll could slot
+  its block reads in between queued writes, which is what loses writes on this
+  device. Polls, write bursts and the diagnostics read now take turns.
+
 - **Units missing some registers can be set up.** Firmware versions differ in
   which registers they serve, and the unit refuses a whole block for one
   address it lacks. A VentCube without 142-145 failed setup outright, and at

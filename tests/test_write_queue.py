@@ -154,6 +154,51 @@ async def test_no_poll_interleaves_with_the_burst(
     assert polls(unit) == 1
 
 
+async def test_a_scheduled_poll_waits_for_the_burst(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+) -> None:
+    """The interval poll does not know about the queue, so the lock has to.
+
+    It fires on its own timer, so it can come due while a burst is going out.
+    Here it is started the moment the first write reaches the wire.
+    """
+    await setup_entry(hass, wgt_entry)
+    coordinator = wgt_entry.runtime_data
+    ventilation = coordinator.device.ventilation
+    unit.read_events.clear()
+
+    polls_seen: list[int] = []
+    scheduled: list[asyncio.Task] = []
+
+    def on_write(event: WriteEvent) -> None:
+        polls_seen.append(polls(unit))
+        if not scheduled:
+            scheduled.append(hass.async_create_task(coordinator.async_refresh()))
+
+    unit.on_write(on_write)
+
+    with (
+        patch("custom_components.schwoerer_lueftung.write_queue.WRITE_SPACING", 0.01),
+        patch(
+            "custom_components.schwoerer_lueftung.write_queue.WRITE_READBACK_DELAY", 0
+        ),
+    ):
+        await asyncio.gather(
+            coordinator.async_write(ventilation, "fan_speed", 3),
+            coordinator.async_write(ventilation, "operation_mode", 1),
+            coordinator.async_write(ventilation, "shock_ventilation", 1),
+        )
+        await coordinator.async_wait_for_writes()
+    await scheduled[0]
+    await hass.async_block_till_done()
+
+    assert polls_seen == [0, 0, 0]
+    assert polls(unit) >= 1
+
+
 # -- serializing and pacing ---------------------------------------------------
 
 

@@ -46,7 +46,7 @@ async def async_get_config_entry_diagnostics(
     }
 
     try:
-        diagnostics["registers"] = await coordinator.device.async_read_raw()
+        diagnostics["registers"] = await coordinator.async_read_raw()
     except ModbusError as err:
         # Better to hand over the report than to fail the download outright.
         diagnostics["registers_error"] = str(err)
