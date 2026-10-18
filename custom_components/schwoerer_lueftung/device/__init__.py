@@ -115,6 +115,12 @@ class SchwoererDevice:
         # pool the instances: N rooms still cost six block reads, not six per
         # room.
         self.rooms: dict[int, Room] = {n: Room(unit, index=n) for n in room_numbers}
+        if not has_heating:
+            # Without heating a room has nothing to set, so only its
+            # temperature is surfaced. The setpoint and heating registers are
+            # not read at all.
+            for room in self.rooms.values():
+                room.restrict_fields(["current_temperature"])
         self._room_group = (
             ComponentGroup(unit, list(self.rooms.values())) if self.rooms else None
         )

@@ -107,6 +107,23 @@ async def test_a_wrt_never_reads_optional_hardware(unit: MockModbusUnit) -> None
     assert not read & GROUND_HEAT_EXCHANGER_ONLY
 
 
+async def test_a_wrt_reads_only_the_room_temperatures(unit: MockModbusUnit) -> None:
+    """A WRT surfaces only the room temperature, so nothing else is read."""
+    device = make_device(
+        unit, has_heating=False, has_ground_heat_exchanger=False, room_numbers=[1, 2]
+    )
+    await device.async_update()
+
+    room_reads = {
+        (event.address, event.count)
+        for event in unit.read_events
+        if 360 <= event.address < 520
+    }
+    assert room_reads == {(360, 2)}
+    assert device.rooms[2].current_temperature == 21.1
+    assert device.unserved == []
+
+
 async def test_a_wgt_does_read_optional_hardware(unit: MockModbusUnit) -> None:
     """The carve-outs must not leave the registers unread when they do exist."""
     device = make_device(unit)

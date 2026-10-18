@@ -33,6 +33,10 @@ Releases before 2.0.0 are described on the
 
 ### Changed
 
+- **A WRT reads only the room temperatures.** The setpoint and heating
+  registers of each room were read on every poll without any entity using
+  them.
+
 - **The README covers the common setup failures.** A second Modbus
   connection blocking setup, and registers missing on older firmware.
 
