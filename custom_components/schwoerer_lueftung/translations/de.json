@@ -1,7 +1,8 @@
 {
   "config": {
     "abort": {
-      "already_configured": "Gerät ist bereits konfiguriert"
+      "already_configured": "Gerät ist bereits konfiguriert",
+      "reconfigure_successful": "Die IP-Adresse wurde geändert"
     },
     "error": {
       "cannot_connect": "Verbindung zum Gerät fehlgeschlagen. Bitte überprüfe die IP-Adresse und ob bereits eine andere Modbus-Verbindung zur Anlage besteht: Sie lässt nur eine gleichzeitig zu.",
@@ -9,6 +10,13 @@
       "unknown": "Unerwarteter Fehler aufgetreten"
     },
     "step": {
+      "reconfigure": {
+        "data": {
+          "host": "IP-Adresse"
+        },
+        "description": "Gib die neue IP-Adresse deiner Schwörer-Lüftungsanlage ein. Entitäten und ihr Verlauf bleiben erhalten.",
+        "title": "IP-Adresse ändern"
+      },
       "user": {
         "data": {
           "device_type": "Gerätetyp",

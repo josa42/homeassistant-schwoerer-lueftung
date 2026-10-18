@@ -11,6 +11,7 @@ from homeassistant.components.modbus import async_get_temporary_unit
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import translation
 from homeassistant.helpers.selector import (
     NumberSelector,
@@ -52,14 +53,14 @@ PROBE_FIELDS = (
 )
 
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Check the device answers before creating the entry.
+async def async_probe(hass: HomeAssistant, host: str) -> None:
+    """Check the device at ``host`` answers, before an entry is created or moved.
 
-    The flow has no config entry yet to tie a connection to, so it borrows a
-    unit for the duration of the context. A connection an entry already holds
-    is shared and stays up; one opened here closes on exit.
+    The flow has no config entry to tie a connection to, so it borrows a unit
+    for the duration of the context. A connection an entry already holds is
+    shared and stays up; one opened here closes on exit.
     """
-    params = ModbusTcpParams(host=data[CONF_HOST], port=DEFAULT_PORT)
+    params = ModbusTcpParams(host=host, port=DEFAULT_PORT)
 
     try:
         async with async_get_temporary_unit(hass, params, DEFAULT_UNIT_ID) as unit:
@@ -76,6 +77,11 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     except HomeAssistantError:
         # The device is already in use over different link settings.
         raise
+
+
+async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
+    """Check the device answers and return the new entry's title."""
+    await async_probe(hass, data[CONF_HOST])
 
     model = MODEL_WGT if data[CONF_DEVICE_TYPE] == DEVICE_TYPE_WGT else MODEL_WRT
 
@@ -171,6 +177,86 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schema = await self._get_schema()
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
+        """Move the entry to a new IP address, keeping its entities and history.
+
+        Only the host can change here. Entities are keyed on the entry, so they
+        survive as they are; the devices are keyed on the host and are moved
+        along with it.
+        """
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            old_host = entry.data[CONF_HOST]
+            if host != old_host:
+                await self.async_set_unique_id(host)
+                self._abort_if_unique_id_configured()
+
+            try:
+                await async_probe(self.hass, host)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except DeviceRefused:
+                errors["base"] = "device_refused"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                _move_devices(self.hass, entry, old_host, host)
+
+                # A title the user renamed is theirs; only the generated one,
+                # which carries the old address, follows the move.
+                model = (
+                    MODEL_WGT
+                    if entry.data.get(CONF_DEVICE_TYPE) == DEVICE_TYPE_WGT
+                    else MODEL_WRT
+                )
+                title = entry.title
+                if title == f"{model} {old_host}":
+                    title = f"{model} {host}"
+                return self.async_update_reload_and_abort(
+                    entry,
+                    unique_id=host,
+                    title=title,
+                    data_updates={CONF_HOST: host},
+                )
+
+        schema = vol.Schema(
+            {vol.Required(CONF_HOST, default=entry.data[CONF_HOST]): str}
+        )
+        return self.async_show_form(
+            step_id="reconfigure", data_schema=schema, errors=errors
+        )
+
+
+def _move_devices(
+    hass: HomeAssistant, entry: config_entries.ConfigEntry, old: str, new: str
+) -> None:
+    """Rewrite the entry's device identifiers from the old host to the new one.
+
+    The main device is ``{host}:{port}`` and a room ``{host}:{port}#{n}``, see
+    the coordinator. Left alone, the reload would register new devices and
+    strand the old ones, along with any area or name the user gave them.
+    """
+    old_key = f"{old}:{DEFAULT_PORT}"
+    new_key = f"{new}:{DEFAULT_PORT}"
+    if old_key == new_key:
+        return
+
+    def moved(identifier: tuple[str, str]) -> tuple[str, str]:
+        domain, key = identifier
+        if domain == DOMAIN and (key == old_key or key.startswith(f"{old_key}#")):
+            return domain, new_key + key.removeprefix(old_key)
+        return identifier
+
+    registry = dr.async_get(hass)
+    for device in dr.async_entries_for_config_entry(registry, entry.entry_id):
+        registry.async_update_device(
+            device.id, new_identifiers={moved(i) for i in device.identifiers}
+        )
 
 
 class CannotConnect(HomeAssistantError):

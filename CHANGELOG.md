@@ -5,6 +5,12 @@ Releases before 2.0.0 are described on the
 
 ## 2.2.2 - 2026-10-17
 
+### Added
+
+- **The IP address can be changed without re-adding the unit.** Reconfigure
+  the integration and enter the new address. Entities, history, and the
+  devices with their names and areas stay as they are.
+
 ### Fixed
 
 - **A scheduled poll no longer runs in the middle of a write burst.** The

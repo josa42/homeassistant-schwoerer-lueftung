@@ -161,6 +161,12 @@ remove or stop it, and power-cycle the unit if the connection does not free up.
 Also check that Modbus is enabled on the control panel and that the IP address
 opens the unit's web interface in a browser.
 
+### The unit has a new IP address
+
+Open the integration under **Settings** → **Devices & Services**, then choose
+**Reconfigure** from its menu and enter the new address. Entities, their
+history, and the devices with their names and areas are kept.
+
 ### Some entities stay unavailable
 
 Firmware versions differ in which registers they serve. A register the unit
