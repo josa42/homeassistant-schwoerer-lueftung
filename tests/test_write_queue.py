@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import UpdateFailed
+from homeassistant.exceptions import HomeAssistantError
 from modbus_connection import ModbusConnectionError
 from modbus_connection.mock import MockModbusUnit, WriteEvent
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -480,8 +480,9 @@ async def test_an_unreachable_device_still_raises(
 
     unit.fail_write(FAN_SPEED, ModbusConnectionError("connection reset"))
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(HomeAssistantError) as raised:
         await coordinator.async_write(coordinator.device.ventilation, "fan_speed", 3)
+    assert raised.value.translation_key == "write_failed"
 
 
 async def test_an_out_of_range_value_still_raises(
@@ -530,7 +531,7 @@ async def test_a_failed_write_does_not_stop_the_queue(
     ventilation = coordinator.device.ventilation
 
     unit.fail_write(FAN_SPEED, ModbusConnectionError("connection reset"))
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(HomeAssistantError):
         await coordinator.async_write(ventilation, "fan_speed", 3)
 
     unit.fail_write(FAN_SPEED, None)

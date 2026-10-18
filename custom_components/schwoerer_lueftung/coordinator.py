@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -110,7 +111,11 @@ class Coordinator(DataUpdateCoordinator[UpdateReport]):
         try:
             await self._writes.async_write(component, field, value)
         except ModbusError as err:
-            raise UpdateFailed(f"Error writing {field}: {err}") from err
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="write_failed",
+                translation_placeholders={"field": field, "error": str(err)},
+            ) from err
 
     async def async_read_raw(self) -> dict[str, dict[int, int | bool]]:
         """Read the raw register map, never while a poll or a burst runs."""

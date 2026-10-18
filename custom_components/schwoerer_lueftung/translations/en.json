@@ -341,6 +341,11 @@
       }
     }
   },
+  "exceptions": {
+    "write_failed": {
+      "message": "Writing {field} to the device failed: {error}"
+    }
+  },
   "selector": {
     "device_type": {
       "options": {

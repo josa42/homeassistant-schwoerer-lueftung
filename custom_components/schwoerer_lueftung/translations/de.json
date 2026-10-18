@@ -341,6 +341,11 @@
       }
     }
   },
+  "exceptions": {
+    "write_failed": {
+      "message": "Schreiben von {field} auf das Gerät fehlgeschlagen: {error}"
+    }
+  },
   "selector": {
     "device_type": {
       "options": {
