@@ -16,7 +16,10 @@ they are recorded so they are not rediscovered from scratch.
   optional component would settle whether the device has heating and a ground
   heat exchanger, and retire the `device_type` and `has_ground_heat_exchanger`
   questions from the config flow. The component split makes this small: see
-  [ADR 0003](adr/0003-components-by-hardware-subsystem.md).
+  [ADR 0003](adr/0003-components-by-hardware-subsystem.md). Telling a missing
+  register from a failing one is already solved: only Illegal Data Address
+  counts, as in [ADR 0008](adr/0008-skip-registers-the-firmware-refuses.md),
+  which drops single fields the same way.
 - **Split readings from settings onto separate coordinator intervals.**
   Everything is on one 30-second poll. Setpoints and schedules do not change on
   their own and could be read far less often.
