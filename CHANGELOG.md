@@ -3,7 +3,7 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
-## 2.2.2 - 2026-10-17
+## Unreleased
 
 ### Added
 
@@ -25,6 +25,16 @@ Releases before 2.0.0 are described on the
 - **Failed writes report a translated error.** They raised the coordinator's
   poll error type before.
 
+### Changed
+
+- **A WRT reads only the room temperatures.** The setpoint and heating
+  registers of each room were read on every poll without any entity using
+  them.
+
+## 2.2.2 - 2026-10-17
+
+### Fixed
+
 - **Units missing some registers can be set up.** Firmware versions differ in
   which registers they serve, and the unit refuses a whole block for one
   address it lacks. A VentCube without 142-145 failed setup outright, and at
@@ -41,10 +51,6 @@ Releases before 2.0.0 are described on the
   time, and a unit that answers but refuses the read gets its own message.
 
 ### Changed
-
-- **A WRT reads only the room temperatures.** The setpoint and heating
-  registers of each room were read on every poll without any entity using
-  them.
 
 - **The README covers the common setup failures.** A second Modbus
   connection blocking setup, and registers missing on older firmware.
