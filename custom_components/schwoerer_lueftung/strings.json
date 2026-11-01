@@ -239,7 +239,8 @@
         "state": {
           "cooling": "Cooling",
           "heating": "Heating",
-          "off": "Off"
+          "off": "Off",
+          "stopping": "Stopping"
         }
       },
       "operating_hours_auxiliary_heating_house": {

@@ -208,6 +208,23 @@ async def test_an_unknown_code_shows_as_unknown_and_is_logged_once(
     assert caplog.text.count("heat_pump_status reported 7") == 1
 
 
+async def test_the_heat_pump_reports_32_while_it_stops(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    unit.holding[114] = 32  # not in the datasheet, seen at the end of every heating run
+    await setup_entry(hass, wgt_entry)
+
+    await wgt_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    assert _by_unique_id(hass, wgt_entry, "heat_pump_status").state == "stopping"
+    assert "heat_pump_status reported 32" not in caplog.text
+
+
 async def _enable(hass: HomeAssistant, entry: MockConfigEntry, *suffixes: str) -> None:
     """Turn entities on the way the entity page does, then reload."""
     registry = er.async_get(hass)

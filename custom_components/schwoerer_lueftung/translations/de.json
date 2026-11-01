@@ -239,7 +239,8 @@
         "state": {
           "cooling": "Kühlen",
           "heating": "Heizen",
-          "off": "Aus"
+          "off": "Aus",
+          "stopping": "Abschaltphase"
         }
       },
       "operating_hours_auxiliary_heating_house": {

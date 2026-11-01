@@ -12,6 +12,12 @@ Releases before 2.0.0 are described on the
   descriptions are in `docs/references`, each with a note on its source, date
   and contents, including where the temperature sensors sit in the air path.
 
+### Fixed
+
+- **The heat pump status no longer shows as unknown at the end of a heating
+  run.** The unit reports a code the datasheet does not list for about half
+  a minute after the compressor stops. It now shows as "Stopping".
+
 ## 2.3.0 - 2026-10-31
 
 ### Added

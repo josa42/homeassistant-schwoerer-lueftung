@@ -37,7 +37,7 @@
 | 110 | ✅ | ❌ | Zeitprogramm Basis Luftstufe (Time Program Base Level) | 0=Aus<br>1-4=Stufe 1-4 | Read-only |
 | 111 | ✅ | ✅ | Stoßlüftung (Shock Ventilation) | 0=Inaktiv<br>1=Aktiv | |
 | 112 | ✅ | ❌ | Restlaufzeit Stoßlüftung (Remaining Time Shock Vent) | 0-60 minutes | Read-only |
-| 114 | ✅ | ❌ | Status Wärmepumpe (Heat Pump Status) | 0=Aus (Off)<br>5=WP Heizen (Heating)<br>49=WP Kühlen (Cooling) | Read-only |
+| 114 | ✅ | ❌ | Status Wärmepumpe (Heat Pump Status) | 0=Aus (Off)<br>5=WP Heizen (Heating)<br>49=WP Kühlen (Cooling) | Read-only. Also reports 32, which the datasheet does not list, for one or two polls after every heating run, once the compressor has stopped (logged on 01.11.2026; the four heating runs before it since 24.10. ended in the same unknown value) |
 | 116 | ✅ | ❌ | NHR Zustand (After-Heater State) | 0=Inaktiv<br>1=Aktiv | Read-only |
 | 117 | ✅ | ❌ | Status Gebläse Zuluft (Supply Fan Status) | 0=Deaktiviert (Disabled)<br>1=Anlaufphase (Startup)<br>2=Aktiv (Active)<br>5=Standby<br>6=Fehler (Error) | Read-only |
 | 118 | ✅ | ❌ | Status Gebläse Abluft (Exhaust Fan Status) | 0=Deaktiviert<br>1=Anlaufphase<br>2=Aktiv<br>5=Standby<br>6=Fehler | Read-only |

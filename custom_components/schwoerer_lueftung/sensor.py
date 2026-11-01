@@ -32,7 +32,9 @@ EXHAUST_AIR_FAN_STATUS = {
     6: "error",
 }
 GROUND_HEAT_EXCHANGER_STATE = {0: "off", 1: "heating", 2: "cooling"}
-HEAT_PUMP_STATUS = {0: "off", 5: "heating", 49: "cooling"}
+# 32 is not in the datasheet. The unit reports it for about half a minute
+# after every heating run, once the compressor has stopped.
+HEAT_PUMP_STATUS = {0: "off", 5: "heating", 32: "stopping", 49: "cooling"}
 SUPPLY_AIR_FAN_STATUS = {
     0: "disabled",
     1: "startup",
