@@ -3,6 +3,15 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Added
+
+- **The documents the integration is based on are in the repository.** The
+  Modbus parameter list, the DIBt approval and the manufacturer's device
+  descriptions are in `docs/references`, each with a note on its source, date
+  and contents, including where the temperature sensors sit in the air path.
+
 ## 2.3.0 - 2026-10-31
 
 ### Added

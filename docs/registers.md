@@ -1,6 +1,6 @@
 # Official Modbus Register Documentation
 
-**Source:** Schwörer Haus KG Official Modbus TCP Documentation  
+**Source:** Schwörer Haus KG Official Modbus TCP Documentation ([PDF](references/schwoerer-modbus-tcp-parameterliste-2020-03.pdf), [notes](references/schwoerer-modbus-tcp-parameterliste-2020-03.md))  
 **Document Date:** 31.03.2020  
 **Firmware Versions:**  
 - Leistungsteil (Power Unit): V02.25  
