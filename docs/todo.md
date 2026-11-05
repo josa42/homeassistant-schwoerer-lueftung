@@ -27,3 +27,9 @@ they are recorded so they are not rediscovered from scratch.
   submitted to Home Assistant Core, which requires the device library to live
   outside the integration. `device/` imports nothing from Home Assistant, so the
   split is already possible.
+- **Check the heat pump status bit field in summer.** The guess in
+  [registers.md](registers.md#heat-pump-status) reads the codes as bits: 1
+  compressor, 4 heating, 16 cooling, 32 refrigerant circuit reversed. Only the
+  compressor bit is backed by data. Run the heat pump in cooling mode for a few
+  minutes: if 49 has the circuit reversed, T7 runs hot and T8 cold, as during
+  a defrost. Not done in winter, since it cools the house.
