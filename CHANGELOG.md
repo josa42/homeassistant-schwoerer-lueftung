@@ -3,6 +3,14 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Changed
+
+- **The integration declares its category, fans and ventilation under
+  climate.** The Marketplace in Home Assistant 2026.11 browses integrations by
+  category.
+
 ## 2.3.2 - 2026-11-05
 
 ### Fixed

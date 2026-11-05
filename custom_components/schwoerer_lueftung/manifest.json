@@ -1,6 +1,9 @@
 {
   "domain": "schwoerer_lueftung",
   "name": "Schwörer Lüftung",
+  "categories": [
+    "climate.fans_ventilation"
+  ],
   "codeowners": [
     "@josa42"
   ],
