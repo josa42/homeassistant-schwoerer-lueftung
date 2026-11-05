@@ -310,7 +310,10 @@ class Heating(SchwoererComponent):
     """
 
     heat_pump_status = integer(114)
-    """Status Wärmepumpe: 0=off, 5=heating, 32=stopping (undocumented), 49=cooling."""
+    """Status Wärmepumpe: 0=off, 5=heating, 49=cooling.
+
+    Undocumented: 32=stopping, 36=defrost starting, 37=defrosting.
+    """
 
     reheater_state = integer(116)
     """NHR Zustand: 0=inactive, 1=active."""

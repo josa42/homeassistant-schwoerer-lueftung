@@ -3,6 +3,16 @@
 Releases before 2.0.0 are described on the
 [releases page](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases).
 
+## Unreleased
+
+### Fixed
+
+- **The heat pump status no longer shows as unknown while it defrosts.** The
+  unit reports two codes the datasheet does not list while it reverses the
+  refrigerant circuit to defrost the evaporator. They now show as
+  "Defrost starting" while the compressor is stopped and "Defrosting" once
+  it runs.
+
 ## 2.3.1 - 2026-11-01
 
 ### Added

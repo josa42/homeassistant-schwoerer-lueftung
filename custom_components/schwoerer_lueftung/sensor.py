@@ -32,9 +32,18 @@ EXHAUST_AIR_FAN_STATUS = {
     6: "error",
 }
 GROUND_HEAT_EXCHANGER_STATE = {0: "off", 1: "heating", 2: "cooling"}
-# 32 is not in the datasheet. The unit reports it for about half a minute
-# after every heating run, once the compressor has stopped.
-HEAT_PUMP_STATUS = {0: "off", 5: "heating", 32: "stopping", 49: "cooling"}
+# 32, 36 and 37 are not in the datasheet. The unit reports 32 for about half
+# a minute after every heating run, once the compressor has stopped. It
+# defrosts the evaporator by reversing the refrigerant circuit and reports 36
+# while the compressor is stopped before the defrost, then 37 while it runs.
+HEAT_PUMP_STATUS = {
+    0: "off",
+    5: "heating",
+    32: "stopping",
+    36: "defrost_starting",
+    37: "defrosting",
+    49: "cooling",
+}
 SUPPLY_AIR_FAN_STATUS = {
     0: "disabled",
     1: "startup",

@@ -238,6 +238,8 @@
         "name": "Status Wärmepumpe",
         "state": {
           "cooling": "Kühlen",
+          "defrost_starting": "Abtauen startet",
+          "defrosting": "Abtauen",
           "heating": "Heizen",
           "off": "Aus",
           "stopping": "Abschaltphase"

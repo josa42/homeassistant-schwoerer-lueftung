@@ -37,7 +37,7 @@
 | 110 | ✅ | ❌ | Zeitprogramm Basis Luftstufe (Time Program Base Level) | 0=Aus<br>1-4=Stufe 1-4 | Read-only |
 | 111 | ✅ | ✅ | Stoßlüftung (Shock Ventilation) | 0=Inaktiv<br>1=Aktiv | |
 | 112 | ✅ | ❌ | Restlaufzeit Stoßlüftung (Remaining Time Shock Vent) | 0-60 minutes | Read-only |
-| 114 | ✅ | ❌ | Status Wärmepumpe (Heat Pump Status) | 0=Aus (Off)<br>5=WP Heizen (Heating)<br>49=WP Kühlen (Cooling) | Read-only. Also reports 32, which the datasheet does not list, for one or two polls after every heating run, once the compressor has stopped (logged on 01.11.2026; the four heating runs before it since 24.10. ended in the same unknown value) |
+| 114 | ✅ | ❌ | Status Wärmepumpe (Heat Pump Status) | 0=Aus (Off)<br>5=WP Heizen (Heating)<br>49=WP Kühlen (Cooling)<br>32=Abschaltphase\*<br>36=Abtauen startet\*<br>37=Abtauen\* | Read-only. \* Not in the datasheet; see [Heat Pump Status](#heat-pump-status) |
 | 116 | ✅ | ❌ | NHR Zustand (After-Heater State) | 0=Inaktiv<br>1=Aktiv | Read-only |
 | 117 | ✅ | ❌ | Status Gebläse Zuluft (Supply Fan Status) | 0=Deaktiviert (Disabled)<br>1=Anlaufphase (Startup)<br>2=Aktiv (Active)<br>5=Standby<br>6=Fehler (Error) | Read-only |
 | 118 | ✅ | ❌ | Status Gebläse Abluft (Exhaust Fan Status) | 0=Deaktiviert<br>1=Anlaufphase<br>2=Aktiv<br>5=Standby<br>6=Fehler | Read-only |
@@ -338,6 +338,27 @@ writable:
 So the bypass cannot be commanded, but lowering a room setpoint below its
 current temperature while it is cooler outside than inside produces the cooling
 demand the controller opens it for.
+
+### Heat Pump Status
+
+Register 114 reports three codes the datasheet does not list:
+
+| Code | When | Shown as |
+|------|------|----------|
+| 32 | One or two polls after every heating run, once the compressor has stopped (logged on 01.11.2026; the four heating runs before it since 24.10. ended in the same code) | Stopping |
+| 36 | One poll at the start of a defrost, with the compressor stopped | Defrost starting |
+| 37 | About 6.5 minutes while the evaporator defrosts, with the compressor running | Defrosting |
+
+The defrost on 05.11.2026 at 05:43 went 5 → 36 → 37 → 0 for 33 s → 5. During
+it T7 rose from -8.9 to +20.8 °C and T8 fell from 35.6 to 1.3 °C, so the
+refrigerant circuit was reversed.
+
+Guess: the codes are a bit field, 1 compressor, 4 heating, 16 cooling, 32
+circuit reversed (5 = 4+1, 36 = 32+4, 37 = 32+4+1, 49 = 32+16+1). It does not
+explain why 32 alone follows a heating run. Bit 1 is backed by a power meter on
+the heating circuit: about 400 W less just before 36 and before 0, about 400 W
+more just before 37. The rest is to be checked in summer, see
+[todo.md](todo.md).
 
 ### Optional Features
 

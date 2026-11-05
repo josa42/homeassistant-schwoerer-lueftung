@@ -238,6 +238,8 @@
         "name": "Heat Pump Status",
         "state": {
           "cooling": "Cooling",
+          "defrost_starting": "Defrost starting",
+          "defrosting": "Defrosting",
           "heating": "Heating",
           "off": "Off",
           "stopping": "Stopping"

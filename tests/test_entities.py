@@ -225,6 +225,28 @@ async def test_the_heat_pump_reports_32_while_it_stops(
     assert "heat_pump_status reported 32" not in caplog.text
 
 
+@pytest.mark.parametrize(
+    ("code", "state"), [(36, "defrost_starting"), (37, "defrosting")]
+)
+async def test_the_heat_pump_reports_36_and_37_while_it_defrosts(
+    hass: HomeAssistant,
+    mock_modbus,
+    unit: MockModbusUnit,
+    wgt_entry: MockConfigEntry,
+    caplog: pytest.LogCaptureFixture,
+    code: int,
+    state: str,
+) -> None:
+    unit.holding[114] = code  # not in the datasheet, seen while defrosting
+    await setup_entry(hass, wgt_entry)
+
+    await wgt_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    assert _by_unique_id(hass, wgt_entry, "heat_pump_status").state == state
+    assert f"heat_pump_status reported {code}" not in caplog.text
+
+
 async def _enable(hass: HomeAssistant, entry: MockConfigEntry, *suffixes: str) -> None:
     """Turn entities on the way the entity page does, then reload."""
     registry = er.async_get(hass)
