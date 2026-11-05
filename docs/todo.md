@@ -33,3 +33,13 @@ they are recorded so they are not rediscovered from scratch.
   compressor bit is backed by data. Run the heat pump in cooling mode for a few
   minutes: if 49 has the circuit reversed, T7 runs hot and T8 cold, as during
   a defrost. Not done in winter, since it cools the house.
+- **Move to the device APIs of Home Assistant 2026.11.** Both need the minimum
+  version in `hacs.json` raised from 2026.9.0, since 2026.10 does not have them
+  yet. Register the main device with `async_get_or_create_from_info` instead of
+  `async_get_or_create(**device_info)` in `coordinator.py`, which only works
+  through a dict compatibility layer that is to be deprecated. And decide
+  whether the room devices become child devices (`ChildDeviceInfo` with
+  `parent_device_id`) instead of linking with `via_device_id`. Child devices are
+  meant for parts of one product, `via_device` for separate products behind a
+  gateway, and the room sensors are somewhere in between. As children they
+  could drop the "WGT - " prefix from their names.
