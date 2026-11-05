@@ -1,5 +1,7 @@
 # Manual installation
 
+**English** | [Deutsch](manual_installation.de.md)
+
 The [button in the README](../README.md#installation) does all of this in one
 click. These steps are for when that button does not work, or when you would
 rather not use HACS at all.

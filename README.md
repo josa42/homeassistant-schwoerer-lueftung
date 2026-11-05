@@ -1,5 +1,7 @@
 # Schwörer Lüftung Integration for Home Assistant
 
+**English** | [Deutsch](README.de.md)
+
 [![GitHub Release](https://img.shields.io/github/v/release/josa42/homeassistant-schwoerer-lueftung?style=flat-square)](https://github.com/josa42/homeassistant-schwoerer-lueftung/releases)
 [![License](https://img.shields.io/github/license/josa42/homeassistant-schwoerer-lueftung?style=flat-square)](LICENSE)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=flat-square)](https://hacs.xyz/)

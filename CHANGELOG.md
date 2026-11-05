@@ -5,6 +5,13 @@ Releases before 2.0.0 are described on the
 
 ## Unreleased
 
+### Added
+
+- **The documentation is also in German.** `README.de.md` and
+  `docs/manual_installation.de.md` sit next to the English versions, with a
+  language switch at the top of each, and name entities as the German
+  interface does.
+
 ### Changed
 
 - **The integration declares its category, fans and ventilation under
