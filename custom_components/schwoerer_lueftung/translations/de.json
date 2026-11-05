@@ -292,7 +292,7 @@
         }
       },
       "temperature_t10_outdoor": {
-        "name": "Außentemperartur (T10)"
+        "name": "Außentemperatur (T10)"
       },
       "temperature_t1_after_ground_heat_exchanger": {
         "name": "Temperatur nach EWT (T1)"

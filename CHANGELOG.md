@@ -18,6 +18,12 @@ Releases before 2.0.0 are described on the
   climate.** The Marketplace in Home Assistant 2026.11 browses integrations by
   category.
 
+### Fixed
+
+- **The German name of the outdoor temperature is spelled correctly.** It read
+  „Außentemperartur (T10)“. Existing entity IDs keep the old spelling, since
+  renaming a translation does not change them.
+
 ## 2.3.2 - 2026-11-05
 
 ### Fixed
